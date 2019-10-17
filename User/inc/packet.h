@@ -1,0 +1,124 @@
+#ifndef __PACKET_H__
+#define __PACKET_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "types.h"
+#include "dsp.h"
+
+typedef enum {
+    TYPE_DSP=0,                     //dsp_data_t
+    TYPE_AMP,                       //amp_data_t
+    TYPE_IODAT,                     //io_data_t
+    TYPE_STATUS,                    //device status
+    TYPE_PARAS,                     //paras_data_t
+    TYPE_PRESET,                    //preset_data_t
+    TYPE_ACK,                       //ack_data_t
+    
+    TYPE_UPGRADE,                   //used for upgrade dsp,mcu firmware and bootloader
+}eTYPE;
+
+typedef enum {
+    INPUT_VOD,
+    INPUT_DVD,
+    INPUT_BGM,
+    INPUT_BTUSB,
+    INPUT_OPT,
+    INPUT_HDMI_IN,
+    INPUT_HDMI_ARC,
+
+    INPUT_MAX
+}eINPUT;
+
+#pragma pack(1)
+typedef struct {
+    u8              id;                //refer to CMD_ID_XXX
+    u8              ch;                //refer to XXX_CH
+    u8              n;                 //only when id is EQ or HPLF, n is used(id==EQ, n: band, id==HPLF, 0:hpf,1:lpf)
+    u16             dlen;
+    u8              data[]; 
+}dsp_data_t;
+
+typedef struct {
+    u8              on;                 //0: off,  1: on
+    u8              ppwr;               //positive power  0: off,  1: on
+    u8              npwr;               //negative power  0: off,  1: on
+}amp_data_t;
+
+typedef struct {
+    u8              amp_temp;           //amplifier temperature
+    u8              pwr_temp;
+    u8              fan_speed;
+}status_data_t;
+
+typedef struct {
+    u8              amp_en;
+    u8              pwr_en;
+    u8              rca_mute;
+    u8              input;
+    
+    u8              amp_ppwr;           //positive power
+    u8              amp_npwr;           //negative power
+    u8              rx485_en;
+    u8              tx485_en;
+}io_data_t;
+
+typedef struct {
+    u8              ver[14];            //version, eg: KA-V103.00
+    u8              bldtime[14];        //build time, eg: 2019.08.22
+}fw_info_t;
+
+typedef struct {
+    u8              index;             //preset index
+    u8              dlen;              //sizeof(Dsp_Paras)
+    u8              data[];            //Dsp_Paras
+}preset_data_t;
+
+typedef struct {
+    fw_info_t       fw;
+
+    Dsp_Paras       dsp;
+    io_data_t       iodat;
+    u8              pre;                //the current used preset index
+}paras_data_t;
+
+typedef struct {   //only used for mcu ui display
+    fw_info_t       *pfw;
+    dsp_paras_t     dsp;
+    io_data_t       *pio;
+    u8              *pre;
+}paras_ui_t;
+
+typedef struct {
+    u8              type;       //eTYPE, the type of the ack respond to
+    s32             err;
+}ack_data_t;
+
+typedef struct {
+    //u16             magic;            //magic number: 0xaa88, reserved
+    u8              type;               //refer to eTYPE
+    u8              nck;                //0: no need ack, 1: need ack
+    u16             pkts;               //sub spacket number
+    u16             pid;                //sub packet id, start form 0
+    u16             dlen;               //sub packet data length
+    u8              data[];             //sub packet data;
+    //data          ......
+    //u16           crc;                //use it?  reserved
+}packet_t;
+#pragma pack()
+
+
+#ifdef APP
+extern paras_data_t gParams; 
+extern paras_ui_t   uiParams;
+extern status_data_t gStatus;
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#endif

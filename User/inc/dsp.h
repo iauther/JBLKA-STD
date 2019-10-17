@@ -1,0 +1,496 @@
+#ifndef __DSP_H__
+#define __DSP_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "types.h"
+
+#define MaxEQBand					10
+#define PRESET_MAX                  8
+#define PEQ_BANDS                   7
+#define DSP_MAX_PKT_SIZE            256
+
+enum CMD_ID//命令ID
+{
+    CMD_ID_Gain = 1,//ID从1开始
+    CMD_ID_Amp,
+    CMD_ID_EQ,
+    CMD_ID_HLPF,//高低通
+    CMD_ID_Delay,
+    CMD_ID_FeedBack,//反馈
+    CMD_ID_Limiter,
+    CMD_ID_PitchShift,//变调
+    CMD_ID_Mute,
+    CMD_ID_NoiseGate,//噪声门
+    CMD_ID_Input,
+    CMD_ID_DSPVer,
+
+    CMD_ID_UpdataDSP = 0x10, //DSP升级, 兼容CBOX机型的升级指令
+    CMD_ID_Upload,//上传数据
+    CMD_ID_Download,//下载数据
+
+    CMD_ID_NUM,//计算元素个数
+};
+
+enum Gain_CH//三个主音量
+{
+    Gain_CH_Music,
+    Gain_CH_Mic,
+    Gain_CH_Eff,
+
+    Gain_CH_NUM,//计算元素个数
+};
+
+enum Vol_CH
+{
+    Vol_CH_Echo_Repeat,//回声重复比例
+
+    Vol_CH_Echo_EffVol,//回声效果音量  100
+    Vol_CH_Echo_DirVol,//回声直达声音量
+
+    Vol_CH_Rev_EffVol,
+    Vol_CH_Rev_DirVol,
+
+    Vol_CH_Main_MusicVol,   //主输出音乐音量
+    Vol_CH_Main_DirVol, //主输出直达声音量
+    Vol_CH_Main_EchoVol,
+    Vol_CH_Main_RevVol,
+
+    Vol_CH_Sub_MusicVol,
+    Vol_CH_Sub_DirVol,
+    Vol_CH_Sub_EchoVol,
+    Vol_CH_Sub_RevVol,
+
+    Vol_CH_Rec_MusicVol,
+    Vol_CH_Rec_DirVol,
+    Vol_CH_Rec_EchoVol,
+    Vol_CH_Rec_RevVol,
+
+    Vol_CH_Main_LVol,
+    Vol_CH_Main_RVol,
+    Vol_CH_SubVol,
+    Vol_CH_RecVol,
+
+    Vol_CH_NUM,//计算元素个数
+};
+
+enum EQ_CH
+{
+    EQ_CH_Music,
+    EQ_CH_Mic,
+    EQ_CH_Echo,
+    EQ_CH_Rev,
+
+    EQ_CH_Main,
+    EQ_CH_Sub,
+    EQ_CH_Rec,
+
+    EQ_CH_NUM,//计算元素个数
+};
+
+
+enum HLPF_CH
+{
+    HLPF_CH_Music,//音乐高低通
+    HLPF_CH_Mic,
+    HLPF_CH_Echo,
+    HLPF_CH_Rev,
+
+    HLPF_CH_Main,
+    HLPF_CH_Sub,
+    HLPF_CH_Rec,
+
+    HLPF_CH_NUM,//计算元素个数
+};
+
+enum Delay_CH
+{
+    Delay_CH_Echo_PreDelay,//左回声预延时  0~4800 :    0~100ms
+    Delay_CH_Echo_Delay,//左回声延时 //0~14400 :    0~300ms
+
+    Delay_CH_Rev_PreDelay,//混响预延时 //0~4800 :    0~100ms
+    Delay_CH_Rev_Time,  //混响时间0~80 : 0~8000ms
+    //以上 step=1
+
+    //以下 step=0.1
+    Delay_CH_MainL_Delay,//主输出左声道 //0~1920 :    0~40ms
+    Delay_CH_MainR_Delay,//0~1920 :    0~40ms
+    Delay_CH_Sub_Delay, //0~1920 :    0~40ms
+
+    Delay_CH_NUM,//计算元素个数
+};
+
+enum FeedBack_CH
+{
+    FeedBack_CH_Mic,
+
+    FeedBack_CH_NUM,//计算元素个数
+};
+
+enum Limiter_CH
+{
+    Limiter_CH_Mic,
+
+    Limiter_CH_Main,
+    Limiter_CH_Sub,
+    Limiter_CH_Rec,
+
+    Limiter_CH_NUM,//计算元素个数
+};
+
+enum EQ_Type
+{
+    EQ_Type_PEQ,
+    EQ_Type_LS,
+    EQ_Type_HS,
+
+    EQ_Type_NUM,//计算元素个数
+};
+
+enum HLPF_Type
+{
+    HLPF_Type_Bypass,
+
+    HLPF_Type_12dBButterworth,
+    HLPF_Type_12dBBessel,
+    HLPF_Type_12dBLinkRiley,
+
+    HLPF_Type_18dBButterworth,
+    HLPF_Type_18dBBessel,
+
+    HLPF_Type_24dBButterworth,
+    HLPF_Type_24dBBessel,
+    HLPF_Type_24dBLinkRiley,
+
+    HLPF_Type_NUM,//计算元素个数
+};
+
+
+enum HLPF_Hpf_Lpf
+{
+    HLPF_Hpf,
+    HLPF_Lpf,
+
+    HLPF_Hpf_Lpf_NUM,//计算元素个数
+};
+
+enum Mute_CH
+{
+    Mute_CH_MainL,
+    Mute_CH_MainR,
+    Mute_CH_Sub,
+    Mute_CH_Rec,
+
+    Mute_CH_NUM,//计算元素个数
+};
+
+enum NoiseGate_CH
+{
+    NoiseGate_CH_Music,
+    NoiseGate_CH_Mic,
+
+    NoiseGate_CH_NUM,//计算元素个数
+};
+
+//-----------------------------------------------------------------------------
+//-----------------------------参数结构体定义------------------------------------
+//-----------------------------------------------------------------------------
+//#pragma pack(1)
+typedef struct
+{
+    u16 Len;
+    u16 ID;
+    u16 Ch;
+    u16 No;
+    u16 *DataPtr;
+}TypeS_CmdSt;
+
+
+typedef struct
+{
+    u16  Gain;  //0~100
+    u16  Mute;// 1:mute;  0:no mute
+}TypeS_Gain;
+
+
+typedef struct
+{
+    u16 Vol;    //0~200 step=1
+    u16 Phase;//1:反相;    0:不反相
+}TypeS_Vol;
+
+
+typedef struct
+{
+    u16  Freq;//20~20000 :   20~20k     (step=1Hz)
+    s16  Gain;//-24~+12dB          (step=0.1dB)
+    u16  Q;   //1~1280 :   0.1~128.0  (step=0.1)
+    u16  Type;  //0/1/2 :   PEQ / LS / HS
+    u16  Bypass;// 0/1 : no bypass / bypass
+}TypeS_EQBand;
+
+typedef struct
+{
+    TypeS_EQBand BandCoef[MaxEQBand];
+}TypeS_EQ;
+
+typedef struct
+{
+    u16  Freq;//20~21000 :   20~21k     (step=1Hz)  小于20 或 高于20k 表示bypass高低通
+    u16  Type;  //看HLPF_Type
+}TypeS_HLPFCoef;
+
+typedef struct
+{
+    TypeS_HLPFCoef HLPFCoef[2];
+}TypeS_HLPF;
+
+typedef struct
+{
+    u16 Delay;
+}TypeS_Delay;
+
+typedef struct
+{
+    u16  FeedBack;//移频量 0:off,  1~3:4Hz/6Hz/8Hz
+}TypeS_FeedBack;
+
+typedef struct
+{
+    s16  threshold;//启动电平 -34~+0dB
+    u16  attackTime;//启动时间 0~900: 0~900ms     step=1
+    u16  releaseTime;//释放时间0~9000: 0~9000ms   step=1
+    u16  ratio;//压限比例 0~1000: 0~100.0  step=0.1
+}TypeS_Limiter;
+
+
+typedef struct
+{
+    s16  PitchShift;//变调 -5~+5
+}TypeS_PitchShift;
+
+
+typedef struct
+{
+    u16 Mute;   //0/1 : mute/unMute
+}TypeS_Mute;
+
+typedef struct
+{
+    s16  threshold;//启动阀值  -60~0dB
+
+}TypeS_NoiseGate;
+
+typedef struct
+{
+    u16  input;//0~2：ANALOG/HDMI_SPDIF/OPTICAL
+}TypeS_Input;
+
+typedef struct
+{
+    TypeS_Gain          Array_Gain[Gain_CH_NUM];
+    TypeS_Vol           Array_Vol[Vol_CH_NUM];
+    TypeS_EQ            Array_EQ[EQ_CH_NUM];
+    TypeS_HLPF          Array_HLPF[HLPF_CH_NUM];
+    TypeS_Delay         Array_Delay[Delay_CH_NUM];
+    TypeS_FeedBack      Array_FeedBack[FeedBack_CH_NUM];
+    TypeS_Limiter       Array_Limiter[Limiter_CH_NUM];
+    TypeS_PitchShift    Array_PitchShift;
+    TypeS_Mute          Array_Mute[Mute_CH_NUM];
+    TypeS_NoiseGate     Array_NoiseGate[NoiseGate_CH_NUM];
+    TypeS_Input         Array_Input;             
+}Dsp_Paras;
+
+typedef struct {
+    Dsp_Paras           paras[PRESET_MAX];
+}Pre_Paras;
+
+////////////////////////new add by gh ////////////////////////////////
+
+typedef struct {
+    u16  hdr;
+    u16  len;
+    u16  id;
+    u16  err;
+    u16  crc;
+}dsp_ack_t;
+
+typedef struct {
+    u16  hdr;
+    u16  len;
+    u16  id;
+    u16  ver;
+    u16  chr1;
+    u16  chr2;
+    u16  crc;
+}dsp_version_t;
+
+typedef struct {
+    u16  hdr;
+    u16  len;
+    u16  id;
+    u16  index;
+    u16  flag;
+    //data...
+    //u16  crc;
+}dsp_upgrade_t;
+
+typedef struct {
+    TypeS_Gain          *gain;
+    TypeS_EQBand        *geq[3];
+    TypeS_EQBand        *peq[7];
+    TypeS_HLPFCoef      *hpf;
+    TypeS_HLPFCoef      *lpf;
+    TypeS_FeedBack      *feedback;
+    TypeS_Limiter       *limiter;
+    TypeS_NoiseGate     *noiseGate;
+}mic_t;
+
+typedef struct {
+    TypeS_Gain          *gain;
+    TypeS_EQBand        *geq[2];
+    TypeS_EQBand        *peq[7];
+    TypeS_HLPFCoef      *hpf;
+    TypeS_HLPFCoef      *lpf;
+    TypeS_NoiseGate     *noiseGate;
+
+    TypeS_Input         *input;
+    TypeS_PitchShift    *pitch;
+}music_t;
+
+typedef struct {
+    mic_t               mic;
+    music_t             music;
+}input_t;
+//////////////////////////////////////////
+typedef struct {
+    TypeS_EQBand        *peq[3];
+
+    TypeS_Vol           *repeat;
+    TypeS_Vol           *effVol;
+    TypeS_Vol           *dirVol;
+
+    TypeS_HLPFCoef      *hpf;
+    TypeS_HLPFCoef      *lpf;
+
+    //以下step=1
+    TypeS_Delay         *preDelay;      //0~4800 :    0~100ms
+    TypeS_Delay         *delay;         //0~14400 :    0~300ms
+}echo_t;
+
+typedef struct {
+    TypeS_EQBand        *peq[3];
+
+    TypeS_Vol           *effVol;
+    TypeS_Vol           *dirVol;
+
+    TypeS_HLPFCoef      *hpf;
+    TypeS_HLPFCoef      *lpf;
+
+    TypeS_Delay         *preDelay;       //混响预延时 //0~4800 :    0~100ms
+    TypeS_Delay         *time;           //混响时间0~80 : 0~8000ms
+}reverb_t;
+
+typedef struct {
+    TypeS_Gain          *gain;
+    echo_t              echo;
+    reverb_t            reverb;
+}effect_t;
+/////////////////////////////////////////
+typedef struct {
+    TypeS_EQBand        *peq[7];
+
+    TypeS_Vol           *musicVol;
+    TypeS_Vol           *dirVol;
+    TypeS_Vol           *echoVol;
+    TypeS_Vol           *reverbVol;
+
+    TypeS_Limiter       *limiter;
+    TypeS_Mute          *mute;
+}rec_t;
+
+typedef struct {
+    TypeS_EQBand        *peq[7];
+    TypeS_Delay         *delay;          //0~1920 :    0~40ms
+
+    TypeS_Vol           *musicVol;
+    TypeS_Vol           *dirVol;
+    TypeS_Vol           *echoVol;
+    TypeS_Vol           *reverbVol;
+
+    TypeS_Limiter       *limiter;
+    TypeS_Mute          *mute;
+}sub_t;
+
+typedef struct {
+    TypeS_EQBand        *peq[7];
+
+    TypeS_Vol           *musicVol;
+    TypeS_Vol           *dirVol;
+    TypeS_Vol           *echoVol;
+    TypeS_Vol           *reverbVol;
+
+    TypeS_Vol           *lVol;
+    TypeS_Vol           *rVol;
+
+    //以下step=0.1
+    TypeS_Delay         *lDelay;         //主输出左声道 //0~1920 :    0~40ms
+    TypeS_Delay         *rDelay;         //0~1920 :    0~40ms
+
+    TypeS_Limiter       *limiter;
+    TypeS_Mute          *L;
+    TypeS_Mute          *R;
+}main_t;
+
+typedef struct {
+    rec_t               rec;
+    sub_t               sub;
+    main_t              main;
+}output_t;
+
+////////////////////////////////////////
+typedef struct {
+    input_t             in;
+    output_t            out;
+    effect_t            eff;
+
+    u8                  *pIdx;     //used preset index
+}dsp_paras_t;
+//#pragma pack()
+
+//////////////////////////////////////////////////////////////////
+#define StructLen sizeof(Dsp_Paras)
+
+void dsp_reset(void);
+
+int dsp_init(void);
+
+int dsp_set_started(void);
+
+int dsp_is_started(void);
+
+int dsp_default(Dsp_Paras *dsp);
+
+int dsp_send(u16 ID, u16 Ch, u16 No);
+
+int dsp_upload(void *data, u16 len);
+
+int dsp_download(void *data, u16 len);
+
+int dsp_upgrade(u16 index, u8 *data, u16 len);
+
+void dsp_remap(dsp_paras_t *paras, Dsp_Paras *dsp);
+
+void dsp_test(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#endif
+
+
+

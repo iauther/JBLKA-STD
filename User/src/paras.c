@@ -1,0 +1,154 @@
+#include <string.h>
+#include "paras.h"
+#include "e2p.h"
+#include "packet.h"
+#include "default.h"
+#include "config.h"
+
+paras_data_t gParams;
+paras_ui_t uiParams;
+static void set_to_default(paras_ui_t *ui, paras_data_t *gb, const default_t *df)
+{
+    u8 i,j;
+    
+    //memset(gb, 0, sizeof(paras_data_t));
+    for(i=0; i<Gain_CH_NUM; i++) {
+        gb->dsp.Array_Gain[i] = df->gain;
+    }
+
+    for(i=0; i<Vol_CH_NUM; i++) {
+        gb->dsp.Array_Vol[i] = df->vol;
+    }
+    
+    for(i=0; i<EQ_CH_NUM; i++) {
+        for(j=0; j<MaxEQBand; j++) {
+            gb->dsp.Array_EQ[i].BandCoef[j] = df->eq;
+        }
+    }
+
+    for(i=0; i<HLPF_CH_NUM; i++) {
+        gb->dsp.Array_HLPF[i].HLPFCoef[0] = df->hlpf;
+        gb->dsp.Array_HLPF[i].HLPFCoef[1] = df->hlpf;
+    }
+    
+    for(i=0; i<Delay_CH_NUM; i++) {
+        gb->dsp.Array_Delay[i] = df->delay;
+    }
+    
+    for(i=0; i<FeedBack_CH_NUM; i++) {
+        gb->dsp.Array_FeedBack[i] = df->feedback;
+    }
+    
+    for(i=0; i<Limiter_CH_NUM; i++) {
+        gb->dsp.Array_Limiter[i] = df->limiter;
+    }
+
+    for(i=0; i<Mute_CH_NUM; i++) {
+        gb->dsp.Array_Mute[i] = df->mute;
+    }
+
+    for(i=0; i<NoiseGate_CH_NUM; i++) {
+        gb->dsp.Array_NoiseGate[i] = df->noisegate;
+    }
+    
+    //2GEQ
+    for(i=0; i<2; i++) {
+        ui->dsp.in.music.geq[i]->Freq = GEQ2_FREQ[i];
+    }
+
+    //3GEQ
+    for(i=0; i<3; i++) {
+        ui->dsp.in.mic.geq[i]->Freq = GEQ3_FREQ[i];
+    }
+    
+    //3PEQ
+    for(i=0; i<3; i++) {
+        ui->dsp.eff.echo.peq[i]->Freq = PEQ3_FREQ[i];
+        ui->dsp.eff.reverb.peq[i]->Freq = PEQ3_FREQ[i];
+    }
+
+    //7PEQ
+    for(i=0; i<PEQ_BANDS; i++) {
+        ui->dsp.in.music.peq[i]->Freq = PEQ7_FREQ[i];
+        ui->dsp.in.mic.peq[i]->Freq = PEQ7_FREQ[i];
+        ui->dsp.out.rec.peq[i]->Freq = PEQ7_FREQ[i];
+        ui->dsp.out.sub.peq[i]->Freq = PEQ7_FREQ[i];
+        ui->dsp.out.main.peq[i]->Freq = PEQ7_FREQ[i];
+    }
+
+    gb->dsp.Array_PitchShift = df->pitch;
+    gb->fw = FW_INFO;
+    gb->iodat = IO_DATA;
+    gb->pre = 0;
+    
+    
+}
+
+static int version_chk(void)
+{
+    int r;
+    fw_info_t fw;
+    char *pver = (char*)&fw.ver;
+    
+    r = e2p_read(0, (u8*)&fw, sizeof(fw_info_t));
+    pver[13] = 0;
+    if(!strstr(pver, "KA-V") || strlen(pver)!=strlen(VERSION) || strcmp(pver, VERSION)<0) {
+        return 0;
+    }
+    return 1;
+}
+
+static void paras_remap()
+{
+    dsp_remap(&uiParams.dsp, &gParams.dsp);
+    uiParams.pfw = &gParams.fw;
+    uiParams.pio = &gParams.iodat;
+    uiParams.pre = &gParams.pre;
+}
+
+
+void paras_init(void)
+{
+    int r,j=0;
+    e2p_init();
+
+    paras_remap();
+    if(!version_chk()) {
+        set_to_default(&uiParams, &gParams, &gDefault);
+        r = e2p_write(0, (u8*)&gParams, sizeof(gParams));
+        j++;
+        //e2p_write preset data...  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    }
+    else {
+        e2p_read(0, (u8*)&gParams, sizeof(gParams));
+    }
+}
+
+
+void paras_read(void *p, int len)
+{
+    u32 offset=(u32)p-(u32)(&gParams);
+    //e2p_read(offset, (u8*)&gParams, sizeof(paras_data_t));
+}
+
+
+void paras_write(void *p, int len)
+{
+    u32 offset=(u32)p-(u32)(&gParams);
+    //e2p_read(offset, (u8*)&gParams, sizeof(paras_data_t));
+}
+
+
+void paras_reset(void)
+{
+    set_to_default(&uiParams, &gParams, &gDefault);
+    //e2p_write(0, (u8*)&gParams, sizeof(paras_data_t));
+}
+
+
+void paras_save_preset(u8 index)
+{
+    u32 offset=sizeof(paras_data_t)+sizeof(u8)+sizeof(Dsp_Paras)*(index+1);
+    //e2p_write(offset, (u8*)&gParams, sizeof(paras_data_t));
+}
+
