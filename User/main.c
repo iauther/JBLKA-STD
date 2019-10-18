@@ -14,8 +14,8 @@
 #include "config.h" 
 #include "queue.h"
 
-
-#define QUEUE_MAX       20
+#define E2P_POLL_TIME       500        //500ms
+#define QUEUE_MAX           20
 
 queue_t *e2p_q=0;
 static int hid_single_proc(packet_t *pkt)
@@ -32,7 +32,7 @@ static int hid_single_proc(packet_t *pkt)
         return r;
     }
     
-    queue_put(e2p_q, &n);
+    queue_put(e2p_q, &n, 1);
     switch(pkt->type) {        
         case TYPE_DSP:
         {
@@ -116,7 +116,7 @@ static int hid_multi_proc(packet_t *pkt)
 
 
 extern u8 usbRxBuf[];
-static void usbhid_proc(void)
+static void usb_proc(void)
 {
     u32 len;
     packet_t *pkt=(packet_t*)usbRxBuf;
@@ -140,7 +140,7 @@ static void usb_init(void)
 	USB_Init();
 }
 
-#define E2P_POLL_TIME     500        //500ms
+
 u32 e2p_flag=0;
 u64 poll_counter=0;
 static void poll_func(void)
@@ -156,8 +156,7 @@ static void e2p_proc(void)
     node_t n;
     
     if(e2p_flag) {
-        
-        r = queue_put(e2p_q, &n);
+        r = queue_get(e2p_q, &n);
         if(r==0) {
             paras_write(n.ptr, n.len);
         }
@@ -170,7 +169,7 @@ int main(void)
     NVIC_SetVectorTable (NVIC_VectTab_FLASH, APP_OFFSET);
     __enable_irq();
 
-	Set_System();//系统时钟初始化
+	Set_System();
 	tim2_init(poll_func);
 	//tim3_init();
     usb_init();
@@ -180,7 +179,8 @@ int main(void)
     e2p_q = queue_init(QUEUE_MAX);
 
 	while(1) {
-        usbhid_proc();
+        usb_proc();
+        e2p_proc();
 	}
 
     return 0;

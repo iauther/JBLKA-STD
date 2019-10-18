@@ -22,7 +22,7 @@ int queue_head(queue_t *q, node_t *n);
 
 int queue_get(queue_t *q, node_t *n);
 
-int queue_put(queue_t *q, node_t *n);
+int queue_put(queue_t *q, node_t *n, int unique);
 
 int queue_clear(queue_t *q);
 
