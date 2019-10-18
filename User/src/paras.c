@@ -1,7 +1,6 @@
 #include <string.h>
 #include "paras.h"
 #include "e2p.h"
-#include "packet.h"
 #include "default.h"
 #include "config.h"
 
@@ -86,11 +85,10 @@ static void set_to_default(paras_ui_t *ui, paras_data_t *gb, const default_t *df
 
 static int version_chk(void)
 {
-    int r;
     fw_info_t fw;
     char *pver = (char*)&fw.ver;
     
-    r = e2p_read(0, (u8*)&fw, sizeof(fw_info_t));
+    e2p_read(0, (u8*)&fw, sizeof(fw_info_t));
     pver[13] = 0;
     if(!strstr(pver, "KA-V") || strlen(pver)!=strlen(VERSION) || strcmp(pver, VERSION)<0) {
         return 0;
@@ -125,30 +123,78 @@ void paras_init(void)
 }
 
 
+int paras_update(packet_t *pkt, node_t *node)
+{
+    int r=0;
+    node_t n={0};
+
+    switch(pkt->type) {
+        case TYPE_DSP:
+        r = dsp_get_node((dsp_data_t*)pkt->data, &n);
+        break;
+
+        case TYPE_AMP:
+        n.ptr = &gParams.iodat;
+        n.len = sizeof(gParams.iodat);
+        break;
+
+        case TYPE_IODAT:
+        n.ptr = &gParams.iodat;
+        n.len = sizeof(gParams.iodat);
+        break;
+
+        case TYPE_PARAS:
+        n.ptr = &gParams;
+        n.len = sizeof(gParams);
+        break;
+
+        case TYPE_PRESET:
+        //n.ptr = &gPreset;
+        //n.len = sizeof(preset_t);
+        break;
+        
+        default:
+        return -1;
+    }
+    if(pkt->dlen != n.len) {
+        r = -1;
+    }
+
+    if(r==0) {
+        memcpy(n.ptr, pkt->data, n.len);
+    }
+    if(node) {
+        *node = n;
+    }
+
+    return r;
+}
+
+
 void paras_read(void *p, int len)
 {
     u32 offset=(u32)p-(u32)(&gParams);
-    //e2p_read(offset, (u8*)&gParams, sizeof(paras_data_t));
+    e2p_read(offset, p, len);
 }
 
 
 void paras_write(void *p, int len)
 {
     u32 offset=(u32)p-(u32)(&gParams);
-    //e2p_read(offset, (u8*)&gParams, sizeof(paras_data_t));
+    e2p_write(offset, p, len);
 }
 
 
 void paras_reset(void)
 {
     set_to_default(&uiParams, &gParams, &gDefault);
-    //e2p_write(0, (u8*)&gParams, sizeof(paras_data_t));
+    e2p_write(0, (u8*)&gParams, sizeof(paras_data_t));
 }
 
 
 void paras_save_preset(u8 index)
 {
     u32 offset=sizeof(paras_data_t)+sizeof(u8)+sizeof(Dsp_Paras)*(index+1);
-    //e2p_write(offset, (u8*)&gParams, sizeof(paras_data_t));
+    e2p_write(offset, (u8*)&gParams, sizeof(paras_data_t));
 }
 

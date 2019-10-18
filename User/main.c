@@ -11,38 +11,33 @@
 #include "paras.h"
 #include "dsp.h"  
 #include "usbd.h"  
-#include "config.h"  
+#include "config.h" 
+#include "queue.h"
 
 
+#define QUEUE_MAX       20
+
+queue_t *e2p_q=0;
 static int hid_single_proc(packet_t *pkt)
 {
     int r=0;
+    node_t n;
     
-    switch(pkt->type) {
-        case 0xff:
-        {
-            dsp_set_started();
-        }
-        break;
-        
+    if(!dsp_is_started()) {
+        return -1;
+    }
+
+    r = paras_update(pkt, &n);
+    if(r) {
+        return r;
+    }
+    
+    queue_put(e2p_q, &n);
+    switch(pkt->type) {        
         case TYPE_DSP:
         {
             dsp_data_t *dsp=(dsp_data_t*)pkt->data;
-
-            if(dsp_is_started()) {
-                r = dsp_send(dsp->id, dsp->ch, dsp->n);
-                if(pkt->nck) {
-                    usbd_send_ack(pkt, r);
-                }
-                else {
-                    if(!r) {
-                        usbd_send_ack(pkt, r);
-                    }
-                }
-            }
-            else {
-                //...
-            }
+            r = dsp_send(dsp->id, dsp->ch, dsp->n);
         }
         break;
         
@@ -57,8 +52,21 @@ static int hid_single_proc(packet_t *pkt)
 
         case TYPE_ACK:
         break;
+
+        default:
+        r = -1;
+        break;
     }
     
+    if(pkt->nck) {
+        usbd_send_ack(pkt, r);
+    }
+    else {
+        if(!r) {
+            usbd_send_ack(pkt, r);
+        }
+    }
+
     return r;
 }
 
@@ -132,6 +140,30 @@ static void usb_init(void)
 	USB_Init();
 }
 
+#define E2P_POLL_TIME     500        //500ms
+u32 e2p_flag=0;
+u64 poll_counter=0;
+static void poll_func(void)
+{
+    poll_counter++;
+    if(poll_counter%E2P_POLL_TIME==0) {
+        e2p_flag = 1;
+    }
+}
+static void e2p_proc(void)
+{
+    int r;
+    node_t n;
+    
+    if(e2p_flag) {
+        
+        r = queue_put(e2p_q, &n);
+        if(r==0) {
+            paras_write(n.ptr, n.len);
+        }
+    }
+}
+
 
 int main(void)
 {
@@ -139,12 +171,13 @@ int main(void)
     __enable_irq();
 
 	Set_System();//系统时钟初始化
-	//tim2_init();
+	tim2_init(poll_func);
 	//tim3_init();
     usb_init();
 
     paras_init();
     dsp_init();
+    e2p_q = queue_init(QUEUE_MAX);
 
 	while(1) {
         usbhid_proc();

@@ -25,6 +25,11 @@ typedef enum {
     MODE_POLL,
 }eMODE;
 
+typedef struct {
+    void            *ptr;
+    u32             len;
+}node_t;
+
 
 #ifdef __cplusplus
 }

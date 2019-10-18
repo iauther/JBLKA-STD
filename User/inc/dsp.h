@@ -15,7 +15,7 @@ extern "C" {
 enum CMD_ID//命令ID
 {
     CMD_ID_Gain = 1,//ID从1开始
-    CMD_ID_Amp,
+    CMD_ID_Vol,
     CMD_ID_EQ,
     CMD_ID_HLPF,//高低通
     CMD_ID_Delay,
@@ -337,6 +337,18 @@ typedef struct {
     //u16  crc;
 }dsp_upgrade_t;
 
+
+#pragma pack(1)
+typedef struct {
+    u8              id;                //refer to CMD_ID_XXX
+    u8              ch;                //refer to XXX_CH
+    u8              n;                 //only when id is EQ or HPLF, n is used(id==EQ, n: band, id==HPLF, 0:hpf,1:lpf)
+    u16             dlen;
+    u8              data[]; 
+}dsp_data_t;
+#pragma pack()
+
+
 typedef struct {
     TypeS_Gain          *gain;
     TypeS_EQBand        *geq[3];
@@ -458,6 +470,7 @@ typedef struct {
 
     u8                  *pIdx;     //used preset index
 }dsp_paras_t;
+
 //#pragma pack()
 
 //////////////////////////////////////////////////////////////////
@@ -473,7 +486,7 @@ int dsp_is_started(void);
 
 int dsp_default(Dsp_Paras *dsp);
 
-int dsp_send(u16 ID, u16 Ch, u16 No);
+int dsp_send(u8 id, u8 ch, u8 no);
 
 int dsp_upload(void *data, u16 len);
 
@@ -482,6 +495,8 @@ int dsp_download(void *data, u16 len);
 int dsp_upgrade(u16 index, u8 *data, u16 len);
 
 void dsp_remap(dsp_paras_t *paras, Dsp_Paras *dsp);
+
+int dsp_get_node(dsp_data_t *dsp, node_t *node);
 
 void dsp_test(void);
 

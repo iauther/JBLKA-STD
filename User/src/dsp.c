@@ -22,7 +22,7 @@ typedef struct {
 
 u8 dspBuf[40];
 u8 dspStarted=0;
-extern paras_data_t gParams;;
+extern paras_data_t gParams;
 
 #if 0
 UartParas_t dspParas={0};
@@ -44,6 +44,86 @@ u16 crc_calc(u16 *data, u16 length)
     return (sum & 0xFFFF);
 }
 
+
+static int get_node(u8 id, u8 ch, u8 no, node_t *node)
+{
+    node_t n;
+    Dsp_Paras *dsp=&gParams.dsp;
+
+    switch(id) {
+        case CMD_ID_Gain:
+        if(ch>=Gain_CH_NUM) return -1;
+        n.len = sizeof(TypeS_Gain);
+        n.ptr = &dsp->Array_Gain[ch];
+        break;
+
+        case CMD_ID_Vol:
+        if(ch>=Vol_CH_NUM) return -1;
+        n.len = sizeof(TypeS_Vol);
+        n.ptr = &dsp->Array_Vol[ch];
+        break;
+
+        case CMD_ID_EQ:
+        if(ch>=EQ_CH_NUM) return -1;
+        n.len = sizeof(TypeS_EQBand);
+        n.ptr = &dsp->Array_EQ[ch].BandCoef[ no ];
+        break;
+
+        case CMD_ID_HLPF:
+        if(ch>=HLPF_CH_NUM) return -1;
+        n.len = sizeof(TypeS_HLPFCoef);
+        n.ptr = &dsp->Array_HLPF[ch].HLPFCoef[ no ];
+        break;
+
+        case CMD_ID_Delay:
+        if(ch>=Delay_CH_NUM) return -1;
+        n.len = sizeof(TypeS_Delay);
+        n.ptr = &dsp->Array_Delay[ch];
+        break;
+
+        case CMD_ID_FeedBack:
+        if(ch>=FeedBack_CH_NUM) return -1;
+        n.len = sizeof(TypeS_FeedBack);
+        n.ptr = &dsp->Array_FeedBack[ch];
+        break;
+
+        case CMD_ID_Limiter:
+        if(ch>=Limiter_CH_NUM) return -1;
+        n.len = sizeof(TypeS_Limiter);
+        n.ptr = &dsp->Array_Limiter[ch];
+        break;
+
+        case CMD_ID_PitchShift:
+        n.len = sizeof(TypeS_PitchShift);
+        n.ptr = &dsp->Array_PitchShift;
+        break;
+
+        case CMD_ID_Mute:
+        if(ch>=Mute_CH_NUM) return -1;
+        n.len = sizeof(TypeS_Mute);
+        n.ptr = &dsp->Array_Mute[ch];
+        break;
+
+        case CMD_ID_NoiseGate:
+        if(ch>=NoiseGate_CH_NUM) return -1;
+        n.len = sizeof(TypeS_NoiseGate);
+        n.ptr = &dsp->Array_NoiseGate[ch];
+        break;
+
+        case CMD_ID_Input:
+        n.len = sizeof(TypeS_Input);
+        n.ptr = &dsp->Array_Input;
+        break;
+
+        default:
+        return -1;
+    }
+    if(node) {
+        *node = n;
+    }
+    
+    return 0;
+}
 
 
 static int dsp_write(dsp_buf_t *db)
@@ -76,10 +156,10 @@ static int dsp_read(dsp_buf_t *db)
 void dsp_reset(void)
 {
     GPIO_InitTypeDef init={0};
-	init.GPIO_Mode = GPIO_Mode_Out_PP;
-	init.GPIO_Pin = GPIO_Pin_8;
-	init.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOC, &init);
+    init.GPIO_Mode = GPIO_Mode_Out_PP;
+    init.GPIO_Pin = GPIO_Pin_8;
+    init.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOC, &init);
 
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_RESET);
     delay_ms(10);
@@ -131,72 +211,21 @@ int dsp_is_started(void)
 //只有EQ,HLPF,用到No
 //用在EQ的时候，No就是Band
 //用在HLPF的时候，No=0/1:hpf/lpf
-int dsp_send(u16 ID, u16 Ch, u16 No)
+int dsp_send(u8 id, u8 ch, u8 no)
 {
-    Dsp_Paras *dsp=&gParams.dsp;
-    gDspBuf.cmd.ID = ID;
-    gDspBuf.cmd.Ch = Ch;
-    switch(ID) {
-        case CMD_ID_Gain:
-        gDspBuf.cmd.Len = sizeof(TypeS_Gain);
-        gDspBuf.cmd.DataPtr = (u16 *)&dsp->Array_Gain[Ch];
-        break;
+    int r;
+    node_t n;
 
-        case CMD_ID_Amp:
-        gDspBuf.cmd.Len = sizeof(TypeS_Vol);
-        gDspBuf.cmd.DataPtr = (u16 *)&dsp->Array_Vol[Ch];
-        break;
-
-        case CMD_ID_EQ:
-        gDspBuf.cmd.Len = sizeof(TypeS_EQBand);
-        gDspBuf.cmd.No = No;
-        gDspBuf.cmd.DataPtr = (u16 *)&dsp->Array_EQ[Ch].BandCoef[ No ];
-        break;
-
-        case CMD_ID_HLPF:
-        gDspBuf.cmd.Len = sizeof(TypeS_HLPFCoef);
-        gDspBuf.cmd.No = No;
-        gDspBuf.cmd.DataPtr = (u16 *)&dsp->Array_HLPF[Ch].HLPFCoef[ No ];
-        break;
-
-        case CMD_ID_Delay:
-        gDspBuf.cmd.Len = sizeof(TypeS_Delay);
-        gDspBuf.cmd.DataPtr = (u16 *)&dsp->Array_Delay[Ch];
-        break;
-
-        case CMD_ID_FeedBack:
-        gDspBuf.cmd.Len = sizeof(TypeS_FeedBack);
-        gDspBuf.cmd.DataPtr = (u16 *)&dsp->Array_FeedBack[Ch];
-        break;
-
-        case CMD_ID_Limiter:
-        gDspBuf.cmd.Len = sizeof(TypeS_Limiter);
-        gDspBuf.cmd.DataPtr = (u16 *)&dsp->Array_Limiter[Ch];
-        break;
-
-        case CMD_ID_PitchShift:
-        gDspBuf.cmd.Len = sizeof(TypeS_PitchShift);
-        gDspBuf.cmd.DataPtr = (u16 *)&dsp->Array_PitchShift;
-        break;
-
-        case CMD_ID_Mute:
-        gDspBuf.cmd.Len = sizeof(TypeS_Mute);
-        gDspBuf.cmd.DataPtr = (u16 *)&dsp->Array_Mute[Ch];
-        break;
-
-        case CMD_ID_NoiseGate:
-        gDspBuf.cmd.Len = sizeof(TypeS_NoiseGate);
-        gDspBuf.cmd.DataPtr = (u16 *)&dsp->Array_NoiseGate[Ch];
-        break;
-
-        case CMD_ID_Input:
-        gDspBuf.cmd.Len = sizeof(TypeS_Input);
-        gDspBuf.cmd.DataPtr = (u16 *)&dsp->Array_Input;
-        break;
-
-        default:
-        return -1;
+    r = get_node(id, ch, no, &n);
+    if(r) {
+        return r;
     }
+
+    gDspBuf.cmd.ID = id;
+    gDspBuf.cmd.Ch = ch;
+    gDspBuf.cmd.No = no;
+    gDspBuf.cmd.Len = n.len;
+    gDspBuf.cmd.DataPtr = (u16 *)n.ptr;
 
     return dsp_write(&gDspBuf);
 }
@@ -245,7 +274,7 @@ int dsp_download(void *data, u16 len)
 int dsp_upgrade(u16 index, u8 *data, u16 len)
 {
     if(len>DOWNLOAD_SIZE || len%2) {
-        return -1;  //even length || len<=256
+        return -1;
     }
 
     gDspBuf.cmd.ID = CMD_ID_UpdataDSP;
@@ -348,6 +377,19 @@ void dsp_remap(dsp_paras_t *paras, Dsp_Paras *dsp)
     paras->eff.echo.lpf = &dsp->Array_HLPF[HLPF_CH_Rev].HLPFCoef[HLPF_Lpf];
     paras->eff.reverb.preDelay = &dsp->Array_Delay[Delay_CH_Rev_PreDelay];
     paras->eff.reverb.time = &dsp->Array_Delay[Delay_CH_Rev_Time];
+}
+
+
+int dsp_get_node(dsp_data_t *dsp, node_t *node)
+{
+    int r;
+    node_t n;
+
+    r = get_node(dsp->id, dsp->ch, dsp->n, &n);
+    if(r==0) {
+        *node = n;
+    }
+    return r;
 }
 
 /////////////////////////////////////////////////////////

@@ -730,6 +730,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\src\stm32f1xx_hal_gpio.c</FilePath>
             </File>
+            <File>
+              <FileName>queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\queue.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

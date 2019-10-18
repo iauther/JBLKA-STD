@@ -17,11 +17,17 @@
 //定时器计数值清零
 #define TIMER_CLEAR_CNT(TIMx)			  ((TIM_TypeDef*)TIMx)->CNT =((uint16_t)0)
 
-void tim2_init( void );
-void tim3_init( void );
+
+
+typedef void (*tim_callback)(void);
+
+
+void tim2_init(tim_callback cb);
+void tim3_init(tim_callback cb);
+void tim4_init(tim_callback cb);
+
 void tim2_callback(void);
 void tim3_callback(void);
-void tim4_init( void );
 void tim4_callback(void);
 #endif
 

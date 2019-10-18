@@ -9,7 +9,7 @@ extern "C" {
 #include "dsp.h"
 
 typedef enum {
-    TYPE_DSP=0,                     //dsp_data_t
+    TYPE_DSP=0,                     //dsp_data_t in dsp.h
     TYPE_AMP,                       //amp_data_t
     TYPE_IODAT,                     //io_data_t
     TYPE_STATUS,                    //device status
@@ -33,14 +33,6 @@ typedef enum {
 }eINPUT;
 
 #pragma pack(1)
-typedef struct {
-    u8              id;                //refer to CMD_ID_XXX
-    u8              ch;                //refer to XXX_CH
-    u8              n;                 //only when id is EQ or HPLF, n is used(id==EQ, n: band, id==HPLF, 0:hpf,1:lpf)
-    u16             dlen;
-    u8              data[]; 
-}dsp_data_t;
-
 typedef struct {
     u8              on;                 //0: off,  1: on
     u8              ppwr;               //positive power  0: off,  1: on
