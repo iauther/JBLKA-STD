@@ -9,13 +9,25 @@ tim_callback tim2_callback_fn=0;
 tim_callback tim3_callback_fn=0;
 tim_callback tim4_callback_fn=0;
 
-
+#if 0
+#define TIM_MAX  17
 TIM_TypeDef *timDef[17]={TIM1,TIM2,TIM3,TIM4,TIM5,TIM6,TIM7,TIM8,TIM9,TIM10,TIM11,TIM12,TIM13,TIM14,TIM15,TIM16,TIM17};
-//IRQn_Type  timIRQn[17]={TIM1,TIM2_IRQn,TIM3_IRQn,TIM4_IRQn,TIM5_IRQn,TIM6_IRQn,TIM7_IRQn,TIM8_IRQn,TIM9,TIM10,TIM11,TIM12,TIM13,TIM14,TIM15,TIM16,TIM17};
+IRQn_Type   timIRQn[17]={0,TIM2_IRQn,TIM3_IRQn,TIM4_IRQn,TIM5_IRQn,TIM6_IRQn,TIM7_IRQn,TIM8_IRQn,TIM9_IRQn,TIM10_IRQn,
+                          TIM11_IRQn,TIM12_IRQn,TIM13_IRQn,TIM14_IRQn,TIM15_IRQn,TIM16_IRQn,TIM17_IRQn};
+
+u32 rccPeriphClock[17]={0, RCC_APB1Periph_TIM2, RCC_APB1Periph_TIM3, RCC_APB1Periph_TIM4, RCC_APB1Periph_TIM5,RCC_APB1Periph_TIM6,
+                           RCC_APB1Periph_TIM7, RCC_APB1Periph_TIM8, RCC_APB1Periph_TIM9, RCC_APB1Periph_TIM10, RCC_APB1Periph_TIM11,
+                           RCC_APB1Periph_TIM12, RCC_APB1Periph_TIM13, RCC_APB1Periph_TIM14, RCC_APB1Periph_TIM15, RCC_APB1Periph_TIM16, 
+                           RCC_APB1Periph_TIM17};
+#endif
+
+u32 ms_counter=0;
 void tim3_init(tim_callback cb)
 {
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
+
+    
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); //时钟使能
 
@@ -44,6 +56,8 @@ void tim3_callback(void)   //TIM3中断
     {
         TIM_ClearITPendingBit(TIM3, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
     }
+    
+    ms_counter++;
     if(tim3_callback_fn) {
         tim3_callback_fn();
     }
@@ -83,14 +97,13 @@ void tim4_init(tim_callback cb)
 }
 
 
-u32 tim4_counter=0;
+
 void tim4_callback(void)
 {
     if(TIM_GetITStatus(TIM3,TIM_IT_Update)==SET)
     {
         TIMER_OFF(TIM4)			;	//关闭计数器
         TIMER_CLEAR_CNT(TIM4)	;	//计数器清零
-        tim4_counter++;
         TIM_ClearITPendingBit(TIM4, TIM_FLAG_Update);       
     }
     if(tim4_callback_fn) {

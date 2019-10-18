@@ -324,10 +324,10 @@
   */
 
 
-extern uint32_t tim4_counter;
+extern uint32_t ms_counter;
 uint32_t HAL_GetTick()
 {
-    return tim4_counter;
+    return ms_counter;
 }
 
 

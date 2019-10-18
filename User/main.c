@@ -14,7 +14,7 @@
 #include "config.h" 
 #include "queue.h"
 
-#define E2P_POLL_TIME       50        //500ms
+#define E2P_POLL_TIME       100        //500ms
 #define QUEUE_MAX           20
 
 int ccc=0;
@@ -178,7 +178,7 @@ static void e2p_proc(void)
     if(e2p_flag) {
         r = queue_get(e2p_q, &n);
         if(r==0) {
-            paras_write(n.ptr, n.len);
+            r = paras_write(n.ptr, n.len);
         }
         e2p_flag = 0;
     }

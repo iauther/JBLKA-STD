@@ -58,8 +58,16 @@ int e2p_read(u32 addr, u8 *data, u16 len)
 }
 
 
+static int write_page(u32 addr, u8 *data, u16 len)
+{
+    int r;
+    r = HAL_I2C_Mem_Write(i2c_handle, E2P_ADDR, addr, I2C_MEMADD_SIZE_16BIT, data, len, 0xFFFF);
+    delay_ms(5);
+}
+
 int e2p_write(u32 addr, u8 *data, u16 len)
 {
+#if 0
     int r;
     u16 i = 0;
     u16 cnt = 0;		//写入字节计数
@@ -99,8 +107,67 @@ int e2p_write(u32 addr, u8 *data, u16 len)
             r = HAL_I2C_Mem_Write(i2c_handle, E2P_ADDR, addr+cnt, I2C_MEMADD_SIZE_16BIT, data+cnt, len-cnt, 0xFFFF);
         }
     }
-
     delay_ms(5);
+#else
+    int r;
+    u16 pages = 0, bytes = 0, start = 0, count = 0;
+
+    start = addr % PAGE_SIZE;
+    count = PAGE_SIZE - start;
+    pages =  len / PAGE_SIZE;
+    bytes = len % PAGE_SIZE;
+ 
+    if(start == 0)  {        //起始地址在页首
+        if(pages == 0)  {//不足一页
+            r = write_page(addr, data, bytes); 
+        }
+        else  {//大于等于1页
+            while(pages--) {
+                r = write_page(addr, data, PAGE_SIZE); 
+                addr +=  PAGE_SIZE;
+                data += PAGE_SIZE;
+            }
+
+            if(bytes) {
+                r = write_page(addr, data, bytes); 
+            }
+        }
+    }
+    else {  //起始地址在页中
+        if(pages== 0) { //不足一页
+            r = write_page(addr, data, bytes); 
+        }
+        else {  //大于等于1页
+            len -= count;
+            pages =  len / PAGE_SIZE;
+            bytes = len % PAGE_SIZE;    
+
+            if(count) {
+                r = write_page(addr, data, count);
+                if(r) {
+                    return r;
+                }
+                addr += count;
+                data += count;
+            } 
+
+            while(pages--) {
+                r = write_page(addr, data, PAGE_SIZE); 
+                if(r) {
+                    return r;
+                }
+                addr +=  PAGE_SIZE;
+                data += PAGE_SIZE;  
+            }
+
+            if(bytes != 0) {
+                r = write_page(addr, data, bytes); 
+            }
+        }
+    }
+
+#endif
+
     return r;
 }
 
