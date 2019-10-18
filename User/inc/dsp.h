@@ -486,7 +486,7 @@ int dsp_is_started(void);
 
 int dsp_default(Dsp_Paras *dsp);
 
-int dsp_send(u8 id, u8 ch, u8 no);
+int dsp_send(dsp_data_t *dsp);
 
 int dsp_upload(void *data, u16 len);
 

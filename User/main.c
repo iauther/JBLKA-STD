@@ -17,6 +17,7 @@
 #define E2P_POLL_TIME       500        //500ms
 #define QUEUE_MAX           20
 
+int ccc=0;
 queue_t *e2p_q=0;
 static int hid_single_proc(packet_t *pkt)
 {
@@ -32,16 +33,17 @@ static int hid_single_proc(packet_t *pkt)
         return r;
     }
     
-    queue_put(e2p_q, &n, 1);
+    r = queue_put(e2p_q, &n, 1);
+    if(r) {
+        ccc++;
+    }
+
     switch(pkt->type) {        
         case TYPE_DSP:
         {
             dsp_data_t *dsp=(dsp_data_t*)pkt->data;
-            r = dsp_send(dsp->id, dsp->ch, dsp->n);
+            r = dsp_send(dsp);
         }
-        break;
-        
-        case TYPE_AMP:
         break;           
         
         case TYPE_IODAT:
@@ -115,28 +117,46 @@ static int hid_multi_proc(packet_t *pkt)
 }
 
 
-extern u8 usbRxBuf[];
 static void usb_proc(void)
 {
-    u32 len;
+    extern u8 usbRxBuf[];
     packet_t *pkt=(packet_t*)usbRxBuf;
     
     if(usbRxFlag) {
-        if(len>0) {
-            if(is_multipkts(pkt)) {
-                hid_multi_proc(pkt);
-            }
-            else {
-                hid_single_proc(pkt);
-            }
+        if(is_multipkts(pkt)) {
+            hid_multi_proc(pkt);
+        }
+        else {
+            hid_single_proc(pkt);
         }
         usbRxFlag = 0;
     }
 }
+
+static void usb_dp_reset(void)
+{
+    GPIO_InitTypeDef init={0};
+    
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+
+    init.GPIO_Mode = GPIO_Mode_Out_PP;
+    init.GPIO_Pin = GPIO_Pin_12;
+    init.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &init);
+
+    GPIO_WriteBit(GPIOA, GPIO_Pin_12, Bit_RESET);
+    delay_ms(5);
+    GPIO_WriteBit(GPIOA, GPIO_Pin_12, Bit_SET);
+    delay_ms(5);
+}
+
+
 static void usb_init(void)
 {
     USB_Interrupts_Config();
 	Set_USBClock();
+
+    usb_dp_reset();
 	USB_Init();
 }
 
@@ -160,6 +180,7 @@ static void e2p_proc(void)
         if(r==0) {
             paras_write(n.ptr, n.len);
         }
+        e2p_flag = 0;
     }
 }
 
@@ -170,7 +191,7 @@ int main(void)
     __enable_irq();
 
 	Set_System();
-	tim2_init(poll_func);
+	tim3_init(poll_func);
 	//tim3_init();
     usb_init();
 

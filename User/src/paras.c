@@ -125,7 +125,7 @@ void paras_init(void)
 
 int paras_update(packet_t *pkt, node_t *node)
 {
-    int r=0;
+    int r=-1;
     node_t n={0};
 
     switch(pkt->type) {
@@ -133,39 +133,35 @@ int paras_update(packet_t *pkt, node_t *node)
         r = dsp_get_node((dsp_data_t*)pkt->data, &n);
         break;
 
-        case TYPE_AMP:
-        n.ptr = &gParams.iodat;
-        n.len = sizeof(gParams.iodat);
-        break;
-
         case TYPE_IODAT:
         n.ptr = &gParams.iodat;
         n.len = sizeof(gParams.iodat);
+        if(pkt->dlen != n.len) return -1;
         break;
 
         case TYPE_PARAS:
         n.ptr = &gParams;
         n.len = sizeof(gParams);
+        if(pkt->dlen != n.len) return -1;
         break;
 
         case TYPE_PRESET:
         //n.ptr = &gPreset;
         //n.len = sizeof(preset_t);
+        if(pkt->dlen != n.len) return -1;
         break;
         
         default:
         return -1;
     }
-    if(pkt->dlen != n.len) {
-        r = -1;
-    }
-
+    
     if(r==0) {
         memcpy(n.ptr, pkt->data, n.len);
+        if(node) {
+            *node = n;
+        }
     }
-    if(node) {
-        *node = n;
-    }
+    
 
     return r;
 }

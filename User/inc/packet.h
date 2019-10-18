@@ -10,7 +10,6 @@ extern "C" {
 
 typedef enum {
     TYPE_DSP=0,                     //dsp_data_t in dsp.h
-    TYPE_AMP,                       //amp_data_t
     TYPE_IODAT,                     //io_data_t
     TYPE_STATUS,                    //device status
     TYPE_PARAS,                     //paras_data_t

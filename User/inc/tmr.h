@@ -19,10 +19,14 @@
 
 
 
+
 typedef void (*tim_callback)(void);
 
 
 void tim2_init(tim_callback cb);
+
+//void tim_init(u8 id, tim_callback cb);s
+
 void tim3_init(tim_callback cb);
 void tim4_init(tim_callback cb);
 

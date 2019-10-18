@@ -10,98 +10,46 @@ tim_callback tim3_callback_fn=0;
 tim_callback tim4_callback_fn=0;
 
 
-/* TIM2定时1ms */
-void tim2_init(tim_callback cb)
-{
-    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
-
-    TIMER_OFF(TIM2);
-    TIMER_CLEAR_CNT(TIM2);
-
-    TIM_DeInit(TIM2);  											//定时器x相关寄存器改为默认值
-    TIM_TimeBaseStructure.TIM_Period = 1000;						//自动重载定时周期
-    TIM_TimeBaseStructure.TIM_Prescaler= 71;						//定时器时钟预分频
-    TIM_TimeBaseStructure.TIM_ClockDivision= TIM_CKD_DIV1;		//采样分频 = CK_INT
-    TIM_TimeBaseStructure.TIM_CounterMode	= TIM_CounterMode_Up;	//计数模式	向上计数
-    TIM_TimeBaseInit(TIM2,&TIM_TimeBaseStructure);
-
-    TIM_PrescalerConfig(TIM2, 71, TIM_PSCReloadMode_Immediate);	   
-    TIM_ClearFlag(TIM2,TIM_FLAG_Update);							//清除更新标记  
-    TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);					//开定时器中断
-
-    /* Enable the TIMER Interrupt */
-    NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 5;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-
-    tim2_callback_fn = cb;
-}
-
-
-void tim2_callback(void)
-{
-    if(TIM_GetITStatus(TIM2,TIM_IT_Update)==SET)
-    {
-        TIMER_OFF(TIM2)			;
-        TIMER_CLEAR_CNT(TIM2)	;
-        uart_timeout   =1		;
-        //tmr2cnt++;
-        TIM_ClearITPendingBit(TIM2,TIM_FLAG_Update);       
-    }
-    if(tim2_callback_fn) {
-        tim2_callback_fn();
-    }
-}
-
-
+TIM_TypeDef *timDef[17]={TIM1,TIM2,TIM3,TIM4,TIM5,TIM6,TIM7,TIM8,TIM9,TIM10,TIM11,TIM12,TIM13,TIM14,TIM15,TIM16,TIM17};
+//IRQn_Type  timIRQn[17]={TIM1,TIM2_IRQn,TIM3_IRQn,TIM4_IRQn,TIM5_IRQn,TIM6_IRQn,TIM7_IRQn,TIM8_IRQn,TIM9,TIM10,TIM11,TIM12,TIM13,TIM14,TIM15,TIM16,TIM17};
 void tim3_init(tim_callback cb)
 {
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
 
-    TIMER_OFF(TIM3);
-    TIMER_CLEAR_CNT(TIM3);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); //时钟使能
 
-    TIM_DeInit(TIM3);  											//定时器x相关寄存器改为默认值
-    TIM_TimeBaseStructure.TIM_Period = 5000;						//Auto-Reload Register
-    TIM_TimeBaseStructure.TIM_Prescaler= 71;						//prescaler value	 预分频寄存器此处写0，它将在下面重新设置
-    TIM_TimeBaseStructure.TIM_ClockDivision= TIM_CKD_DIV1;		//采样分频 = CK_INT
-    TIM_TimeBaseStructure.TIM_CounterMode	= TIM_CounterMode_Up;	//计数模式	向上计数
-    TIM_TimeBaseInit(TIM3,&TIM_TimeBaseStructure);
+    TIM_TimeBaseStructure.TIM_Period = 1000; //设置在下一个更新事件装入活动的自动重装载寄存器周期的值     计数到5000为500ms
+    TIM_TimeBaseStructure.TIM_Prescaler = 71; //设置用来作为TIMx时钟频率除数的预分频值  10Khz的计数频率  
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; //设置时钟分割:TDTS = Tck_tim
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  //TIM向上计数模式
+    TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure); //根据TIM_TimeBaseInitStruct中指定的参数初始化TIMx的时间基数单位
 
-    TIM_PrescalerConfig(TIM3, 71, TIM_PSCReloadMode_Immediate);	   
-    TIM_ClearFlag(TIM3,TIM_FLAG_Update);		//清除更新标记  
-    TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);//开定时器中断
+    TIM_ITConfig(TIM3,TIM_IT_Update,ENABLE ); //使能指定的TIM3中断,允许更新中断
 
-    /* Enable the TIMER Interrupt */
-    NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 6;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+    NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;  //TIM3中断
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;  //先占优先级0级
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;  //从优先级3级
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQ通道被使能
+    NVIC_Init(&NVIC_InitStructure);  //根据NVIC_InitStruct中指定的参数初始化外设NVIC寄存器
 
+    TIM_Cmd(TIM3, ENABLE);  //使能TIMx外设
     tim3_callback_fn = cb;
 }
 
 
-//HID接收超时，4ms没有收到HID的包则认为传输结束
-void tim3_callback(void)
+void tim3_callback(void)   //TIM3中断
 {
-    if(TIM_GetITStatus(TIM3,TIM_IT_Update)==SET)
+    if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET) //检查指定的TIM中断发生与否:TIM 中断源 
     {
-        TIMER_OFF(TIM3)			;	//关闭计数器
-        TIMER_CLEAR_CNT(TIM3)	;	//计数器清零
-        //tmr3cnt++;
-        //USB_Received_state=2	; 	//接收完毕
-        TIM_ClearITPendingBit(TIM3,TIM_FLAG_Update);       
+        TIM_ClearITPendingBit(TIM3, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
     }
     if(tim3_callback_fn) {
         tim3_callback_fn();
     }
 }
+
+    
 
 
 //systick

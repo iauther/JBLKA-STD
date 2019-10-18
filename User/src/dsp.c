@@ -45,52 +45,52 @@ u16 crc_calc(u16 *data, u16 length)
 }
 
 
-static int get_node(u8 id, u8 ch, u8 no, node_t *node)
+static int get_node(dsp_data_t *dd, node_t *node)
 {
     node_t n;
     Dsp_Paras *dsp=&gParams.dsp;
 
-    switch(id) {
+    switch(dd->id) {
         case CMD_ID_Gain:
-        if(ch>=Gain_CH_NUM) return -1;
+        if(dd->ch>=Gain_CH_NUM) return -1;
         n.len = sizeof(TypeS_Gain);
-        n.ptr = &dsp->Array_Gain[ch];
+        n.ptr = &dsp->Array_Gain[dd->ch];
         break;
 
         case CMD_ID_Vol:
-        if(ch>=Vol_CH_NUM) return -1;
+        if(dd->ch>=Vol_CH_NUM) return -1;
         n.len = sizeof(TypeS_Vol);
-        n.ptr = &dsp->Array_Vol[ch];
+        n.ptr = &dsp->Array_Vol[dd->ch];
         break;
 
         case CMD_ID_EQ:
-        if(ch>=EQ_CH_NUM) return -1;
+        if(dd->ch>=EQ_CH_NUM) return -1;
         n.len = sizeof(TypeS_EQBand);
-        n.ptr = &dsp->Array_EQ[ch].BandCoef[ no ];
+        n.ptr = &dsp->Array_EQ[dd->ch].BandCoef[dd->n];
         break;
 
         case CMD_ID_HLPF:
-        if(ch>=HLPF_CH_NUM) return -1;
+        if(dd->ch>=HLPF_CH_NUM) return -1;
         n.len = sizeof(TypeS_HLPFCoef);
-        n.ptr = &dsp->Array_HLPF[ch].HLPFCoef[ no ];
+        n.ptr = &dsp->Array_HLPF[dd->ch].HLPFCoef[dd->n];
         break;
 
         case CMD_ID_Delay:
-        if(ch>=Delay_CH_NUM) return -1;
+        if(dd->ch>=Delay_CH_NUM) return -1;
         n.len = sizeof(TypeS_Delay);
-        n.ptr = &dsp->Array_Delay[ch];
+        n.ptr = &dsp->Array_Delay[dd->ch];
         break;
 
         case CMD_ID_FeedBack:
-        if(ch>=FeedBack_CH_NUM) return -1;
+        if(dd->ch>=FeedBack_CH_NUM) return -1;
         n.len = sizeof(TypeS_FeedBack);
-        n.ptr = &dsp->Array_FeedBack[ch];
+        n.ptr = &dsp->Array_FeedBack[dd->ch];
         break;
 
         case CMD_ID_Limiter:
-        if(ch>=Limiter_CH_NUM) return -1;
+        if(dd->ch>=Limiter_CH_NUM) return -1;
         n.len = sizeof(TypeS_Limiter);
-        n.ptr = &dsp->Array_Limiter[ch];
+        n.ptr = &dsp->Array_Limiter[dd->ch];
         break;
 
         case CMD_ID_PitchShift:
@@ -99,15 +99,15 @@ static int get_node(u8 id, u8 ch, u8 no, node_t *node)
         break;
 
         case CMD_ID_Mute:
-        if(ch>=Mute_CH_NUM) return -1;
+        if(dd->ch>=Mute_CH_NUM) return -1;
         n.len = sizeof(TypeS_Mute);
-        n.ptr = &dsp->Array_Mute[ch];
+        n.ptr = &dsp->Array_Mute[dd->ch];
         break;
 
         case CMD_ID_NoiseGate:
-        if(ch>=NoiseGate_CH_NUM) return -1;
+        if(dd->ch>=NoiseGate_CH_NUM) return -1;
         n.len = sizeof(TypeS_NoiseGate);
-        n.ptr = &dsp->Array_NoiseGate[ch];
+        n.ptr = &dsp->Array_NoiseGate[dd->ch];
         break;
 
         case CMD_ID_Input:
@@ -118,6 +118,10 @@ static int get_node(u8 id, u8 ch, u8 no, node_t *node)
         default:
         return -1;
     }
+    if(dd->dlen != n.len) {
+        return -1;
+    }
+
     if(node) {
         *node = n;
     }
@@ -211,19 +215,20 @@ int dsp_is_started(void)
 //只有EQ,HLPF,用到No
 //用在EQ的时候，No就是Band
 //用在HLPF的时候，No=0/1:hpf/lpf
-int dsp_send(u8 id, u8 ch, u8 no)
+int dsp_send(dsp_data_t *dsp)
 {
     int r;
     node_t n;
+    
 
-    r = get_node(id, ch, no, &n);
+    r = get_node(dsp, &n);
     if(r) {
         return r;
     }
 
-    gDspBuf.cmd.ID = id;
-    gDspBuf.cmd.Ch = ch;
-    gDspBuf.cmd.No = no;
+    gDspBuf.cmd.ID = dsp->id;
+    gDspBuf.cmd.Ch = dsp->ch;
+    gDspBuf.cmd.No = dsp->n;
     gDspBuf.cmd.Len = n.len;
     gDspBuf.cmd.DataPtr = (u16 *)n.ptr;
 
@@ -385,7 +390,7 @@ int dsp_get_node(dsp_data_t *dsp, node_t *node)
     int r;
     node_t n;
 
-    r = get_node(dsp->id, dsp->ch, dsp->n, &n);
+    r = get_node(dsp, &n);
     if(r==0) {
         *node = n;
     }
@@ -398,7 +403,7 @@ dsp_version_t ver;
 void dsp_test(void)
 {
     while(1) {
-        dsp_send(CMD_ID_DSPVer, 0, 0);
+        //dsp_send(CMD_ID_DSPVer, 0, 0);
         //memset(&ver, 0, sizeof(ver));
         //usart4_read((u8*)&ver, sizeof(ver));
         delay_ms(1000);

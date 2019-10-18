@@ -51,7 +51,7 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 }
 void TIM2_IRQHandler(void)
 {
-  	tim2_callback();
+  	//tim2_callback();
 }
 void TIM3_IRQHandler(void)
 {
