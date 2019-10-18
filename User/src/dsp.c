@@ -121,7 +121,7 @@ static int get_node(dsp_data_t *dd, node_t *node)
     if(dd->dlen != n.len) {
         return -1;
     }
-
+    
     if(node) {
         *node = n;
     }
@@ -219,7 +219,6 @@ int dsp_send(dsp_data_t *dsp)
 {
     int r;
     node_t n;
-    
 
     r = get_node(dsp, &n);
     if(r) {
@@ -385,13 +384,14 @@ void dsp_remap(dsp_paras_t *paras, Dsp_Paras *dsp)
 }
 
 
-int dsp_get_node(dsp_data_t *dsp, node_t *node)
+int dsp_update(dsp_data_t *dsp, node_t *node)
 {
     int r;
     node_t n;
 
     r = get_node(dsp, &n);
     if(r==0) {
+        memcpy(n.ptr, dsp->data, n.len);
         *node = n;
     }
     return r;

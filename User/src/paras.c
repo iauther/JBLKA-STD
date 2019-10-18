@@ -83,11 +83,14 @@ static void set_to_default(paras_ui_t *ui, paras_data_t *gb, const default_t *df
     
 }
 
-static int version_chk(void)
+
+//0: write default paras to e2prom
+//1: directly read paras form e2prom
+static int check_version(void)
 {
     fw_info_t fw;
     char *pver = (char*)&fw.ver;
-    
+//return 0;    
     e2p_read(0, (u8*)&fw, sizeof(fw_info_t));
     pver[13] = 0;
     if(!strstr(pver, "KA-V") || strlen(pver)!=strlen(VERSION) || strcmp(pver, VERSION)<0) {
@@ -105,21 +108,22 @@ static void paras_remap()
 }
 
 
-void paras_init(void)
+int paras_init(void)
 {
-    int r,j=0;
+    int r;
     e2p_init();
 
     paras_remap();
-    if(!version_chk()) {
+    if(!check_version()) {
         set_to_default(&uiParams, &gParams, &gDefault);
         r = e2p_write(0, (u8*)&gParams, sizeof(gParams));
-        j++;
         //e2p_write preset data...  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     }
     else {
-        e2p_read(0, (u8*)&gParams, sizeof(gParams));
+        r = e2p_read(0, (u8*)&gParams, sizeof(gParams));
     }
+
+    return r;
 }
 
 
@@ -130,67 +134,66 @@ int paras_update(packet_t *pkt, node_t *node)
 
     switch(pkt->type) {
         case TYPE_DSP:
-        r = dsp_get_node((dsp_data_t*)pkt->data, &n);
+        r = dsp_update((dsp_data_t*)pkt->data, &n);
         break;
 
         case TYPE_IODAT:
         n.ptr = &gParams.iodat;
         n.len = sizeof(gParams.iodat);
         if(pkt->dlen != n.len) return -1;
+        memcpy(n.ptr, pkt->data, n.len);
         break;
 
         case TYPE_PARAS:
         n.ptr = &gParams;
         n.len = sizeof(gParams);
         if(pkt->dlen != n.len) return -1;
+        memcpy(n.ptr, pkt->data, n.len);
         break;
 
         case TYPE_PRESET:
         //n.ptr = &gPreset;
         //n.len = sizeof(preset_t);
         if(pkt->dlen != n.len) return -1;
+        memcpy(n.ptr, pkt->data, n.len);
         break;
         
         default:
         return -1;
     }
     
-    if(r==0) {
-        memcpy(n.ptr, pkt->data, n.len);
-        if(node) {
-            *node = n;
-        }
+    if(r==0 && node) {
+        *node = n;
     }
-    
 
     return r;
 }
 
 
-void paras_read(void *p, int len)
+int paras_read(void *p, int len)
 {
     u32 offset=(u32)p-(u32)(&gParams);
-    e2p_read(offset, p, len);
+    return e2p_read(offset, p, len);
 }
 
 
-void paras_write(void *p, int len)
+int paras_write(void *p, int len)
 {
     u32 offset=(u32)p-(u32)(&gParams);
-    e2p_write(offset, p, len);
+    return e2p_write(offset, p, len);
 }
 
 
-void paras_reset(void)
+int paras_reset(void)
 {
     set_to_default(&uiParams, &gParams, &gDefault);
-    e2p_write(0, (u8*)&gParams, sizeof(paras_data_t));
+    return e2p_write(0, (u8*)&gParams, sizeof(paras_data_t));
 }
 
 
-void paras_save_preset(u8 index)
+int paras_save_preset(u8 index)
 {
     u32 offset=sizeof(paras_data_t)+sizeof(u8)+sizeof(Dsp_Paras)*(index+1);
-    e2p_write(offset, (u8*)&gParams, sizeof(paras_data_t));
+    return e2p_write(offset, (u8*)&gParams, sizeof(paras_data_t));
 }
 

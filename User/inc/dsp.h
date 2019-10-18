@@ -496,7 +496,7 @@ int dsp_upgrade(u16 index, u8 *data, u16 len);
 
 void dsp_remap(dsp_paras_t *paras, Dsp_Paras *dsp);
 
-int dsp_get_node(dsp_data_t *dsp, node_t *node);
+int dsp_update(dsp_data_t *dsp, node_t *node);
 
 void dsp_test(void);
 

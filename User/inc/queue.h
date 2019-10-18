@@ -9,6 +9,8 @@ typedef struct {
 	int         cnt;		// element counter in the queue
 	int         head;		// head points to head element in the queue (if any)
 	int         tail;		// tail points to last element in the queue
+
+    int         locked;
 }queue_t;
 
 

@@ -14,7 +14,7 @@
 #include "config.h" 
 #include "queue.h"
 
-#define E2P_POLL_TIME       500        //500ms
+#define E2P_POLL_TIME       50        //500ms
 #define QUEUE_MAX           20
 
 int ccc=0;
