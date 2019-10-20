@@ -1,12 +1,11 @@
 #include "e2p.h"
-#include "i2c.h"
 #include "delay.h"
 #include "config.h"
 #ifdef APP
 //#include "cmsis_os2.h"
 #endif
 
-#define E2P_ADDR        0xA0
+#define E2P_ADDR            0xA0
 #ifdef USE_24XX512
     #define PAGE_SIZE       128
 #else   //24C02
@@ -14,7 +13,16 @@
 #endif
 
 
+#define USE_HAL
+//#define USE_STD
+#ifdef USE_STD
+    #define USE_STD_HW_I2C
+    //#define USE_STD_SW_I2C
+#endif
 
+
+#ifdef USE_HAL
+#include "i2c.h"
 static I2C_HandleTypeDef *i2c_handle=0;
 int e2p_init(void)
 {
@@ -179,6 +187,394 @@ int e2p_write(u32 addr, u8 *data, u16 len)
 
     return r;
 }
+#endif
+
+
+
+#ifdef USE_STD_HW_I2C
+
+static void gpio_config(void)
+{
+    GPIO_InitTypeDef  GPIO_InitStructure;
+
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
+}
+static void i2c_config(void)
+{
+    I2C_InitTypeDef I2C_InitStructure;
+
+    I2C_DeInit(I2C1);                                                  //复位I2C
+
+    I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;                         //I2C模式
+    I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;                 //占空比(快速模式时)
+    I2C_InitStructure.I2C_OwnAddress1 = E2P_ADDR;               //设备地址
+    I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;                        //应答
+    I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
+    I2C_InitStructure.I2C_ClockSpeed = I2C_SPEED;                      //速度
+    I2C_Init(I2C1, &I2C_InitStructure);
+
+    I2C_Cmd(I2C1, ENABLE);                                             //使能I2C
+}
+
+void e2p_init(void)
+{
+    gpio_config();
+    i2c_config();
+    return 0;
+}
+
+int e2p_read_byte(u32 Addr, u8 *Data)
+{
+    while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY));
+
+    /* 1.开始 */
+    I2C_GenerateSTART(I2C1, ENABLE);
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
+
+    /* 2.设备地址/写 */
+    I2C_Send7bitAddress(I2C1, E2P_ADDR, I2C_Direction_Transmitter);
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
+
+    /* 3.数据地址 */
+    I2C_SendData(I2C1, (u8)(Addr>>8));                            //数据地址(16位)
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+    I2C_SendData(I2C1, (u8)(Addr&0x00FF));
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+
+    /* 4.重新开始 */
+    I2C_GenerateSTART(I2C1, ENABLE);
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
+
+    /* 5.设备地址/读 */
+    I2C_Send7bitAddress(I2C1, E2P_ADDR, I2C_Direction_Receiver);
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED));
+
+    /* 6.读一字节数据 */
+    I2C_AcknowledgeConfig(I2C1, DISABLE);                              //产生非应答
+    while(I2C_GetFlagStatus(I2C1, I2C_FLAG_RXNE) == RESET);
+    *Data = I2C_ReceiveData(I2C1);                                     //读取数据
+
+    /* 7.停止 */
+    I2C_GenerateSTOP(I2C1, ENABLE);
+
+    return 0;
+}
+
+int e2p_write_byte(u32 Addr, u8 Data)
+{
+    while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY));
+
+    /* 1.开始 */
+    I2C_GenerateSTART(I2C1, ENABLE);
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
+
+    /* 2.设备地址/写 */
+    I2C_Send7bitAddress(I2C1, E2P_ADDR, I2C_Direction_Transmitter);
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
+
+    /* 3.数据地址 */
+    I2C_SendData(I2C1, (u8)(Addr>>8));                            //数据地址(16位)
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+    I2C_SendData(I2C1, (u8)(Addr&0x00FF));
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+
+    /* 4.写一字节数据 */
+    I2C_SendData(I2C1, Data);
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+
+    /* 5.停止 */
+    I2C_GenerateSTOP(I2C1, ENABLE);
+    return 0;
+}
+
+static void write_page(u32 Addr, u8 *pData, u8 Length)
+{
+    u16 cnt;
+
+    while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY));
+
+    /* 1.开始 */
+    I2C_GenerateSTART(I2C1, ENABLE);
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
+
+    /* 2.设备地址/写 */
+    I2C_Send7bitAddress(I2C1, E2P_ADDR, I2C_Direction_Transmitter);
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
+
+    /* 3.数据地址 */
+    I2C_SendData(I2C1, (u8)(Addr>>8));                            //数据地址(16位)
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+    I2C_SendData(I2C1, (u8)(Addr&0x00FF));
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+
+    /* 4.连续写数据 */
+    for(cnt=0; cnt<(Length-1); cnt++)
+    {
+        I2C_SendData(I2C1, *pData);
+        while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+        pData++;
+    }
+    I2C_SendData(I2C1, *pData);
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+
+    /* 5.停止 */
+    I2C_GenerateSTOP(I2C1, ENABLE);
+    return 0;
+}
+
+
+int e2p_write(u32 Addr, u8 *pData, u16 Length)
+{
+    u32 Addr_offset;                                              //偏移地址
+    u8  num_page = 0;                                             //页数(Length字节共多少页)
+    u8  num_single = 0;                                           //"单"字节数(除了整页外的字节数)
+    u8  count = 0;                                                //页剩余字节数量(偏移地址 -> 页末)
+
+    addr_offset = Addr % PAGE_SIZE;                             //"起始地址"偏移该页地址多少
+    count = PAGE_SIZE - addr_offset;                            //页剩余字节数量
+    num_page = Length / PAGE_SIZE;                              //页数
+    num_single = Length % PAGE_SIZE;
+
+    /* 1.起始地址未偏移(位于页首地址) */
+    if(0 == addr_offset)
+    {
+        /* 数据量小于1页 */
+        if(0 == num_page)
+        {
+            write_page(Addr, pData, Length);                         //页首地址,写入小于1页的数据
+        }
+        /* 数据量大于等于1页 */
+        else
+        {
+            while(num_page--)
+            {                                                              //写num_page页数据
+                write_page(Addr, pData, PAGE_SIZE);
+                Addr += PAGE_SIZE;
+                pData += PAGE_SIZE;
+            }
+            
+            if(0 != num_single)
+            {                                                              //写整页外剩下的字节数
+                write_page(Addr, pData, num_single);
+            }
+        }
+    }
+
+    /* 2.起始地址已偏移(不在页首地址) */
+    else
+    {
+        /* 数据量小于1页 */
+        if(0 == num_page)
+        {
+            /* 不超过该页 */
+            if(Length < count)
+            {
+                write_page(Addr, pData, Length);                       //页偏移地址,写入小于该页的数据
+            }
+            /* 超过该页 */
+            else
+            {
+                write_page(Addr, pData, count);                        //页偏移地址,写满该页的数据
+                Addr += count;
+                pData += count;
+                                                                             //下页首地址,写完剩下的数据
+                write_page(Addr, pData, Length - count);
+            }
+        }
+        else
+        {
+            Length -= count;
+            num_page = Length / PAGE_SIZE;                          //剩下的页数(减去前面写的数)
+            num_single = Length % PAGE_SIZE;                        //最后一页需要写的字节数
+
+            write_page(Addr, pData, count);                          //页偏移地址,写满该页的数据
+            Addr += count;
+            pData += count;
+
+            while(num_page--)
+            {                                                              //写num_page页数据
+                delay_ms(5);                                             //写周期延时5ms
+                write_page(Addr, pData, PAGE_SIZE);
+                Addr += PAGE_SIZE;
+                pData += PAGE_SIZE;
+            }
+            
+            if(0 != num_single)
+            {                                                              //写整页外剩下的字节数
+                delay_ms(5);
+                write_page(Addr, pData, num_single);
+            }
+        }
+    }
+  
+    return 0;
+}
+
+int e2p_read(u32 Addr, u8 *pData, u16 Length)
+{
+    u16 cnt;
+
+    while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY));
+
+    /* 1.开始 */
+    I2C_GenerateSTART(I2C1, ENABLE);
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
+
+    /* 2.设备地址/写 */
+    I2C_Send7bitAddress(I2C1, E2P_ADDR, I2C_Direction_Transmitter);
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
+
+    /* 3.数据地址 */
+    I2C_SendData(I2C1, (u8)(Addr>>8));                            //数据地址(16位)
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+    I2C_SendData(I2C1, (u8)(Addr&0x00FF));
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+
+    /* 4.重新开始 */
+    I2C_GenerateSTART(I2C1, ENABLE);
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
+
+    /* 5.设备地址/读 */
+    I2C_Send7bitAddress(I2C1, E2P_ADDR, I2C_Direction_Receiver);
+    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED));
+
+    /* 6.读多字节数据 */
+    for(cnt=0; cnt<(Length-1); cnt++)
+    {
+        I2C_AcknowledgeConfig(I2C1, ENABLE);                             //产生应答
+        while(I2C_GetFlagStatus(I2C1, I2C_FLAG_RXNE) == RESET);
+        *pData = I2C_ReceiveData(I2C1);                                  //连续读取(Length-1)字节
+        pData++;
+    }
+    I2C_AcknowledgeConfig(I2C1, DISABLE);                              //读取最后1字节(产生非应答)
+    while(I2C_GetFlagStatus(I2C1, I2C_FLAG_RXNE) == RESET);
+    *pData = I2C_ReceiveData(I2C1);                                    //读取数据
+
+    /* 7.停止 */
+    I2C_GenerateSTOP(I2C1, ENABLE);
+    return 0;
+}
+#endif
+
+
+#ifdef USE_STD_SW_I2C
+#include "i2c2.h"
+int e2p_read_byte(u32 Addr, u8 *Data)
+{
+  u8  ack;
+
+  /* 1.开始 */
+  I2C_Start();
+
+  /* 2.设备地址/写 */
+  ack = I2C_WriteByte(E2P_ADDR | EEPROM_WR);
+  if(I2C_NOACK == ack)
+  {
+    I2C_Stop();
+    return I2C_NOACK;
+  }
+
+  /* 3.数据地址 */
+  ack = I2C_WriteByte((u8)(Addr>>8));       //数据地址(16位)
+  if(I2C_NOACK == ack)
+  {
+    I2C_Stop();
+    return I2C_NOACK;
+  }
+  ack = I2C_WriteByte((u8)(Addr&0x00FF));
+  if(I2C_NOACK == ack)
+  {
+    I2C_Stop();
+    return I2C_NOACK;
+  }
+
+  /* 4.重新开始 */
+  I2C_Start();
+
+  /* 5.设备地址/读 */
+  ack = I2C_WriteByte(E2P_ADDR | EEPROM_RD);
+  if(I2C_NOACK == ack)
+  {
+    I2C_Stop();
+    return I2C_NOACK;
+  }
+
+  /* 6.读一字节数据 */
+  *Data = I2C_ReadByte(I2C_NOACK);               //只读取1字节(产生非应答)
+
+  /* 7.停止 */
+  I2C_Stop();
+
+  return I2C_ACK;
+}
+
+int e2p_write_byte(u32 Addr, u8 Data)
+{
+  u8  ack;
+
+  /* 1.开始 */
+  I2C_Start();
+
+  /* 2.设备地址/写 */
+  ack = I2C_WriteByte(E2P_ADDR | EEPROM_WR);
+  if(I2C_NOACK == ack)
+  {
+    I2C_Stop();
+    return I2C_NOACK;
+  }
+
+  /* 3.数据地址 */
+  ack = I2C_WriteByte((u8)(Addr>>8));       //数据地址(16位)
+  if(I2C_NOACK == ack)
+  {
+    I2C_Stop();
+    return I2C_NOACK;
+  }
+  ack = I2C_WriteByte((u8)(Addr&0x00FF));
+  if(I2C_NOACK == ack)
+  {
+    I2C_Stop();
+    return I2C_NOACK;
+  }
+
+  /* 4.写一字节数据 */
+  ack = I2C_WriteByte(Data);
+  if(I2C_NOACK == ack)
+  {
+    I2C_Stop();
+    return I2C_NOACK;
+  }
+
+  /* 5.停止 */
+  I2C_Stop();
+
+  return I2C_ACK;
+}
+
+int e2p_read(u32 addr, u8 *data, u16 len)
+{
+    int i;
+    for(i=0; i<len; i++) {
+        e2p_read_byte(addr+i, data[i]);
+    }
+    return 0;
+}
+
+int e2p_write(u32 addr, u8 *data, u16 len)
+{
+    int i;
+    for(i=0; i<len; i++) {
+        e2p_write_byte(addr+i, data[i]);
+    }
+    return 0;
+}
+
+#endif
+
+
 
 #if 0
 typedef struct {
