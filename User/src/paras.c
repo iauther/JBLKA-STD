@@ -89,7 +89,7 @@ static void set_to_default(paras_ui_t *ui, paras_data_t *gb, const default_t *df
 static int check_version(void)
 {
     fw_info_t fw;
-    char *pver = (char*)&fw.ver;
+    char *pver = (char*)&fw.ver1;
 //return 0;    
     e2p_read(0, (u8*)&fw, sizeof(fw_info_t));
     pver[13] = 0;
@@ -117,6 +117,9 @@ int paras_init(void)
     if(!check_version()) {
         set_to_default(&uiParams, &gParams, &gDefault);
         r = e2p_write(0, (u8*)&gParams, sizeof(gParams));
+        //the following used for test
+        //memset(&gParams, 0, sizeof(gParams));
+        //r = e2p_read(0, (u8*)&gParams, sizeof(gParams));
         //e2p_write preset data...  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     }
     else {

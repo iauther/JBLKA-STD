@@ -105,7 +105,8 @@ const para_info_t infoDelay[] = {
 };
 
 const fw_info_t FW_INFO = {
-    .ver = VERSION,
+    .ver1 = VERSION,
+    .ver2 = "",
     .bldtime = __DATE__,
 };
 

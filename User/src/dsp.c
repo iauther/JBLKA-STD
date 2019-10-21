@@ -179,10 +179,15 @@ static int dsp_rx_cb(u8 *data, u16 len)
     if(len==4) {
         if(*(u32*)data==STARTUP_CODE) {
             dspStarted = 1;
+            dsp_data_t dsp={0};
+            dsp.id = CMD_ID_DSPVer;
+            dsp_send(&dsp);
+            
         }
     }
     else if(len==sizeof(dsp_version_t)) {
         dsp_version_t *ver=(dsp_version_t*)data;
+        sprintf((char*)gParams.fw.ver2, "KA %02f", ((f32)ver->ver/10));
         
     }
     else if(len==sizeof(dsp_ack_t)){
@@ -211,6 +216,8 @@ int dsp_is_started(void)
 {
     return dspStarted;
 }
+
+
 
 //只有EQ,HLPF,用到No
 //用在EQ的时候，No就是Band

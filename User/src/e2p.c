@@ -14,8 +14,8 @@
 #endif
 
 
-//#define USE_HAL
-#define USE_STD
+#define USE_HAL
+//#define USE_STD
 #ifdef USE_STD
     //#define USE_STD_HW_I2C
     #define USE_STD_SW_I2C
@@ -73,10 +73,10 @@ static int write_page(u32 addr, u8 *data, u16 len)
     u8  tmp[PAGE_SIZE];
     
     r = HAL_I2C_Mem_Write(i2c_handle, E2P_ADDR, addr, I2C_MEMADD_SIZE_16BIT, data, len, 0xFFFF);
-    r = HAL_I2C_Mem_Read(i2c_handle, E2P_ADDR, addr, I2C_MEMADD_SIZE_16BIT, tmp, len, 0xFFFF);
-    if(memcmp(data, tmp, len)) {
-        return -1;
-    }
+    //r = HAL_I2C_Mem_Read(i2c_handle, E2P_ADDR, addr, I2C_MEMADD_SIZE_16BIT, tmp, len, 0xFFFF);
+    //if(memcmp(data, tmp, len)) {
+    //    return -1;
+    //}
     
     delay_ms(5);
     

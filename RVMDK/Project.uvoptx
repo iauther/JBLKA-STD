@@ -120,7 +120,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name></Name>
+          <Name>d</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -167,34 +167,34 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>33</LineNumber>
+          <LineNumber>129</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134267344</Address>
+          <Address>134271844</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\User\main.c</Filename>
+          <Filename>..\User\src\paras.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\Project\../User/main.c\33</Expression>
+          <Expression>\\Project\../User/src/paras.c\129</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>38</LineNumber>
+          <LineNumber>119</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134267364</Address>
+          <Address>134271814</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\User\main.c</Filename>
+          <Filename>..\User\src\paras.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\Project\../User/main.c\38</Expression>
+          <Expression>\\Project\../User/src/paras.c\119</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -231,7 +231,7 @@
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>offset</ItemText>
+          <ItemText>fw</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
