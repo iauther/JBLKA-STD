@@ -1,3 +1,4 @@
+#include "string.h"
 #include "e2p.h"
 #include "delay.h"
 #include "config.h"
@@ -13,11 +14,11 @@
 #endif
 
 
-#define USE_HAL
-//#define USE_STD
+//#define USE_HAL
+#define USE_STD
 #ifdef USE_STD
-    #define USE_STD_HW_I2C
-    //#define USE_STD_SW_I2C
+    //#define USE_STD_HW_I2C
+    #define USE_STD_SW_I2C
 #endif
 
 
@@ -192,7 +193,7 @@ int e2p_write(u32 addr, u8 *data, u16 len)
 
 
 #ifdef USE_STD_HW_I2C
-
+#include "stm32f10x.h"
 static void gpio_config(void)
 {
     GPIO_InitTypeDef  GPIO_InitStructure;
@@ -213,13 +214,13 @@ static void i2c_config(void)
     I2C_InitStructure.I2C_OwnAddress1 = E2P_ADDR;               //设备地址
     I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;                        //应答
     I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
-    I2C_InitStructure.I2C_ClockSpeed = I2C_SPEED;                      //速度
+    I2C_InitStructure.I2C_ClockSpeed = 100000;                      //速度
     I2C_Init(I2C1, &I2C_InitStructure);
 
     I2C_Cmd(I2C1, ENABLE);                                             //使能I2C
 }
 
-void e2p_init(void)
+int e2p_init(void)
 {
     gpio_config();
     i2c_config();
@@ -263,7 +264,7 @@ int e2p_read_byte(u32 Addr, u8 *Data)
     return 0;
 }
 
-int e2p_write_byte(u32 Addr, u8 Data)
+int e2p_write_byte(u32 Addr, u8 *Data)
 {
     while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY));
 
@@ -282,7 +283,7 @@ int e2p_write_byte(u32 Addr, u8 Data)
     while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
 
     /* 4.写一字节数据 */
-    I2C_SendData(I2C1, Data);
+    I2C_SendData(I2C1, *Data);
     while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
 
     /* 5.停止 */
@@ -290,7 +291,7 @@ int e2p_write_byte(u32 Addr, u8 Data)
     return 0;
 }
 
-static void write_page(u32 Addr, u8 *pData, u8 Length)
+static int write_page(u32 Addr, u8 *pData, u8 Length)
 {
     u16 cnt;
 
@@ -328,7 +329,7 @@ static void write_page(u32 Addr, u8 *pData, u8 Length)
 
 int e2p_write(u32 Addr, u8 *pData, u16 Length)
 {
-    u32 Addr_offset;                                              //偏移地址
+    u32 addr_offset;                                              //偏移地址
     u8  num_page = 0;                                             //页数(Length字节共多少页)
     u8  num_single = 0;                                           //"单"字节数(除了整页外的字节数)
     u8  count = 0;                                                //页剩余字节数量(偏移地址 -> 页末)
@@ -462,6 +463,13 @@ int e2p_read(u32 Addr, u8 *pData, u16 Length)
 
 #ifdef USE_STD_SW_I2C
 #include "i2c2.h"
+
+int e2p_init(void)
+{
+    I2C_Initializes();
+    return 0;
+}
+
 int e2p_read_byte(u32 Addr, u8 *Data)
 {
   u8  ack;
@@ -470,7 +478,7 @@ int e2p_read_byte(u32 Addr, u8 *Data)
   I2C_Start();
 
   /* 2.设备地址/写 */
-  ack = I2C_WriteByte(E2P_ADDR | EEPROM_WR);
+  ack = I2C_WriteByte(E2P_ADDR | 0);
   if(I2C_NOACK == ack)
   {
     I2C_Stop();
@@ -495,7 +503,7 @@ int e2p_read_byte(u32 Addr, u8 *Data)
   I2C_Start();
 
   /* 5.设备地址/读 */
-  ack = I2C_WriteByte(E2P_ADDR | EEPROM_RD);
+  ack = I2C_WriteByte(E2P_ADDR | 1);
   if(I2C_NOACK == ack)
   {
     I2C_Stop();
@@ -511,7 +519,7 @@ int e2p_read_byte(u32 Addr, u8 *Data)
   return I2C_ACK;
 }
 
-int e2p_write_byte(u32 Addr, u8 Data)
+int e2p_write_byte(u32 Addr, u8 *Data)
 {
   u8  ack;
 
@@ -519,7 +527,7 @@ int e2p_write_byte(u32 Addr, u8 Data)
   I2C_Start();
 
   /* 2.设备地址/写 */
-  ack = I2C_WriteByte(E2P_ADDR | EEPROM_WR);
+  ack = I2C_WriteByte(E2P_ADDR | 0);
   if(I2C_NOACK == ack)
   {
     I2C_Stop();
@@ -541,7 +549,7 @@ int e2p_write_byte(u32 Addr, u8 Data)
   }
 
   /* 4.写一字节数据 */
-  ack = I2C_WriteByte(Data);
+  ack = I2C_WriteByte(*Data);
   if(I2C_NOACK == ack)
   {
     I2C_Stop();
@@ -558,7 +566,7 @@ int e2p_read(u32 addr, u8 *data, u16 len)
 {
     int i;
     for(i=0; i<len; i++) {
-        e2p_read_byte(addr+i, data[i]);
+        e2p_read_byte(addr+i, data+i);
     }
     return 0;
 }
@@ -567,7 +575,7 @@ int e2p_write(u32 addr, u8 *data, u16 len)
 {
     int i;
     for(i=0; i<len; i++) {
-        e2p_write_byte(addr+i, data[i]);
+        e2p_write_byte(addr+i, data+i);
     }
     return 0;
 }
@@ -576,7 +584,7 @@ int e2p_write(u32 addr, u8 *data, u16 len)
 
 
 
-#if 0
+#if 1
 typedef struct {
     u32 x[1000];
 }test_t;
