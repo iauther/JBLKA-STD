@@ -9,7 +9,8 @@
 #include "packet.h"  
 #include "hid.h"
 #include "paras.h"
-#include "dsp.h"  
+#include "dsp.h"
+#include "lcd.h"
 #include "usbd.h"  
 #include "config.h" 
 #include "queue.h"
@@ -283,6 +284,7 @@ int main(void)
     __enable_irq();
 
 	Set_System();
+    e2p_q = queue_init(QUEUE_MAX);
 
     gpio_init();
 	tim3_init(poll_func);
@@ -290,7 +292,7 @@ int main(void)
 
     paras_init();
     dsp_init();
-    e2p_q = queue_init(QUEUE_MAX);
+    lcd_init();
 
 	while(1) {
         adda_reset();

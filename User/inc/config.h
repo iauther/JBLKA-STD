@@ -83,13 +83,13 @@
     
     //LCD config
     #define LCD_RS_GRP          GPIOC
-    #define LCD_RS_PIN          GPIO_PIN_4
+    #define LCD_RS_PIN          GPIO_Pin_4
     #define LCD_CS_GRP          GPIOC
-    #define LCD_CS_PIN          GPIO_PIN_5  
+    #define LCD_CS_PIN          GPIO_Pin_5  
     #define LCD_RST_GRP         GPIOB
-    #define LCD_RST_PIN         GPIO_PIN_10
+    #define LCD_RST_PIN         GPIO_Pin_10
     #define LCD_PWR_GRP         GPIOA
-    #define LCD_PWR_PIN         GPIO_PIN_5
+    #define LCD_PWR_PIN         GPIO_Pin_5
     
     //#define LCD_SOFT_SPI
     #ifdef LCD_SOFT_SPI
