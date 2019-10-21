@@ -14,11 +14,11 @@
 #endif
 
 
-#define USE_HAL
-//#define USE_STD
+//#define USE_HAL
+#define USE_STD
 #ifdef USE_STD
-    //#define USE_STD_HW_I2C
-    #define USE_STD_SW_I2C
+    #define USE_STD_HW_I2C
+    //#define USE_STD_SW_I2C
 #endif
 
 
@@ -197,7 +197,8 @@ int e2p_write(u32 addr, u8 *data, u16 len)
 static void gpio_config(void)
 {
     GPIO_InitTypeDef  GPIO_InitStructure;
-
+  
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
@@ -208,7 +209,8 @@ static void i2c_config(void)
     I2C_InitTypeDef I2C_InitStructure;
 
     I2C_DeInit(I2C1);                                                  //复位I2C
-
+    
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
     I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;                         //I2C模式
     I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;                 //占空比(快速模式时)
     I2C_InitStructure.I2C_OwnAddress1 = E2P_ADDR;               //设备地址
@@ -291,7 +293,7 @@ int e2p_write_byte(u32 Addr, u8 *Data)
     return 0;
 }
 
-static int write_page(u32 Addr, u8 *pData, u8 Length)
+static int write_page(u32 Addr, u8 *pData, u16 Length)
 {
     u16 cnt;
 
@@ -323,6 +325,8 @@ static int write_page(u32 Addr, u8 *pData, u8 Length)
 
     /* 5.停止 */
     I2C_GenerateSTOP(I2C1, ENABLE);
+    delay_ms(5);
+
     return 0;
 }
 
@@ -340,44 +344,33 @@ int e2p_write(u32 Addr, u8 *pData, u16 Length)
     num_single = Length % PAGE_SIZE;
 
     /* 1.起始地址未偏移(位于页首地址) */
-    if(0 == addr_offset)
-    {
+    if(0 == addr_offset) {
         /* 数据量小于1页 */
-        if(0 == num_page)
-        {
+        if(0 == num_page) {
             write_page(Addr, pData, Length);                         //页首地址,写入小于1页的数据
         }
         /* 数据量大于等于1页 */
-        else
-        {
-            while(num_page--)
-            {                                                              //写num_page页数据
+        else {
+            while(num_page--) {                                     //写num_page页数据
                 write_page(Addr, pData, PAGE_SIZE);
                 Addr += PAGE_SIZE;
                 pData += PAGE_SIZE;
             }
             
-            if(0 != num_single)
-            {                                                              //写整页外剩下的字节数
+            if(0 != num_single) {                                  //写整页外剩下的字节数
                 write_page(Addr, pData, num_single);
             }
         }
     }
-
-    /* 2.起始地址已偏移(不在页首地址) */
-    else
-    {
+    else {  /* 2.起始地址已偏移(不在页首地址) */
         /* 数据量小于1页 */
-        if(0 == num_page)
-        {
+        if(0 == num_page) {
             /* 不超过该页 */
-            if(Length < count)
-            {
+            if(Length < count) {
                 write_page(Addr, pData, Length);                       //页偏移地址,写入小于该页的数据
             }
             /* 超过该页 */
-            else
-            {
+            else {
                 write_page(Addr, pData, count);                        //页偏移地址,写满该页的数据
                 Addr += count;
                 pData += count;
@@ -385,8 +378,7 @@ int e2p_write(u32 Addr, u8 *pData, u16 Length)
                 write_page(Addr, pData, Length - count);
             }
         }
-        else
-        {
+        else {
             Length -= count;
             num_page = Length / PAGE_SIZE;                          //剩下的页数(减去前面写的数)
             num_single = Length % PAGE_SIZE;                        //最后一页需要写的字节数
@@ -395,17 +387,13 @@ int e2p_write(u32 Addr, u8 *pData, u16 Length)
             Addr += count;
             pData += count;
 
-            while(num_page--)
-            {                                                              //写num_page页数据
-                delay_ms(5);                                             //写周期延时5ms
+            while(num_page--) {                                                              //写num_page页数据
                 write_page(Addr, pData, PAGE_SIZE);
                 Addr += PAGE_SIZE;
                 pData += PAGE_SIZE;
             }
             
-            if(0 != num_single)
-            {                                                              //写整页外剩下的字节数
-                delay_ms(5);
+            if(0 != num_single) {                                                              //写整页外剩下的字节数
                 write_page(Addr, pData, num_single);
             }
         }

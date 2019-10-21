@@ -27,7 +27,7 @@ static void I2C_Delay(void)
 {
   //uint16_t cnt = 100;
   //while(cnt--);
-    delay_us(10);
+    delay_us(4);
 }
 
 /************************************************
@@ -39,12 +39,14 @@ static void I2C_Delay(void)
 *************************************************/
 void I2C_GPIO_Configuration(void)
 {
-  GPIO_InitTypeDef  GPIO_InitStructure;
+    GPIO_InitTypeDef  GPIO_InitStructure;
 
-  GPIO_InitStructure.GPIO_Pin = PIN_I2C_SCL | PIN_I2C_SDA;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
-  GPIO_Init(PORT_I2C_SCL, &GPIO_InitStructure);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
+
+    GPIO_InitStructure.GPIO_Pin = PIN_I2C_SCL | PIN_I2C_SDA;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+    GPIO_Init(PORT_I2C_SCL, &GPIO_InitStructure);
 }
 
 /************************************************
