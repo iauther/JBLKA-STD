@@ -28,7 +28,9 @@ static void gpio_output_set(GPIO_TypeDef  *grp, u32 pin)
 }
 static void lcd_gpio_init(void)
 {
+    RCC_APB2PeriphClockCmd(	RCC_APB2Periph_GPIOA, ENABLE );
     RCC_APB2PeriphClockCmd(	RCC_APB2Periph_GPIOB, ENABLE );
+    RCC_APB2PeriphClockCmd(	RCC_APB2Periph_GPIOC, ENABLE );
 
     LCD_PWR(0);LCD_CS(0);LCD_RST(0);LCD_RS(0);
 
@@ -97,13 +99,15 @@ static void spi_write(u8 *data, u16 len)
     for(i=0; i<len; i++) {
         while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET); //检查指定的SPI标志位设置与否:发送缓存空标志位
         SPI_I2S_SendData(SPI2, data[i]);
+        while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_RXNE) == RESET);
+        SPI_I2S_ReceiveData(SPI2);
     }
 }
 
 static void lcd_pre_init(void)
 {
-    lcd_spi_init();
     lcd_gpio_init();
+    lcd_spi_init();
 }
 
 static void lcd_write(u8 *data, u16 len)

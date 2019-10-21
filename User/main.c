@@ -193,6 +193,9 @@ static void gpio_init(void)
     u32 pins_a, pins_b, pins_c;
     GPIO_InitTypeDef  init;
     
+    //RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO,ENABLE);
+    //GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable,ENABLE);
+
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
@@ -292,7 +295,7 @@ int main(void)
 
     paras_init();
     dsp_init();
-    lcd_init();
+    //lcd_init();
 
 	while(1) {
         adda_reset();
