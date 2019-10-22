@@ -750,6 +750,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\src\lcd.c</FilePath>
             </File>
+            <File>
+              <FileName>sys.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\sys.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -502,6 +502,8 @@ int dsp_upload(void *data, u16 len);
 
 int dsp_download(void *data, u16 len);
 
+int dsp_version(void);
+
 int dsp_upgrade(u16 index, u8 *data, u16 len);
 
 void dsp_remap(dsp_paras_t *paras, Dsp_Paras *dsp);

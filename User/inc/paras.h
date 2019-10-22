@@ -6,6 +6,8 @@
 
 int paras_init(void);
 
+int paras_default(void);
+
 int paras_read(void *p, int len);
 
 int paras_write(void *p, int len);

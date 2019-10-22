@@ -90,7 +90,7 @@ static int check_version(void)
 {
     fw_info_t fw;
     char *pver = (char*)&fw.ver1;
-//sreturn 0;    
+//return 0;    
     e2p_read(0, (u8*)&fw, sizeof(fw_info_t));
     pver[13] = 0;
     if(!strstr(pver, "KA-V") || strlen(pver)!=strlen(VERSION) || strcmp(pver, VERSION)<0) {
@@ -131,6 +131,15 @@ int paras_init(void)
 }
 
 
+int paras_default(void)
+{
+    int r;
+    set_to_default(&uiParams, &gParams, &gDefault);
+    r = e2p_write(0, (u8*)&gParams, sizeof(gParams));
+    return r;
+}
+
+
 int paras_update(packet_t *pkt, node_t *node)
 {
     int r=-1;
@@ -162,6 +171,10 @@ int paras_update(packet_t *pkt, node_t *node)
         memcpy(n.ptr, pkt->data, n.len);
         break;
         
+        case TYPE_DEFAULT:
+        r = 0;
+        break;
+
         default:
         return -1;
     }

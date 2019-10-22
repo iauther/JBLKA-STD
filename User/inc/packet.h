@@ -15,8 +15,10 @@ typedef enum {
     TYPE_PARAS,                     //paras_data_t
     TYPE_PRESET,                    //preset_data_t
     TYPE_ACK,                       //ack_data_t
+    TYPE_DEFAULT,                   //reset paras to default
     
-    TYPE_UPGRADE,                   //used for upgrade dsp,mcu firmware and bootloader
+    TYPE_UPGRADE=0xA0,              //used for upgrade dsp,mcu firmware and bootloader
+    TYPE_VERSION,
 }eTYPE;
 
 typedef enum {

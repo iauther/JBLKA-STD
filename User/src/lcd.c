@@ -97,7 +97,7 @@ static void spi_write(u8 *data, u16 len)
     u16 i;
 
     for(i=0; i<len; i++) {
-        while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET); //检查指定的SPI标志位设置与否:发送缓存空标志位
+        while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET);
         SPI_I2S_SendData(SPI2, data[i]);
         while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_RXNE) == RESET);
         SPI_I2S_ReceiveData(SPI2);

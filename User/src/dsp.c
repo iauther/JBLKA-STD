@@ -1,6 +1,7 @@
 #include <string.h>
 #include "dsp.h"
 #include "usbd.h"
+#include "sys.h"
 #include "usart.h"
 #include "delay.h"
 #include "packet.h"
@@ -114,6 +115,11 @@ static int get_node(dsp_data_t *dd, node_t *node)
         n.len = sizeof(TypeS_Input);
         n.ptr = &dsp->Array_Input;
         break;
+        
+        case CMD_ID_DSPVer:
+        n.len = 1;
+        n.ptr = &dsp->Array_Input;
+        break;
 
         default:
         return -1;
@@ -160,6 +166,8 @@ static int dsp_read(dsp_buf_t *db)
 void dsp_reset(void)
 {
     GPIO_InitTypeDef init={0};
+    
+    dspStarted = 0;
     init.GPIO_Mode = GPIO_Mode_Out_PP;
     init.GPIO_Pin = GPIO_Pin_8;
     init.GPIO_Speed = GPIO_Speed_50MHz;
@@ -179,15 +187,11 @@ static int dsp_rx_cb(u8 *data, u16 len)
     if(len==4) {
         if(*(u32*)data==STARTUP_CODE) {
             dspStarted = 1;
-            dsp_data_t dsp={0};
-            dsp.id = CMD_ID_DSPVer;
-            dsp_send(&dsp);
-            
         }
     }
     else if(len==sizeof(dsp_version_t)) {
         dsp_version_t *ver=(dsp_version_t*)data;
-        sprintf((char*)gParams.fw.ver2, "KA %02f", ((f32)ver->ver/10));
+        sprintf((char*)gParams.fw.ver2, "KA %04d", ver->ver);
         
     }
     else if(len==sizeof(dsp_ack_t)){
@@ -218,7 +222,6 @@ int dsp_is_started(void)
 }
 
 
-
 //只有EQ,HLPF,用到No
 //用在EQ的时候，No就是Band
 //用在HLPF的时候，No=0/1:hpf/lpf
@@ -237,6 +240,11 @@ int dsp_send(dsp_data_t *dsp)
     gDspBuf.cmd.No = dsp->n;
     gDspBuf.cmd.Len = n.len;
     gDspBuf.cmd.DataPtr = (u16 *)n.ptr;
+
+    if(dsp->id==CMD_ID_Input) {
+        TypeS_Input *input=(TypeS_Input*)dsp->data;
+        sys_set_input(input->input);
+    }
 
     return dsp_write(&gDspBuf);
 }
@@ -279,6 +287,15 @@ int dsp_download(void *data, u16 len)
     }
 
     return 0;
+}
+
+
+int dsp_version(void)
+{
+    dsp_data_t dsp={0};
+    dsp.id = CMD_ID_DSPVer;
+    dsp.dlen = 1;
+    return dsp_send(&dsp);
 }
 
 
@@ -413,7 +430,7 @@ int dsp_update(dsp_data_t *dsp, node_t *node)
 
 /////////////////////////////////////////////////////////
 
-dsp_version_t ver;
+
 void dsp_test(void)
 {
     while(1) {
