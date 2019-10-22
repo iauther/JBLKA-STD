@@ -397,6 +397,7 @@ typedef struct {
 
     TypeS_Vol           *effVol;
     TypeS_Vol           *dirVol;
+    TypeS_Vol           *vol;
 
     TypeS_HLPFCoef      *hpf;
     TypeS_HLPFCoef      *lpf;
@@ -413,11 +414,14 @@ typedef struct {
 /////////////////////////////////////////
 typedef struct {
     TypeS_EQBand        *peq[7];
+    TypeS_HLPFCoef      *hpf;
+    TypeS_HLPFCoef      *lpf;
 
     TypeS_Vol           *musicVol;
     TypeS_Vol           *dirVol;
     TypeS_Vol           *echoVol;
     TypeS_Vol           *reverbVol;
+    TypeS_Vol           *vol;
 
     TypeS_Limiter       *limiter;
     TypeS_Mute          *mute;
@@ -425,12 +429,16 @@ typedef struct {
 
 typedef struct {
     TypeS_EQBand        *peq[7];
+    TypeS_HLPFCoef      *hpf;
+    TypeS_HLPFCoef      *lpf;
+
     TypeS_Delay         *delay;          //0~1920 :    0~40ms
 
     TypeS_Vol           *musicVol;
     TypeS_Vol           *dirVol;
     TypeS_Vol           *echoVol;
     TypeS_Vol           *reverbVol;
+    TypeS_Vol           *vol;
 
     TypeS_Limiter       *limiter;
     TypeS_Mute          *mute;
@@ -438,6 +446,8 @@ typedef struct {
 
 typedef struct {
     TypeS_EQBand        *peq[7];
+    TypeS_HLPFCoef      *hpf;
+    TypeS_HLPFCoef      *lpf;
 
     TypeS_Vol           *musicVol;
     TypeS_Vol           *dirVol;

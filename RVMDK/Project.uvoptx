@@ -167,18 +167,18 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>11</LineNumber>
+          <LineNumber>122</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134271128</Address>
+          <Address>134267272</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\User\src\queue.c</Filename>
+          <Filename>..\User\src\dsp.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\Project\../User/src/queue.c\11</Expression>
+          <Expression>\\APP\../User/src/dsp.c\122</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -191,6 +191,26 @@
           <count>1</count>
           <WinNumber>1</WinNumber>
           <ItemText>uiParams</ItemText>
+        </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>dd</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>coef</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>gbl_coef</ItemText>
+        </Ww>
+        <Ww>
+          <count>5</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>gvol</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
