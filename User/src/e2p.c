@@ -14,8 +14,8 @@
 #endif
 
 
-//#define USE_HAL
-#define USE_STD
+#define USE_HAL
+//#define USE_STD
 #ifdef USE_STD
     #define USE_STD_HW_I2C
     //#define USE_STD_SW_I2C

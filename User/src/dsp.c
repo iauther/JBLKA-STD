@@ -178,7 +178,7 @@ void dsp_reset(void)
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_SET);
     delay_ms(10);
 
-    dsp_download(&gParams.dsp, sizeof(gParams.dsp));
+    
 }
 
 
@@ -201,10 +201,23 @@ static int dsp_rx_cb(u8 *data, u16 len)
     return 0;
 }
 
+
 int dsp_init(void)
 {
-    usart4_init(dsp_rx_cb);
+    dspStarted = 0;
     dsp_reset();
+    usart4_init(dsp_rx_cb);
+    dsp_download(&gParams.dsp, sizeof(gParams.dsp));
+
+    return 0;
+}
+
+
+int dsp_reinit(void)
+{
+    dspStarted = 0;
+    dsp_reset();
+    dsp_download(&gParams.dsp, sizeof(gParams.dsp));
 
     return 0;
 }
@@ -215,6 +228,7 @@ int dsp_set_started(void)
     dspStarted = 1;
     return 0;
 }
+
 
 int dsp_is_started(void)
 {

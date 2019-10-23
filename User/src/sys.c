@@ -1,5 +1,6 @@
 #include "sys.h"
 #include "dsp.h"
+#include "lcd.h"
 #include "delay.h"
 #include "paras.h"
 #include "usb_lib.h"
@@ -127,7 +128,7 @@ int sys_init(void)
 
     gpio_init();
     dsp_init();
-    //lcd_init();
+    lcd_init();
     usb_init();
 
     return 0;
@@ -201,7 +202,7 @@ int sys_set_iodat(io_data_t *io)
 int sys_set_default(void)
 {
     paras_default();
-    dsp_reset();
+    dsp_reinit();
     sys_config();
     
     return 0;

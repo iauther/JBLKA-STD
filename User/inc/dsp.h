@@ -111,7 +111,7 @@ enum Delay_CH
     Delay_CH_Echo_Delay,//左回声延时 //0~14400 :    0~300ms
 
     Delay_CH_Rev_PreDelay,//混响预延时 //0~4800 :    0~100ms
-    Delay_CH_Rev_Time,  //混响时间0~80 : 0~8000ms
+    Delay_CH_Rev_Time,  //混响时间0~8000 : 0~8000ms
     //以上 step=1
 
     //以下 step=0.1
@@ -489,6 +489,8 @@ typedef struct {
 void dsp_reset(void);
 
 int dsp_init(void);
+
+int dsp_reinit(void);
 
 int dsp_set_started(void);
 

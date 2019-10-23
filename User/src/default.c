@@ -96,7 +96,7 @@ const para_info_t infoDelay[] = {
     {"Echo Delay",          "ms",        0,         14400,            48,          48},
 
     {"Reverb PreDelay",     "ms",        0,         4800,             48,          48},
-    {"Reverb Delay",        "ms",        0,         80,               1,           0.01},
+    {"Reverb Delay",        "ms",        0,         8000,              1,           1},
 
     {"MainL Delay",         "ms",        0,         1920,             48,          48},
     {"MainR Delay",         "ms",        0,         1920,             48,          48},
