@@ -755,6 +755,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\src\sys.c</FilePath>
             </File>
+            <File>
+              <FileName>gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\gpio.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

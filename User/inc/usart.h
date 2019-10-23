@@ -21,12 +21,31 @@
 #include <stdio.h>
 #include <stm32f10x.h>
 
-typedef int (*datain_func)(u8 *data, u16 len);
+typedef enum {
+    UART_1,
+    UART_2,
+    UART_3,
+    UART_4,
+    UART_5,
 
-int usart4_init(datain_func fn);
-int usart4_write(u8 *data, u16 len);
-int usart4_read(u8 *data, u16 len);
-void uart4_rx_callback(void);
+    UART_MAX
+}eUART;
+
+typedef void (*idle_func)(u8 *data, u16 data_len);
+
+typedef struct {
+    idle_func   fn;
+    u8          *buf;
+    u16         buf_len;
+}uart_paras_t;
+
+
+
+
+int usart_init(eUART uart, uart_paras_t *paras);
+int usart_write(eUART uart, u8 *data, u16 len);
+int usart_read(eUART uart, u8 *data, u16 len);
+void uart_rx_callback(void);
 
 #endif /*_usart_H*/
 

@@ -21,6 +21,9 @@ typedef struct {
 }dsp_buf_t;
 
 
+#define RX_BUF_LEN 100
+u8 dspRxBuf[RX_BUF_LEN];
+
 u8 dspBuf[40];
 u8 dspStarted=0;
 extern paras_data_t gParams;
@@ -153,7 +156,7 @@ static int dsp_write(dsp_buf_t *db)
     crc = crc_calc(&db->buf[1], db->cmd.Len+ComHeadLen);
     db->buf[5 + db->cmd.Len] = crc;
 
-    return usart4_write((u8*)db->buf, sizeof(u16)*(6+db->cmd.Len));
+    return usart_write(DSP_UART, (u8*)db->buf, sizeof(u16)*(6+db->cmd.Len));
 }
 
 
@@ -182,7 +185,7 @@ void dsp_reset(void)
 }
 
 
-static int dsp_rx_cb(u8 *data, u16 len)
+static void dsp_rx_cb(u8 *data, u16 len)
 {
     if(len==4) {
         if(*(u32*)data==STARTUP_CODE) {
@@ -198,15 +201,16 @@ static int dsp_rx_cb(u8 *data, u16 len)
         dsp_ack_t *ack=(dsp_ack_t*)data;
         
     }
-    return 0;
 }
 
 
 int dsp_init(void)
 {
+    uart_paras_t para={dsp_rx_cb, dspRxBuf, RX_BUF_LEN};
+    
     dspStarted = 0;
     dsp_reset();
-    usart4_init(dsp_rx_cb);
+    usart_init(DSP_UART, &para);
     dsp_download(&gParams.dsp, sizeof(gParams.dsp));
 
     return 0;
@@ -450,7 +454,7 @@ void dsp_test(void)
     while(1) {
         //dsp_send(CMD_ID_DSPVer, 0, 0);
         //memset(&ver, 0, sizeof(ver));
-        //usart4_read((u8*)&ver, sizeof(ver));
+        //usart_read(DSP_UART, (u8*)&ver, sizeof(ver));
         //delay_ms(1000);
     }
 }

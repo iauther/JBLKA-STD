@@ -64,7 +64,7 @@ void TIM4_IRQHandler(void)
 
 void UART4_IRQHandler(void)
 {
-	uart4_rx_callback();	
+	uart_rx_callback();	
 }
 
 /**
