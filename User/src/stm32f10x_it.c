@@ -127,60 +127,23 @@ void UsageFault_Handler(void)
   {
   }
 }
-/**
-  * @brief  This function handles SVCall exception.
-  * @param  None
-  * @retval None
-  */
-void SVC_Handler(void)
-{
-}
 
-/**
-  * @brief  This function handles Debug Monitor exception.
-  * @param  None
-  * @retval None
-  */
+
+
 void DebugMon_Handler(void)
 {
 }
 
-/**
-  * @brief  This function handles PendSVC exception.
-  * @param  None
-  * @retval None
-  */
-void PendSV_Handler(void)
-{
-}
 
-/**
-  * @brief  This function handles SysTick Handler.
-  * @param  None
-  * @retval None
-  */
-void SysTick_Handler(void)
-{
-}
 
-/**
-  * @brief  This function handles OTG WakeUp interrupt request.
-  * @note	None
-  * @param  None
-  * @retval None
-  */
 void OTG_FS_WKUP_IRQHandler(void)
 {
   /* Initiate external resume sequence (1 step) */
   Resume(RESUME_EXTERNAL);  
 
 }
-/**
-  * @brief  This function handles USB-On-The-Go FS global interrupt request.
-  * @note	None
-  * @param  None
-  * @retval None
-  */
+
+
 #ifdef STM32F10X_CL
 void OTG_FS_IRQHandler(void)
 {
@@ -189,7 +152,16 @@ void OTG_FS_IRQHandler(void)
 #endif /* STM32F10X_CL */
 
 
+#if 0
+void SVC_Handler(void)
+{
+}
 
+void PendSV_Handler(void)
+{
+}
 
-
-/*********************************END OF FILE**********************************/
+void SysTick_Handler(void)
+{
+}
+#endif

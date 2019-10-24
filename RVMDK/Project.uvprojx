@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F10X_HD,APP</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\Libraries\CMSIS\CM3\CoreSupport;..\User\inc;..\Libraries\STM32_USB-FS-Device_Driver\inc;..\User\USB\inc</IncludePath>
+              <IncludePath>..\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\Libraries\CMSIS\CM3\CoreSupport;..\User\inc;..\Libraries\STM32_USB-FS-Device_Driver\inc;..\User\USB\inc;..\Os\RTX5</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -779,6 +779,91 @@
               <FileName>Readme.txt</FileName>
               <FileType>5</FileType>
               <FilePath>..\User\Readme.txt</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Os</GroupName>
+          <Files>
+            <File>
+              <FileName>irq_cm3.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\Os\RTX5\irq_cm3.s</FilePath>
+            </File>
+            <File>
+              <FileName>os_systick.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Os\RTX5\os_systick.c</FilePath>
+            </File>
+            <File>
+              <FileName>RTX_Config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Os\RTX5\RTX_Config.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtx_delay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Os\RTX5\rtx_delay.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtx_evflags.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Os\RTX5\rtx_evflags.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtx_evr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Os\RTX5\rtx_evr.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtx_kernel.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Os\RTX5\rtx_kernel.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtx_lib.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Os\RTX5\rtx_lib.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtx_memory.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Os\RTX5\rtx_memory.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtx_mempool.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Os\RTX5\rtx_mempool.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtx_msgqueue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Os\RTX5\rtx_msgqueue.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtx_mutex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Os\RTX5\rtx_mutex.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtx_semaphore.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Os\RTX5\rtx_semaphore.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtx_system.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Os\RTX5\rtx_system.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtx_thread.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Os\RTX5\rtx_thread.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtx_timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Os\RTX5\rtx_timer.c</FilePath>
             </File>
           </Files>
         </Group>
