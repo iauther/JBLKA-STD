@@ -79,6 +79,14 @@ void hid_pkt_init(int mode, u8 nck, packet_t *pkt)
             }
         }
         break;
+        
+        case TYPE_EQRESET:
+        {
+            eq_reset_t *rst=(eq_reset_t*)pkt->data;
+            hd->ptr = (u8*)&gParams.dsp.Array_EQ[rst->ch];
+            hd->length = sizeof(TypeS_EQ);
+        }
+        break;
 #endif
 
         case TYPE_UPGRADE:

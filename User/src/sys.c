@@ -39,9 +39,9 @@ static void usb_dp_reset(void)
     GPIO_Init(GPIOA, &init);
 
     GPIO_WriteBit(GPIOA, GPIO_Pin_12, Bit_RESET);
-    delay_ms(50);
+    delay_ms(10);
     GPIO_WriteBit(GPIOA, GPIO_Pin_12, Bit_SET);
-    delay_ms(50);
+    delay_ms(10);
 }
 static void usb_init(void)
 {
@@ -76,7 +76,8 @@ int sys_config(void)
     do {
         delay_ms(10);
     }while(!dsp_is_started());
-
+    
+    dsp_download();
     dsp_version();
     adda_reset();
     rca_mute(0);
@@ -89,6 +90,15 @@ int sys_config(void)
 
 int sys_set_input(u16 input)
 {
+#if 0
+    GPIO_InitTypeDef  init;
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+    init.GPIO_Pin = GPIO_Pin_3|GPIO_Pin_4;
+    init.GPIO_Mode = GPIO_Mode_Out_PP;
+    init.GPIO_Speed = GPIO_Speed_10MHz;
+    GPIO_Init(GPIOB, &init);
+#endif
+
     switch(input) {
 
         case INPUT_VOD: //11
@@ -138,7 +148,7 @@ int sys_set_iodat(io_data_t *io)
 int sys_set_default(void)
 {
     paras_default();
-    dsp_reinit();
+    dsp_download();
     sys_config();
     
     return 0;

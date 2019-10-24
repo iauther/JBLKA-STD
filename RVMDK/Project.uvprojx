@@ -760,6 +760,16 @@
               <FileType>1</FileType>
               <FilePath>..\User\src\gpio.c</FilePath>
             </File>
+            <File>
+              <FileName>knob.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\knob.c</FilePath>
+            </File>
+            <File>
+              <FileName>adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\adc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

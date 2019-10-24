@@ -35,9 +35,29 @@ int is_multipkts(packet_t *pkt)
 
 static int usb_send(u8 *data, u16 len)
 {
+    //u32 tx_status = 0 ;
+	//u32 tx_count  = 0 ;
+	//u32 i = 0;
+	//SetEPTxCount(ENDP2,0);
+
     UserToPMABufferCopy(data, ENDP2_TXADDR, len);
     SetEPTxCount(ENDP2, REPORT_COUNT);
     SetEPTxValid(ENDP2);
+
+#if 0
+    while(1) {
+		tx_status = GetEPTxStatus(ENDP2);
+		tx_count  = GetEPTxCount(ENDP2) ;
+		
+		if( (tx_status == 0x00000020) && (tx_count == 0x00000040)	)
+			return 0 ;
+		else 
+			i++ ; 
+		if(i>2000)
+			return -1 ;
+	}
+#endif
+
     return 0;
 }
 

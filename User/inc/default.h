@@ -18,6 +18,7 @@ typedef struct
     TypeS_PitchShift    pitch;
     TypeS_Mute          mute;
     TypeS_NoiseGate     noisegate;
+    TypeS_Input         input;
 }default_t;
 
 

@@ -6,6 +6,8 @@
 
 int paras_init(void);
 
+int paras_reset_peq(eq_reset_t *rst);
+
 int paras_default(void);
 
 int paras_read(void *p, int len);

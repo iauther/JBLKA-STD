@@ -64,6 +64,10 @@ const default_t gDefault={
     .noisegate = {
         .threshold  = -60,      //Æô¶¯·§Öµ  -60~0dB
     },
+
+    .input = {
+        .input = 0,             //0:vod 1:dvd 2:bgm 3:btusb 4:optical 5:hdmi-in 6:hdmi-arc
+    },
 };
 
 const para_info_t infoGain[] = {

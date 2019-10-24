@@ -7,8 +7,8 @@ int gpio_init(void)
     u32 pins_a, pins_b, pins_c;
     GPIO_InitTypeDef  init;
     
-    //RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO,ENABLE);
-    //GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable,ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO,ENABLE);
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable,ENABLE);
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | 
                            RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD, ENABLE);

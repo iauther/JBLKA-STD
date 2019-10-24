@@ -76,6 +76,7 @@ static void set_to_default(paras_ui_t *ui, paras_data_t *gb, const default_t *df
     }
 
     gb->dsp.Array_PitchShift = df->pitch;
+    gb->dsp.Array_Input = df->input;
     gb->fw = FW_INFO;
     gb->iodat = IO_DATA;
     gb->pre = 0;
@@ -128,6 +129,77 @@ int paras_init(void)
     }
 
     return r;
+}
+
+static int reset_peq(u8 ch)
+{
+    int i;
+    paras_ui_t *ui=&uiParams;
+
+    switch(ch) {
+        case EQ_CH_Music:
+        for(i=0; i<PEQ_BANDS; i++) {
+            *ui->dsp.in.music.peq[i] = gDefault.eq;
+            ui->dsp.in.music.peq[i]->Freq = PEQ7_FREQ[i];
+        }
+        break;
+
+        case EQ_CH_Mic:
+        for(i=0; i<PEQ_BANDS; i++) {
+            *ui->dsp.in.mic.peq[i] = gDefault.eq;
+            ui->dsp.in.mic.peq[i]->Freq = PEQ7_FREQ[i];
+        }
+        break;
+
+        case EQ_CH_Echo:
+        for(i=0; i<3; i++) {
+            *ui->dsp.eff.echo.peq[i] = gDefault.eq;
+            ui->dsp.eff.echo.peq[i]->Freq = PEQ3_FREQ[i];
+        }
+        break;
+
+        case EQ_CH_Rev:
+        for(i=0; i<3; i++) {
+            *ui->dsp.eff.reverb.peq[i] = gDefault.eq;
+            ui->dsp.eff.reverb.peq[i]->Freq = PEQ3_FREQ[i];
+        }
+        break;
+
+        case EQ_CH_Main:
+        for(i=0; i<PEQ_BANDS; i++) {
+            *ui->dsp.out.main.peq[i] = gDefault.eq;
+            ui->dsp.out.main.peq[i]->Freq = PEQ7_FREQ[i];
+        }
+        break;
+
+        case EQ_CH_Sub:
+        for(i=0; i<PEQ_BANDS; i++) {
+            *ui->dsp.out.sub.peq[i] = gDefault.eq;
+            ui->dsp.out.sub.peq[i]->Freq = PEQ7_FREQ[i];
+        }
+        break;
+
+        case EQ_CH_Rec:
+        for(i=0; i<PEQ_BANDS; i++) {
+            *ui->dsp.out.rec.peq[i] = gDefault.eq;
+            ui->dsp.out.rec.peq[i]->Freq = PEQ7_FREQ[i];
+        }
+        break;
+
+        default:
+        return -1;
+    }
+    return 0;
+}
+
+int paras_reset_peq(eq_reset_t *rst)
+{
+    if(!rst) {
+        return -1;
+    }
+    reset_peq(rst->ch);
+    
+    return 0;
 }
 
 

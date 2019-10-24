@@ -165,6 +165,39 @@ static int dsp_read(dsp_buf_t *db)
     return 0;
 }
 
+/*
+case CMD_ID_UpdataDSP:
+case CMD_ID_Download:
+cmd.Len = 128;//每次下载128个双字节，即256字节
+cmd.No = No;//表示发送了第几个128个双字节
+//cmd.DataPtr = buf;//buf用来存储128个双字节
+*/
+static int do_download(void *data, u16 len)
+{
+    u32 i,left,times;
+    u16 *ptr = (u16*)data;
+
+    left = len%DOWNLOAD_SIZE;
+    times = len/DOWNLOAD_SIZE;
+
+    gDspBuf.cmd.ID = CMD_ID_Download;
+    gDspBuf.cmd.Len = DOWNLOAD_SIZE;
+    for(i=0; i<times; i++) {
+        gDspBuf.cmd.No = i;
+        gDspBuf.cmd.DataPtr = ptr+i*DOWNLOAD_SIZE;
+        dsp_write(&gDspBuf);
+    }
+
+    if(left>0) {
+        gDspBuf.cmd.No = i;
+        gDspBuf.cmd.Len = left;
+        gDspBuf.cmd.DataPtr = ptr+i*DOWNLOAD_SIZE;
+        dsp_write(&gDspBuf);
+    }
+
+    return 0;
+}
+
 
 void dsp_reset(void)
 {
@@ -211,17 +244,87 @@ int dsp_init(void)
     dspStarted = 0;
     dsp_reset();
     usart_init(DSP_UART, &para);
-    dsp_download(&gParams.dsp, sizeof(gParams.dsp));
+    do_download(&gParams.dsp, sizeof(gParams.dsp));
 
     return 0;
 }
 
 
-int dsp_reinit(void)
+int dsp_download(void)
 {
-    dspStarted = 0;
-    dsp_reset();
-    dsp_download(&gParams.dsp, sizeof(gParams.dsp));
+    do_download(&gParams.dsp, sizeof(gParams.dsp));
+
+    return 0;
+}
+
+int dsp_reset_peq(eq_reset_t *rst)
+{
+    u8 i;
+    dsp_data_t dsp={0};
+
+    if(!rst) {
+        return -1;
+    }
+    
+    switch(rst->ch) {
+        case EQ_CH_Music:
+        for(i=0; i<PEQ_BANDS; i++) {
+            //*ui->dsp.in.music.peq[i] = gDefault.eq;
+            //ui->dsp.in.music.peq[i]->Freq = PEQ7_FREQ[i];
+        }
+        break;
+
+        case EQ_CH_Mic:
+        for(i=0; i<PEQ_BANDS; i++) {
+            //*ui->dsp.in.mic.peq[i] = gDefault.eq;
+            //ui->dsp.in.mic.peq[i]->Freq = PEQ7_FREQ[i];
+        }
+        break;
+
+        case EQ_CH_Echo:
+        for(i=0; i<3; i++) {
+            //*ui->dsp.eff.echo.peq[i] = gDefault.eq;
+            //ui->dsp.eff.echo.peq[i]->Freq = PEQ3_FREQ[i];
+        }
+        break;
+
+        case EQ_CH_Rev:
+        for(i=0; i<3; i++) {
+            //*ui->dsp.eff.reverb.peq[i] = gDefault.eq;
+            //ui->dsp.eff.reverb.peq[i]->Freq = PEQ3_FREQ[i];
+        }
+        break;
+
+        case EQ_CH_Main:
+        for(i=0; i<PEQ_BANDS; i++) {
+            //*ui->dsp.out.main.peq[i] = gDefault.eq;
+            //ui->dsp.out.main.peq[i]->Freq = PEQ7_FREQ[i];
+        }
+        break;
+
+        case EQ_CH_Sub:
+        for(i=0; i<PEQ_BANDS; i++) {
+            //*ui->dsp.out.sub.peq[i] = gDefault.eq;
+            //ui->dsp.out.sub.peq[i]->Freq = PEQ7_FREQ[i];
+        }
+        break;
+
+        case EQ_CH_Rec:
+        for(i=0; i<PEQ_BANDS; i++) {
+            //*ui->dsp.out.rec.peq[i] = gDefault.eq;
+            //ui->dsp.out.rec.peq[i]->Freq = PEQ7_FREQ[i];
+        }
+        break;
+
+        default:
+        return -1;
+    }
+
+
+    dsp.ch = rst->ch;
+    dsp.id = CMD_ID_EQ;
+    
+    //dsp_send(&dsp);
 
     return 0;
 }
@@ -274,38 +377,7 @@ int dsp_upload(void *data, u16 len)
 }
 
 
-/*
-case CMD_ID_UpdataDSP:
-case CMD_ID_Download:
-cmd.Len = 128;//每次下载128个双字节，即256字节
-cmd.No = No;//表示发送了第几个128个双字节
-//cmd.DataPtr = buf;//buf用来存储128个双字节
-*/
-int dsp_download(void *data, u16 len)
-{
-    u32 i,left,times;
-    u16 *ptr = (u16*)data;
 
-    left = len%DOWNLOAD_SIZE;
-    times = len/DOWNLOAD_SIZE;
-
-    gDspBuf.cmd.ID = CMD_ID_Download;
-    gDspBuf.cmd.Len = DOWNLOAD_SIZE;
-    for(i=0; i<times; i++) {
-        gDspBuf.cmd.No = i;
-        gDspBuf.cmd.DataPtr = ptr+i*DOWNLOAD_SIZE;
-        dsp_write(&gDspBuf);
-    }
-
-    if(left>0) {
-        gDspBuf.cmd.No = i;
-        gDspBuf.cmd.Len = left;
-        gDspBuf.cmd.DataPtr = ptr+i*DOWNLOAD_SIZE;
-        dsp_write(&gDspBuf);
-    }
-
-    return 0;
-}
 
 
 int dsp_version(void)

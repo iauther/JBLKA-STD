@@ -16,6 +16,7 @@ typedef enum {
     TYPE_PRESET,                    //preset_data_t
     TYPE_ACK,                       //ack_data_t
     TYPE_DEFAULT,                   //reset paras to default
+    TYPE_EQRESET,                   //eq reset
     
     TYPE_UPGRADE=0xA0,              //used for upgrade dsp,mcu firmware and bootloader
     TYPE_VERSION,

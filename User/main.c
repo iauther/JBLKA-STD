@@ -13,7 +13,7 @@
 #include "config.h" 
 #include "queue.h"
 
-#define E2P_POLL_TIME       100        //500ms
+#define E2P_POLL_TIME       1000        //500ms
 #define QUEUE_MAX           20
 
 int ccc=0;
@@ -45,7 +45,20 @@ static int hid_single_proc(packet_t *pkt)
             dsp_data_t *dsp=(dsp_data_t*)pkt->data;
             r = dsp_send(dsp);
         }
-        break;           
+        break;
+        
+        case TYPE_EQRESET:
+        {
+            eq_reset_t *rst=(eq_reset_t*)pkt->data;
+
+            //paras_reset_peq(rst);
+            //dsp_reset_peq(rst);
+            //hid_pkt_reset(TX);
+            //hid_pkt_init(TX, 1, pkt);
+            //hid_pkt_send();
+        
+        }
+        break;
         
         case TYPE_DEFAULT:
         {
@@ -126,7 +139,7 @@ static int hid_multi_proc(packet_t *pkt)
     return 0;
 }
 
-
+u32 usb_rx_cnt=0;
 static void usb_proc(void)
 {
     extern u8 usbRxBuf[];
@@ -140,6 +153,7 @@ static void usb_proc(void)
             hid_single_proc(pkt);
         }
         usbRxFlag = 0;
+usb_rx_cnt++;
     }
 }
 
@@ -178,6 +192,7 @@ int main(void)
 
     e2p_q = queue_init(QUEUE_MAX);
 	tim3_init(poll_func);
+
 
 	while(1) {
         usb_proc();

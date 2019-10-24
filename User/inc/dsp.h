@@ -346,6 +346,11 @@ typedef struct {
     u16             dlen;
     u8              data[]; 
 }dsp_data_t;
+
+typedef struct {
+    u8              ch;                 //eq channel, refer to EQ_CH
+    TypeS_EQ        eq[];
+}eq_reset_t;
 #pragma pack()
 
 
@@ -492,9 +497,13 @@ int dsp_init(void);
 
 int dsp_reinit(void);
 
+int dsp_reset_peq(eq_reset_t *rst);
+
 int dsp_set_started(void);
 
 int dsp_is_started(void);
+
+int dsp_eq_reset(eq_reset_t *rst);
 
 int dsp_default(Dsp_Paras *dsp);
 
@@ -502,7 +511,7 @@ int dsp_send(dsp_data_t *dsp);
 
 int dsp_upload(void *data, u16 len);
 
-int dsp_download(void *data, u16 len);
+int dsp_download(void);
 
 int dsp_version(void);
 
