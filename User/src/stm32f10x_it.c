@@ -152,7 +152,7 @@ void OTG_FS_IRQHandler(void)
 #endif /* STM32F10X_CL */
 
 
-#if 0
+#ifndef RTX
 void SVC_Handler(void)
 {
 }

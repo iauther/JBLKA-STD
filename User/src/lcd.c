@@ -273,7 +273,7 @@ void lcd_init(void)
     lcd_write_data(0x23);
 
     lcd_clear(LCD_BC);
-    lcd_draw_string(50, 100, 200, 60, (u8*)"HELLO!", FONT_32, LCD_FC);
+    lcd_draw_string(50, 100, 200, 60, (u8*)"hello!", FONT_32, LCD_FC);
 
     lcd_display(1);
 }

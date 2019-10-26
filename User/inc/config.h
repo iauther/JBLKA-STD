@@ -6,6 +6,9 @@
 //#define BOARD_ALIENTEK
 #define BOARD_KOBBLE
 
+#define UPG_FLAG                       0xfeedface
+#define UPG_FLAG_FLASH_OFFSET          0x3ff80       //256K(0x40000)-FLSH_PAGE_SIZE(0x800)
+#define UPG_FLAG_SRAM_OFFSET           0xbe00        //max  0xc000
 
 ///////////////////////////////////////////////
 

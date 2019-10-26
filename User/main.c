@@ -19,6 +19,28 @@
 int ccc=0;
 queue_t *e2p_q=0;
 extern paras_data_t gParams;
+typedef void (*jump_func)(void);
+jump_func jump_fn;
+uint32_t jump_addr;
+static void jump_to(u32 addr)
+{
+    if(((*(__IO u32*)addr) & 0x2FFE0000) == 0x20000000) {
+        
+        jump_addr = *(__IO u32*)(addr+4);
+        jump_fn = (jump_func)jump_addr;
+        
+        __disable_irq();
+        __set_CONTROL(0);   //??psp????msp
+        __set_MSP(*(__IO u32*)addr);
+        jump_fn();
+    }
+}
+
+static void jumpToBoot(void)
+{
+    jump_to(0);
+}
+
 
 static int hid_single_proc(packet_t *pkt)
 {
@@ -56,13 +78,25 @@ static int hid_single_proc(packet_t *pkt)
             //hid_pkt_reset(TX);
             //hid_pkt_init(TX, 1, pkt);
             //hid_pkt_send();
-        
         }
         break;
         
         case TYPE_DEFAULT:
         {
             r = sys_set_default();
+        }
+        break;
+
+        case TYPE_VERSION:
+        {
+            usbd_send_pkt(TYPE_VERSION, &gParams.fw, sizeof(gParams.fw), 1, 0, 0);
+        }
+        break;
+
+        case TYPE_UPGRADE_REQ:
+        {
+            *(vu32*)UPG_FLAG_SRAM_OFFSET = UPG_FLAG;
+            jumpToBoot();
         }
         break;
 
@@ -192,7 +226,6 @@ int main(void)
 
     e2p_q = queue_init(QUEUE_MAX);
 	tim3_init(poll_func);
-
 
 	while(1) {
         usb_proc();
