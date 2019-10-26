@@ -70,7 +70,7 @@ int e2p_read(u32 addr, u8 *data, u16 len)
 static int write_page(u32 addr, u8 *data, u16 len)
 {
     int r;
-    u8  tmp[PAGE_SIZE];
+    //u8  tmp[PAGE_SIZE];
     
     r = HAL_I2C_Mem_Write(i2c_handle, E2P_ADDR, addr, I2C_MEMADD_SIZE_16BIT, data, len, 0xFFFF);
     //r = HAL_I2C_Mem_Read(i2c_handle, E2P_ADDR, addr, I2C_MEMADD_SIZE_16BIT, tmp, len, 0xFFFF);
@@ -80,7 +80,7 @@ static int write_page(u32 addr, u8 *data, u16 len)
     
     delay_ms(5);
     
-    return 0;
+    return r;
 }
 
 int e2p_write(u32 addr, u8 *data, u16 len)

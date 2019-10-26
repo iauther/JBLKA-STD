@@ -9,10 +9,15 @@
 //mv: 0~3300mv
 static void set_dac_vol(u16 mv)
 {
-    float tmp=mv;
-    tmp /= 1000;
-    tmp = tmp*4096/3.3;
-    DAC_SetChannel1Data(DAC_Align_12b_R, tmp)
+    u32 tmp;
+
+    if(mv>3300) {
+        return;
+    }
+
+    tmp = mv*4096;
+    tmp /= 3300;
+    DAC_SetChannel1Data(DAC_Align_12b_R, (u16)tmp);
 }
 
 int fan_init(void)
@@ -34,7 +39,9 @@ int fan_init(void)
     x1.DAC_OutputBuffer = DAC_OutputBuffer_Disable ;  //DAC1 Êä³ö»º´æ¹Ø±Õ
     DAC_Init(DAC_Channel_1, &x1);
     DAC_Cmd(DAC_Channel_1, ENABLE);
-    DAC_SetChannel1Data(DAC_Align_12b_R, 0);
+
+    //fan_set(50);
+    set_dac_vol(1600);
 
     return 0;
 }
@@ -44,14 +51,14 @@ int fan_init(void)
 int fan_set(u8 temp)
 {
     if(temp<=TEMP_MIN) {
-        set_vol(0);
+        set_dac_vol(0);
     }
     else if(temp>=TEMP_MAX){
-        set_vol(3300);
+        set_dac_vol(3300);
     }
     else {
-        u16 vol=3300*(temp-40)/(TEMP_MAX-TEMP_MIN);
-        set_vol(vol);
+        u16 mv=3300*(temp-40)/(TEMP_MAX-TEMP_MIN);
+        set_dac_vol(mv);
     }
 
     return 0;

@@ -1,5 +1,6 @@
 #include <string.h>
 #include "dsp.h"
+#include "e2p.h"
 #include "usbd.h"
 #include "sys.h"
 #include "usart.h"
@@ -217,7 +218,16 @@ void dsp_reset(void)
     
 }
 
-
+static void save_version(dsp_version_t *ver)
+{
+    u8 tmp[20];
+    
+    sprintf((char*)tmp, "V%04d", ver->ver);
+    if(strcmp((char*)tmp, (char*)gParams.fw.dsp)) {
+        strcpy((char*)gParams.fw.dsp, (char*)tmp);
+        e2p_write(0, (u8*)&gParams.fw, sizeof(gParams.fw));
+    }
+}
 static void dsp_rx_cb(u8 *data, u16 len)
 {
     if(len==4) {
@@ -227,12 +237,10 @@ static void dsp_rx_cb(u8 *data, u16 len)
     }
     else if(len==sizeof(dsp_version_t)) {
         dsp_version_t *ver=(dsp_version_t*)data;
-        sprintf((char*)gParams.fw.ver2, "KA %04d", ver->ver);
-        
+        save_version(ver);
     }
     else if(len==sizeof(dsp_ack_t)){
         dsp_ack_t *ack=(dsp_ack_t*)data;
-        
     }
 }
 

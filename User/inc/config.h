@@ -2,7 +2,10 @@
 #define __CONFIG_H__
 
 
-#define VERSION  "KA-V101.00"
+#define BOOT_VERSION "V01.0"
+#define MCU_VERSION  "V001.01"
+
+
 //#define BOARD_ALIENTEK
 #define BOARD_KOBBLE
 
@@ -104,16 +107,20 @@
         #define LCD_SPI         SPI_2
     #endif
     
-    #define KA150
-    //#define KA350
+    #define KA350
     //#define KA650i
 
 #endif
 
 
+#ifdef KA350
+    #define MODEL_NAME         "KA350"
+#endif
+
 #ifdef KA650i
     #define USE_HDMI
     #define USE_RS485
+    #define MODEL_NAME        "KA650i"
 #endif
 
 

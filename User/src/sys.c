@@ -1,6 +1,9 @@
+#include <string.h>
 #include "sys.h"
 #include "dsp.h"
+#include "fan.h"
 #include "lcd.h"
+#include "e2p.h"
 #include "gpio.h"
 #include "delay.h"
 #include "paras.h"
@@ -13,6 +16,12 @@
 
 static void rca_mute(u8 on)         //PB9, ∏ﬂæ≤“Ù£¨µÕ»°œ˚æ≤“Ù
 {
+    GPIO_InitTypeDef init={0};
+    init.GPIO_Mode = GPIO_Mode_Out_PP;
+    init.GPIO_Pin = GPIO_Pin_9;
+    init.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_Init(GPIOB, &init);
+
     if(on) {
         GPIO_SetBits(GPIOB, GPIO_Pin_9);
     }
@@ -64,6 +73,7 @@ int sys_init(void)
 
     gpio_init();
     dsp_init();
+    fan_init();
     lcd_init();
     usb_init();
 

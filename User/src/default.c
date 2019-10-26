@@ -109,9 +109,12 @@ const para_info_t infoDelay[] = {
 };
 
 const fw_info_t FW_INFO = {
-    .ver1 = VERSION,
-    .ver2 = "",
-    .bldtime = __DATE__,
+    .mode = 0,
+    .model = MODEL_NAME,
+    .boot = "",
+    .mcu = MCU_VERSION,
+    .dsp = "",
+    //.bldtime = __DATE__,
 };
 
 const io_data_t IO_DATA = {

@@ -49,7 +49,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\OBJS\</OutputDirectory>
-          <OutputName>APP</OutputName>
+          <OutputName>MCU</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -82,8 +82,8 @@
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>1</RunUserProg2>
-            <UserProg1Name>fromelf --bin --output ../APP.bin OBJS/APP.axf</UserProg1Name>
-            <UserProg2Name>conv app ../APP.bin ../UPG.bin</UserProg2Name>
+            <UserProg1Name>fromelf --bin --output ../MCU.bin OBJS/MCU.axf</UserProg1Name>
+            <UserProg2Name>conv mcu ../MCU.bin ../UPG.bin</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopA1X>0</nStopA1X>
@@ -769,6 +769,16 @@
               <FileName>adc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\src\adc.c</FilePath>
+            </File>
+            <File>
+              <FileName>dac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\dac.c</FilePath>
+            </File>
+            <File>
+              <FileName>fan.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\fan.c</FilePath>
             </File>
           </Files>
         </Group>

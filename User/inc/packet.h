@@ -21,6 +21,7 @@ typedef enum {
     TYPE_UPGRADE=0xA0,              //used for upgrade dsp,mcu firmware and bootloader
     TYPE_VERSION,
     TYPE_UPGRADE_REQ,
+    TYPE_REBOOT,
 }eTYPE;
 
 typedef enum {
@@ -61,11 +62,11 @@ typedef struct {
 }io_data_t;
 
 typedef struct {
-    u8              model[8];           //machine model, eg: KA350 KA650i
-    u8              boot[8];           //boot version, eg: 001
-    u8              mcu[8];            //mcu version, eg: 002
-    u8              dsp[8];            //dsp version, eg: 001
-    u8              bldtime[14];        //build time, eg: 2019.08.22
+    u8              mode;               //1: boot   2: app
+    u8              model[10];          //KA350 or KA650i
+    u8              boot[10];           //bootloader version
+    u8              mcu[10];            //mcu firmware version
+    u8              dsp[10];            //dsp firmware version
 }fw_info_t;
 
 typedef struct {

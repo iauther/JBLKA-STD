@@ -16,7 +16,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usb_lib.h"
 #include "usb_desc.h"
-
+#include "config.h"
 
 #define LOBYTE(x)  ((uint8_t)((x) & 0x00FFU))
 #define HIBYTE(x)  ((uint8_t)(((x) & 0xFF00U) >> 8U))
@@ -162,20 +162,25 @@ const uint8_t CustomHID_StringVendor[CUSTOMHID_SIZ_STRING_VENDOR] =
     CUSTOMHID_SIZ_STRING_VENDOR, /* Size of Vendor string */
     USB_STRING_DESCRIPTOR_TYPE,  /* bDescriptorType*/
     // Manufacturer: "STMicroelectronics" 
-    'M', 0, 'y', 0, 'U', 0,'S', 0,'B', 0, '_', 0, 'A', 0,'K',0,'S',0
+    'J', 0, 'B', 0, 'L', 0
 };
 
 const uint8_t CustomHID_StringProduct[CUSTOMHID_SIZ_STRING_PRODUCT] =
 {
     CUSTOMHID_SIZ_STRING_PRODUCT,          /* bLength */
     USB_STRING_DESCRIPTOR_TYPE,        /* bDescriptorType */
-    'A', 0, 'K', 0, 'S', 0, ' ', 0, 'C', 0, 'o', 0,'n',0,'t',0,'r',0,'o',0,'l',0
+    'K', 0, 'A', 0, ' ', 0, 'S', 0, 'e', 0, 'r', 0,'i',0,'a',0,'l',0
 };
 uint8_t CustomHID_StringSerial[CUSTOMHID_SIZ_STRING_SERIAL] =
 {
     CUSTOMHID_SIZ_STRING_SERIAL,           /* bLength */
     USB_STRING_DESCRIPTOR_TYPE,        /* bDescriptorType */
-    'A', 0, 'K', 0, 'S', 0,'A', 0,'K', 0, 'A', 0, 'K', 0
+#ifdef KA350
+    'K', 0, 'A', 0, '3', 0,'5', 0,'0', 0
+#else
+    'K', 0, 'A', 0, '6', 0,'5', 0,'0', 0, 'i', 0
+#endif
+
 };
 /******************* (C) COPYRIGHT 2010 STMicroelectronics *****END OF FILE****/
 

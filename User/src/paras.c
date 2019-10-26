@@ -9,7 +9,12 @@ paras_ui_t uiParams;
 static void set_to_default(paras_ui_t *ui, paras_data_t *gb, const default_t *df)
 {
     u8 i,j;
+    fw_info_t fw;
     
+    e2p_read(0, (u8*)&fw, sizeof(fw_info_t));
+    strcpy((char*)fw.mcu, (char*)FW_INFO.mcu);
+    strcpy((char*)fw.model, (char*)FW_INFO.model);
+
     //memset(gb, 0, sizeof(paras_data_t));
     for(i=0; i<Gain_CH_NUM; i++) {
         gb->dsp.Array_Gain[i] = df->gain;
@@ -77,11 +82,9 @@ static void set_to_default(paras_ui_t *ui, paras_data_t *gb, const default_t *df
 
     gb->dsp.Array_PitchShift = df->pitch;
     gb->dsp.Array_Input = df->input;
-    gb->fw = FW_INFO;
+    gb->fw = fw;
     gb->iodat = IO_DATA;
     gb->pre = 0;
-    
-    
 }
 
 
@@ -90,13 +93,13 @@ static void set_to_default(paras_ui_t *ui, paras_data_t *gb, const default_t *df
 static int check_version(void)
 {
     fw_info_t fw;
-    char *pver = (char*)&fw.ver1;
-//return 0;    
+    
     e2p_read(0, (u8*)&fw, sizeof(fw_info_t));
-    pver[13] = 0;
-    if(!strstr(pver, "KA-V") || strlen(pver)!=strlen(VERSION) || strcmp(pver, VERSION)<0) {
+    fw.mcu[9] = 0;
+    if(strcmp((char*)fw.mcu, MCU_VERSION)) {     //版本不同，需要重置参数
         return 0;
     }
+
     return 1;
 }
 
@@ -244,6 +247,7 @@ int paras_update(packet_t *pkt, node_t *node)
         break;
         
         case TYPE_DEFAULT:
+        case TYPE_VERSION:
         r = 0;
         break;
 

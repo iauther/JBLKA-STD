@@ -40,7 +40,11 @@ static void jumpToBoot(void)
 {
     jump_to(0);
 }
-
+static void reboot(void)
+{
+    __disable_fiq();
+    NVIC_SystemReset();
+}
 
 static int hid_single_proc(packet_t *pkt)
 {
@@ -89,14 +93,23 @@ static int hid_single_proc(packet_t *pkt)
 
         case TYPE_VERSION:
         {
-            usbd_send_pkt(TYPE_VERSION, &gParams.fw, sizeof(gParams.fw), 1, 0, 0);
+            fw_info_t fw=gParams.fw;
+            fw.mode = 2;
+            delay_ms(10);
+            r = usbd_send_pkt(TYPE_VERSION, &fw, sizeof(fw), 1, 0, 0);
+        }
+        break;
+
+        case TYPE_REBOOT:
+        {
+            reboot();
         }
         break;
 
         case TYPE_UPGRADE_REQ:
         {
-            *(vu32*)UPG_FLAG_SRAM_OFFSET = UPG_FLAG;
-            jumpToBoot();
+            //*(vu32*)UPG_FLAG_SRAM_OFFSET = UPG_FLAG;
+            //jumpToBoot();
         }
         break;
 
@@ -122,7 +135,7 @@ static int hid_single_proc(packet_t *pkt)
     }
     else {
         if(!r) {
-            usbd_send_ack(pkt, r);
+            //usbd_send_ack(pkt, r);
         }
     }
 
