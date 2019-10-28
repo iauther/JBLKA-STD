@@ -5,8 +5,10 @@
 #include "sys.h"
 #include "usart.h"
 #include "delay.h"
+#include "paras.h"
 #include "packet.h"
 #include "config.h"
+#include "default.h"
 #include <stm32f10x.h>
 
 #define STARTUP_CODE    0xEFBEADDE
@@ -25,10 +27,12 @@ typedef struct {
 #define RX_BUF_LEN 100
 u8 dspRxBuf[RX_BUF_LEN];
 
+
 u8 dspBuf[40];
 u8 dspStarted=0;
-extern paras_data_t gParams;
-
+u8 upgrade_ack_flag=0;
+//extern paras_data_t gParams;
+//extern paras_ui_t uiParams;
 #if 0
 UartParas_t dspParas={0};
 UART_HandleTypeDef *hdsp;
@@ -241,6 +245,7 @@ static void dsp_rx_cb(u8 *data, u16 len)
     }
     else if(len==sizeof(dsp_ack_t)){
         dsp_ack_t *ack=(dsp_ack_t*)data;
+        upgrade_ack_flag = 1;
     }
 }
 
@@ -268,6 +273,7 @@ int dsp_download(void)
 int dsp_reset_peq(eq_reset_t *rst)
 {
     u8 i;
+    paras_ui_t *ui=&uiParams;
     dsp_data_t dsp={0};
 
     if(!rst) {
@@ -277,50 +283,50 @@ int dsp_reset_peq(eq_reset_t *rst)
     switch(rst->ch) {
         case EQ_CH_Music:
         for(i=0; i<PEQ_BANDS; i++) {
-            //*ui->dsp.in.music.peq[i] = gDefault.eq;
-            //ui->dsp.in.music.peq[i]->Freq = PEQ7_FREQ[i];
+            *ui->dsp.in.music.peq[i] = gDefault.eq;
+            ui->dsp.in.music.peq[i]->Freq = PEQ7_FREQ[i];
         }
         break;
 
         case EQ_CH_Mic:
         for(i=0; i<PEQ_BANDS; i++) {
-            //*ui->dsp.in.mic.peq[i] = gDefault.eq;
-            //ui->dsp.in.mic.peq[i]->Freq = PEQ7_FREQ[i];
+            *ui->dsp.in.mic.peq[i] = gDefault.eq;
+            ui->dsp.in.mic.peq[i]->Freq = PEQ7_FREQ[i];
         }
         break;
 
         case EQ_CH_Echo:
         for(i=0; i<3; i++) {
-            //*ui->dsp.eff.echo.peq[i] = gDefault.eq;
-            //ui->dsp.eff.echo.peq[i]->Freq = PEQ3_FREQ[i];
+            *ui->dsp.eff.echo.peq[i] = gDefault.eq;
+            ui->dsp.eff.echo.peq[i]->Freq = PEQ3_FREQ[i];
         }
         break;
 
         case EQ_CH_Rev:
         for(i=0; i<3; i++) {
-            //*ui->dsp.eff.reverb.peq[i] = gDefault.eq;
-            //ui->dsp.eff.reverb.peq[i]->Freq = PEQ3_FREQ[i];
+            *ui->dsp.eff.reverb.peq[i] = gDefault.eq;
+            ui->dsp.eff.reverb.peq[i]->Freq = PEQ3_FREQ[i];
         }
         break;
 
         case EQ_CH_Main:
         for(i=0; i<PEQ_BANDS; i++) {
-            //*ui->dsp.out.main.peq[i] = gDefault.eq;
-            //ui->dsp.out.main.peq[i]->Freq = PEQ7_FREQ[i];
+            *ui->dsp.out.main.peq[i] = gDefault.eq;
+            ui->dsp.out.main.peq[i]->Freq = PEQ7_FREQ[i];
         }
         break;
 
         case EQ_CH_Sub:
         for(i=0; i<PEQ_BANDS; i++) {
-            //*ui->dsp.out.sub.peq[i] = gDefault.eq;
-            //ui->dsp.out.sub.peq[i]->Freq = PEQ7_FREQ[i];
+            *ui->dsp.out.sub.peq[i] = gDefault.eq;
+            ui->dsp.out.sub.peq[i]->Freq = PEQ7_FREQ[i];
         }
         break;
 
         case EQ_CH_Rec:
         for(i=0; i<PEQ_BANDS; i++) {
-            //*ui->dsp.out.rec.peq[i] = gDefault.eq;
-            //ui->dsp.out.rec.peq[i]->Freq = PEQ7_FREQ[i];
+            *ui->dsp.out.rec.peq[i] = gDefault.eq;
+            ui->dsp.out.rec.peq[i]->Freq = PEQ7_FREQ[i];
         }
         break;
 
@@ -328,11 +334,11 @@ int dsp_reset_peq(eq_reset_t *rst)
         return -1;
     }
 
-
     dsp.ch = rst->ch;
     dsp.id = CMD_ID_EQ;
-    
-    //dsp_send(&dsp);
+    for(i=0; i<MaxEQBand; i++) {
+        dsp_send(&dsp);
+    }
 
     return 0;
 }
@@ -408,7 +414,10 @@ int dsp_upgrade(u16 index, u8 *data, u16 len)
 
     gDspBuf.cmd.No = index;
     gDspBuf.cmd.DataPtr = (u16*)data;
+
+    upgrade_ack_flag = 0;
     dsp_write(&gDspBuf);
+    while(upgrade_ack_flag==0);
     
     return 0;
 }

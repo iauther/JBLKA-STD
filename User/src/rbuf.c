@@ -49,12 +49,11 @@ int rbuf_read(rbuf_t *rb, u8 *buf, int len)
     if(len<=rb->dlen) {     //数据有余，读取长度等于要求的长度
         
         rlen = len;
-        if(rb->pr < rb->pw) {
+        if(rb->pr <= rb->pw) {
             memcpy(buf, rb->buf+rb->pr, rlen);
-            rb->pr += rlen;
         }
         else {
-            u16 l = rb->size-rb->pr;
+            int l = rb->size-rb->pr;
             if(rlen<=l) {
                 memcpy(buf, rb->buf+rb->pr, rlen);
             }
@@ -70,7 +69,7 @@ int rbuf_read(rbuf_t *rb, u8 *buf, int len)
             memcpy(buf, rb->buf+rb->pr, rlen);
         }
         else {
-            u16 l = rb->size-rb->pr;
+            int l = rb->size-rb->pr;
             if(rlen<=l) {
                 memcpy(buf, rb->buf+rb->pr, rlen);
             }
@@ -107,7 +106,7 @@ int rbuf_write(rbuf_t *rb, u8 *buf, int len)
             memcpy(rb->buf+rb->pw, buf, wlen);
         }
         else {
-            u16 l = rb->size-rb->pw;
+            int l = rb->size-rb->pw;
             if(wlen<=l) {   //写指针在后，后续足够，只需写1次
                 memcpy(rb->buf+rb->pw, buf, wlen);
             }
@@ -123,7 +122,7 @@ int rbuf_write(rbuf_t *rb, u8 *buf, int len)
             memcpy(rb->buf+rb->pw, buf, wlen);
         }
         else {
-            u16 l = rb->size-rb->pw;
+            int l = rb->size-rb->pw;
             memcpy(rb->buf+rb->pw, buf, l);
             memcpy(rb->buf, buf+l, wlen-l);
         } 
@@ -138,17 +137,17 @@ int rbuf_write(rbuf_t *rb, u8 *buf, int len)
 int rbuf_get_size(rbuf_t *rb)
 {
 	if(!rb) {
-        return 0;
+        return -1;
     }
 
 	return rb->size;
 }
 
 
-int rbuf_get_data_len(rbuf_t *rb)
+int rbuf_get_dlen(rbuf_t *rb)
 {
 	if(!rb) {
-        return 0;
+        return -1;
     }
 
 	return rb->dlen;

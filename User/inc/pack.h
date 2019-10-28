@@ -3,31 +3,25 @@
 
 #include "types.h"
 
-#define UPG_FILE			 "upg.bin"
 #define UPG_MAGIC1           0xFF88AA99
 #define UPG_MAGIC2           (~UPG_MAGIC1)
 
 enum {
 	FILE_BOOT = 0,
 	FILE_DSP,
-	FILE_APP,
+	FILE_MCU,
 };
 
 #pragma pack(1)
 typedef struct {
-	u8			chr[16];
-}md5_t;
-typedef struct {
 	u32			magic1;      //UPG_MAGIC1
 	u32			magic2;
 	u8			ftype;      //file type
-	u32         dlen;
-	u8			data[];
-}upg_t;
+}head_t;
 typedef struct {
-	md5_t		md5;
-	u32         dlen;
-	u8			data[];		//upg_hdr_t
+	u8			md5[16];
+	head_t      head;
+	u8			data[];
 }hdr_t;
 #pragma pack()
 

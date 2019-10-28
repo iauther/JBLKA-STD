@@ -71,19 +71,7 @@ static int hid_single_proc(packet_t *pkt)
             dsp_data_t *dsp=(dsp_data_t*)pkt->data;
             r = dsp_send(dsp);
         }
-        break;
-        
-        case TYPE_EQRESET:
-        {
-            eq_reset_t *rst=(eq_reset_t*)pkt->data;
-
-            //paras_reset_peq(rst);
-            //dsp_reset_peq(rst);
-            //hid_pkt_reset(TX);
-            //hid_pkt_init(TX, 1, pkt);
-            //hid_pkt_send();
-        }
-        break;
+        break;   
         
         case TYPE_DEFAULT:
         {
@@ -123,6 +111,9 @@ static int hid_single_proc(packet_t *pkt)
         break;
 
         case TYPE_ACK:
+        {
+            
+        }
         break;
 
         default:
@@ -146,6 +137,7 @@ u8 retry_times = 0;
 static int hid_multi_proc(packet_t *pkt)
 {
     int r=0;
+    u8  last;
 
     switch(pkt->type) {
         case TYPE_ACK:
@@ -156,6 +148,20 @@ static int hid_multi_proc(packet_t *pkt)
             //stop_timeout_timer();
         }
         break;
+        
+        case TYPE_EQRESET:
+        {
+#if 0
+            eq_reset_t *rst=(eq_reset_t*)pkt->data;
+
+            paras_reset_peq(rst);
+            dsp_reset_peq(rst);
+            hid_pkt_reset(TX);
+            hid_pkt_init(TX, 1, pkt);
+            hid_pkt_send();
+#endif
+        }
+        break;
 
         case TYPE_PARAS:
         case TYPE_PRESET:
@@ -163,7 +169,9 @@ static int hid_multi_proc(packet_t *pkt)
         {
             if(pkt->dlen>0 && pkt->pkts>1) {
                 hid_pkt_init(RX, 0, pkt);
-                r = hid_pkt_recv(pkt);
+
+                last = (pkt->pkts==pkt->pid+1)?1:0;
+                r = hid_pkt_recv(pkt, last);
                 if(pkt->nck) {
                     usbd_send_ack(pkt, r);
                 }

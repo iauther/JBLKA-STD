@@ -17,7 +17,8 @@ int is_multipkts(packet_t *pkt)
 {
     if(pkt->type==TYPE_PRESET  || 
        pkt->type==TYPE_PARAS   || 
-       pkt->type==TYPE_UPGRADE) {
+       pkt->type==TYPE_UPGRADE ||
+       pkt->type==TYPE_EQRESET) {
         return 1;
     }
 
@@ -25,7 +26,8 @@ int is_multipkts(packet_t *pkt)
         ack_data_t *ack=(ack_data_t*)pkt->data;
         if(ack->type==TYPE_PRESET ||
             ack->type==TYPE_PARAS   || 
-            ack->type==TYPE_UPGRADE) {
+            ack->type==TYPE_UPGRADE ||
+            ack->type==TYPE_EQRESET) {
             return 1;
         }
     }

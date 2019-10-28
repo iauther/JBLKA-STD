@@ -8,8 +8,7 @@
 
 #define HID_LEN             64
 #define HID_RETRY_TIMES     5
-#define HID_TIMEOUT         100
-#define BUF_LEN             1100
+#define HID_TIMEOUT         5
 
 #define PAYLOAD_LEN         (HID_LEN-sizeof(packet_t))
 
@@ -31,14 +30,14 @@ typedef struct {
 
     u8      index;
     u16     onceLen;
+    u16     times;
     u16     pkts;
 
-    u8      *ptr;
+    void    *ptr;
     u32     length;
     u16     lastlen;
 
     rbuf_t  rb;
-    u8      buf[BUF_LEN];
 }hid_data_t;
 
 typedef struct {
@@ -49,7 +48,7 @@ typedef struct {
 
 void hid_pkt_init(int mode, u8 nck, packet_t *pkt);
 
-int hid_pkt_recv(packet_t *pkt);
+int hid_pkt_recv(packet_t *pkt, u8 last);
 
 int hid_pkt_send(void);
 

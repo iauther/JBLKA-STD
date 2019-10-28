@@ -22,6 +22,6 @@ int rbuf_write(rbuf_t *rb, u8 *buf, int len);
 
 int rbuf_get_size(rbuf_t *rb);
 
-int rbuf_get_data_len(rbuf_t *rb);
+int rbuf_get_dlen(rbuf_t *rb);
 
 #endif

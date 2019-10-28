@@ -63,12 +63,17 @@ static void usb_init(void)
 ////////////////////////////////////////////////
 static int do_config(void)
 {
+#if 0
+    dsp_reset();
+#else
+    dsp_init();
     do {
         delay_ms(10);
     }while(!dsp_is_started());
     
     dsp_download();
     dsp_version();
+#endif
     adda_reset();
     rca_mute(0);
     sys_set_iodat(0);
@@ -86,7 +91,6 @@ int sys_init(void)
     paras_init();
 
     gpio_init();
-    dsp_init();
     fan_init();
     lcd_init();
     usb_init();
@@ -161,7 +165,7 @@ int sys_set_default(void)
 {
     paras_default();
     dsp_download();
-    sys_config();
+    do_config();
     
     return 0;
 }
