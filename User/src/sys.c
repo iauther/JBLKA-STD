@@ -61,7 +61,21 @@ static void usb_init(void)
 	USB_Init();
 }
 ////////////////////////////////////////////////
-
+static int do_config(void)
+{
+    do {
+        delay_ms(10);
+    }while(!dsp_is_started());
+    
+    dsp_download();
+    dsp_version();
+    adda_reset();
+    rca_mute(0);
+    sys_set_iodat(0);
+    sys_set_input(gParams.dsp.Array_Input.input);
+    
+    return 0;
+}
 
 int sys_init(void)
 {
@@ -77,25 +91,13 @@ int sys_init(void)
     lcd_init();
     usb_init();
 
+    do_config();
+
     return 0;
 }
 
 
-int sys_config(void)
-{
-    do {
-        delay_ms(10);
-    }while(!dsp_is_started());
-    
-    dsp_download();
-    dsp_version();
-    adda_reset();
-    rca_mute(0);
-    sys_set_iodat(0);
-    sys_set_input(gParams.dsp.Array_Input.input);
-    
-    return 0;
-}
+
 
 
 int sys_set_input(u16 input)

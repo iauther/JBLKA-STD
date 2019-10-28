@@ -227,7 +227,7 @@ static void e2p_proc(void)
         e2p_flag = 0;
     }
 }
-
+ 
 
 
 
@@ -235,7 +235,6 @@ static void e2p_proc(void)
 int main(void)
 {
 	sys_init();
-    sys_config();
 
     e2p_q = queue_init(QUEUE_MAX);
 	tim3_init(poll_func);

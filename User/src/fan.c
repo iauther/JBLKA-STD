@@ -5,7 +5,15 @@
 #define TEMP_MIN    40
 #define TEMP_MAX    60
 
+static void set_vol(float Voltage)
+{
+  uint16_t data;
 
+  data = (uint16_t)((Voltage/3.3) * 4096);                           //换算数值
+
+  DAC_SetChannel1Data(DAC_Align_12b_R, data);                        //12位数 右对齐
+  DAC_SoftwareTriggerCmd(DAC_Channel_1, ENABLE);                     //启动转换
+}
 //mv: 0~3300mv
 static void set_dac_vol(u16 mv)
 {
@@ -18,30 +26,31 @@ static void set_dac_vol(u16 mv)
     tmp = mv*4096;
     tmp /= 3300;
     DAC_SetChannel1Data(DAC_Align_12b_R, (u16)tmp);
+    DAC_SoftwareTriggerCmd(DAC_Channel_1, ENABLE);
 }
 
 int fan_init(void)
 {
-    DAC_InitTypeDef x1={0};
-    GPIO_InitTypeDef x2={0};
+    GPIO_InitTypeDef x1={0};
+    DAC_InitTypeDef x2={0};
+    
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE );
-    x2.GPIO_Pin = GPIO_Pin_4;                 // 端口配置
-    x2.GPIO_Mode = GPIO_Mode_AIN;          //模拟输入
-    x2.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &x2);
-    GPIO_SetBits(GPIOA, GPIO_Pin_4)    ;//PA.4 输出高
-
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC, ENABLE );
-    x1.DAC_Trigger = DAC_Trigger_None;  //不使用触发功能  TEN1=0
-    x1.DAC_WaveGeneration = DAC_WaveGeneration_None;//不使用波形发生
-    x1.DAC_LFSRUnmask_TriangleAmplitude = DAC_LFSRUnmask_Bit0;
-    x1.DAC_OutputBuffer = DAC_OutputBuffer_Disable ;  //DAC1 输出缓存关闭
-    DAC_Init(DAC_Channel_1, &x1);
+    x1.GPIO_Pin = GPIO_Pin_4;                 // 端口配置
+    x1.GPIO_Mode = GPIO_Mode_AIN;          //模拟输入
+    x1.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_Init(GPIOA, &x1);
+    //DAC_DeInit();
+    
+    x2.DAC_Trigger = DAC_Trigger_Software;
+    x2.DAC_WaveGeneration = DAC_WaveGeneration_None;//不使用波形发生
+    x2.DAC_LFSRUnmask_TriangleAmplitude = DAC_LFSRUnmask_Bits11_0;
+    x2.DAC_OutputBuffer = DAC_OutputBuffer_Enable ;  //DAC1 输出缓存关闭
+    DAC_Init(DAC_Channel_1, &x2);
     DAC_Cmd(DAC_Channel_1, ENABLE);
 
-    //fan_set(50);
-    set_dac_vol(1600);
+    set_dac_vol(1700);
 
     return 0;
 }
