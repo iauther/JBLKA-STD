@@ -21,14 +21,20 @@ const default_t gDefault={
     .eq = {
         .Freq       = 20,       //20~20000
         .Gain       = 0,        //-24~+12dB
-        .Q          = 1,        //1~1280
+        .Q          = 22,       //1~1280
         .Type       = 0,        //0,1,2: PEQ,LS,HS
         .Bypass     = 0,        //0:not bypass  1:bypass
     },
     
-    //hlpf
-    .hlpf = {
+    //hpf
+    .hpf = {
         .Freq       = 20,       //20~21000
+        .Type       = 0,        //HLPF_Type_Bypass
+    },
+
+    //lpf
+    .lpf = {
+        .Freq       = 20000,    //20~21000
         .Type       = 0,        //HLPF_Type_Bypass
     },
     
@@ -52,7 +58,7 @@ const default_t gDefault={
     
     //pitch
     .pitch = {
-        .PitchShift = -5,       //变调 -5~+5
+        .PitchShift = 0,       //变调 -5~+5
     },
     
     //mute

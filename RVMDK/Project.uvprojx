@@ -780,6 +780,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\src\fan.c</FilePath>
             </File>
+            <File>
+              <FileName>mp25.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\mp25.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

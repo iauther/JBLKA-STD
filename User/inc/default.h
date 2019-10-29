@@ -11,7 +11,8 @@ typedef struct
     TypeS_Gain          gain;
     TypeS_Vol           vol;
     TypeS_EQBand        eq;
-    TypeS_HLPFCoef      hlpf;
+    TypeS_HLPFCoef      hpf;
+    TypeS_HLPFCoef      lpf;
     TypeS_Delay         delay;
     TypeS_FeedBack      feedback;
     TypeS_Limiter       limiter;

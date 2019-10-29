@@ -31,8 +31,8 @@ static void set_to_default(paras_ui_t *ui, paras_data_t *gb, const default_t *df
     }
 
     for(i=0; i<HLPF_CH_NUM; i++) {
-        gb->dsp.Array_HLPF[i].HLPFCoef[0] = df->hlpf;
-        gb->dsp.Array_HLPF[i].HLPFCoef[1] = df->hlpf;
+        gb->dsp.Array_HLPF[i].HLPFCoef[HLPF_Hpf] = df->hpf;
+        gb->dsp.Array_HLPF[i].HLPFCoef[HLPF_Lpf] = df->lpf;
     }
     
     for(i=0; i<Delay_CH_NUM; i++) {
