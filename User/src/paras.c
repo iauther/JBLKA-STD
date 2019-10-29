@@ -246,13 +246,9 @@ int paras_update(packet_t *pkt, node_t *node)
         memcpy(n.ptr, pkt->data, n.len);
         break;
         
-        case TYPE_DEFAULT:
-        case TYPE_VERSION:
+        default:
         r = 0;
         break;
-
-        default:
-        return -1;
     }
     
     if(r==0 && node) {

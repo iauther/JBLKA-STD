@@ -87,8 +87,16 @@ void hid_pkt_init(int mode, u8 nck, packet_t *pkt)
         case TYPE_EQRESET:
         {
             eq_reset_t *rst=(eq_reset_t*)pkt->data;
-            hd->ptr = (u8*)&gParams.dsp.Array_EQ[rst->ch];
-            hd->length = sizeof(TypeS_EQ);
+            hd->length = sizeof(eq_reset_t)+sizeof(TypeS_EQ);
+            hd->ptr = malloc(hd->length);
+            if(hd->ptr) {
+                eq_reset_t *rs=(eq_reset_t*)hd->ptr;
+                rs->ch = rst->ch;
+                memcpy(rs->eq, &gParams.dsp.Array_EQ[rst->ch], sizeof(TypeS_EQ));
+            }
+            
+            int more = (hd->length%PAYLOAD_LEN)>0?1:0;
+            hd->pkts = hd->length /PAYLOAD_LEN+more;
         }
         break;
 #endif

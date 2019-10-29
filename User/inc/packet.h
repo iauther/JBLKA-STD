@@ -37,11 +37,6 @@ typedef enum {
 }eINPUT;
 
 #pragma pack(1)
-typedef struct {
-    u8              on;                 //0: off,  1: on
-    u8              ppwr;               //positive power  0: off,  1: on
-    u8              npwr;               //negative power  0: off,  1: on
-}amp_data_t;
 
 typedef struct {
     u8              amp_temp;           //amplifier temperature

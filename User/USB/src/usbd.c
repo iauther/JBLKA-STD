@@ -21,8 +21,7 @@ int is_multipkts(packet_t *pkt)
        pkt->type==TYPE_EQRESET) {
         return 1;
     }
-
-    if(pkt->type==TYPE_ACK) {
+    else if(pkt->type==TYPE_ACK) {
         ack_data_t *ack=(ack_data_t*)pkt->data;
         if(ack->type==TYPE_PRESET ||
             ack->type==TYPE_PARAS   || 

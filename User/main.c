@@ -148,25 +148,15 @@ static int hid_multi_proc(packet_t *pkt)
             //stop_timeout_timer();
         }
         break;
-        
-        case TYPE_EQRESET:
-        {
-#if 0
-            eq_reset_t *rst=(eq_reset_t*)pkt->data;
 
-            paras_reset_peq(rst);
-            dsp_reset_peq(rst);
-            hid_pkt_reset(TX);
-            hid_pkt_init(TX, 1, pkt);
-            hid_pkt_send();
-#endif
-        }
-        break;
-
-        case TYPE_PARAS:
-        case TYPE_PRESET:
-        case TYPE_UPGRADE:
+        default:
         {
+            if(pkt->type==TYPE_EQRESET) {
+                eq_reset_t *rst=(eq_reset_t*)pkt->data;
+                paras_reset_peq(rst);
+                dsp_reset_peq(rst);
+            }
+
             if(pkt->dlen>0 && pkt->pkts>1) {
                 hid_pkt_init(RX, 0, pkt);
 
