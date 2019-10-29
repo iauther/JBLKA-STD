@@ -165,7 +165,7 @@ int sys_set_default(void)
 {
     paras_default();
     dsp_download();
-    do_config();
+    sys_set_input(gParams.dsp.Array_Input.input);
     
     return 0;
 }
