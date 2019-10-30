@@ -4,75 +4,183 @@
 #define offset_of(type, member) ((u32) &((type *)0)->member)
 
 
-const default_t gDefault={
-    //gain
-    .gain = {
-        .Gain       = 0,        //0~100
-        .Mute       = 0,        //0:mute off  1:mute on
+const def_dsp_t dspDefault={
+    .music = {
+        .gain       = {.Gain = 50, .Mute = 0},
+        
+        .eq        = {
+                        .BandCoef = {
+                            {.Freq = 100,  .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 1000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+
+                            {.Freq = 1000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 2000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 3000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 4000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 5000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 6000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 7000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                        }
+                      },
+
+        .hpf        = {.Freq = 20, .Type = HLPF_Type_12dBButterworth},
+        .lpf        = {.Freq = 20000, .Type = HLPF_Type_12dBButterworth},
+
+        .noiseGate  = {.threshold = -60},
+        
+        .pitch      = {.PitchShift = 0},
+        .input      = {.input = 0}, //0:vod 1:dvd 2:bgm 3:btusb 4:optical 5:hdmi-in 6:hdmi-arc
+    },
+        
+    .mic = {
+        .gain       = {.Gain = 50, .Mute = 0},
+
+        .eq        = {
+                        .BandCoef = {
+                            {.Freq = 100,   .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 1000,  .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 10000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+
+                            {.Freq = 2000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 3000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 4000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 5000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 6000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 7000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 8000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                        }
+                      },
+
+        .hpf        = {.Freq = 20, .Type = HLPF_Type_12dBButterworth},
+        .lpf        = {.Freq = 20000, .Type = HLPF_Type_12dBButterworth},
+        .feedback   = {.FeedBack = 2},      //移频量 0:off,  1~3:4Hz/6Hz/8Hzs
+        .limiter    = {.threshold = -3, .attackTime = 100, .releaseTime= 1000, .ratio = 10},
+        .noiseGate  = {.threshold = -60},
     },
     
-    //vol
-    .vol = {
-        .Vol        = 0,        //0~200     step=1
-        .Phase      = 0,        //0:不反相  1:反相
+    .effGain        = {.Gain = 35, .Mute = 0},
+    .echo = {
+        .eq        = {
+                        .BandCoef = {
+                            {.Freq = 100, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 1000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 10000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                        }
+                      },
+
+        .repeat     = {.Vol = 55, .Phase = 0},
+        .effVol     = {.Vol = 100, .Phase = 0},
+        .dirVol     = {.Vol = 15, .Phase = 0},
+
+
+        .hpf        = {.Freq = 20, .Type = HLPF_Type_12dBButterworth},
+        .lpf        = {.Freq = 20000, .Type = HLPF_Type_12dBButterworth},
+        .preDelay   = {.Delay = 2},
+        .delay      = {.Delay = 235},
     },
     
-    //eq
-    .eq = {
-        .Freq       = 20,       //20~20000
-        .Gain       = 0,        //-24~+12dB
-        .Q          = 22,       //1~1280
-        .Type       = 0,        //0,1,2: PEQ,LS,HS
-        .Bypass     = 0,        //0:not bypass  1:bypass
-    },
-    
-    //hpf
-    .hpf = {
-        .Freq       = 20,       //20~21000
-        .Type       = 0,        //HLPF_Type_Bypass
+    .reverb = {
+        .eq        = {
+                        .BandCoef = {
+                            {.Freq = 100, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 1000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 10000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                        }
+                      },
+        
+        .effVol     = {.Vol = 100, .Phase = 0},
+        .dirVol     = {.Vol = 15, .Phase = 0},
+
+        .hpf        = {.Freq = 20, .Type = HLPF_Type_12dBButterworth},
+        .lpf        = {.Freq = 20000, .Type = HLPF_Type_12dBButterworth},
+        .preDelay   = {.Delay = 12},
+        .time       = {.Delay = 4300},
     },
 
-    //lpf
-    .lpf = {
-        .Freq       = 20000,    //20~21000
-        .Type       = 0,        //HLPF_Type_Bypass
-    },
-    
-    //delay
-    .delay = {
-        .Delay      = 0,
-    },
-    
-    //feedback
-    .feedback = {
-        .FeedBack   = 0,        //移频量, 0:off,  1~3:4Hz/6Hz/8Hz
-    },
-    
-    //limiter
-    .limiter = {
-        .threshold  = -34,      //启动电平 -34~+0dB
-        .attackTime = 0,        //启动时间 0~900: 0~900ms
-        .releaseTime= 0,        //释放时间0~9000: 0~9000ms
-        .ratio      = 0,        //压限比例 0~1000: 0~100.0
-    },
-    
-    //pitch
-    .pitch = {
-        .PitchShift = 0,       //变调 -5~+5
-    },
-    
-    //mute
-    .mute = {
-        .Mute       = 0,        //0: mute off  1: mute on
-    },
-    
-    //noisegate
-    .noisegate = {
-        .threshold  = -60,      //启动阀值  -60~0dB
+    .main = {
+        .eq        = {
+                        .BandCoef = {
+                            {.Freq = 100,  .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 1000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 10000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 2000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 3000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 4000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 5000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                        }
+                      },
+
+        .hpf        = {.Freq = 20, .Type = HLPF_Type_12dBButterworth},
+        .lpf        = {.Freq = 20000, .Type = HLPF_Type_12dBButterworth},
+
+        .musicVol   = {.Vol = 100, .Phase = 0},
+        .dirVol     = {.Vol = 100, .Phase = 0},
+        .echoVol    = {.Vol = 100, .Phase = 0},
+        .reverbVol  = {.Vol = 50,  .Phase = 0},
+
+        .lVol       = {.Vol = 100, .Phase = 0},
+        .rVol       = {.Vol = 100, .Phase = 0},
+
+
+        .lDelay     = {.Delay = 0},
+        .rDelay     = {.Delay = 0},
+        .limiter    = {.threshold = -5, .attackTime = 100, .releaseTime = 1000, .ratio = 40},
+        .L          = {.Mute = 0},
+        .R          = {.Mute = 0},
     },
 
-    .input = {
-        .input = 0,             //0:vod 1:dvd 2:bgm 3:btusb 4:optical 5:hdmi-in 6:hdmi-arc
+    .sub = {
+        .eq        = {
+                        .BandCoef = {
+                            {.Freq = 100,  .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 1000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 10000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 2000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 3000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 4000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 5000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                        }
+                      },
+
+        .hpf        = {.Freq = 23, .Type = HLPF_Type_12dBButterworth},
+        .lpf        = {.Freq = 105, .Type = HLPF_Type_12dBButterworth},
+            
+        .delay     = {.Delay = 0},
+
+        .musicVol   = {.Vol = 100, .Phase = 0},
+        .dirVol     = {.Vol = 0, .Phase = 0},
+        .echoVol    = {.Vol = 0, .Phase = 0},
+        .reverbVol  = {.Vol = 0, .Phase = 0},
+        .vol        = {.Vol = 100, .Phase = 0},
+
+        .limiter    = {.threshold = -2, .attackTime = 100, .releaseTime = 1000, .ratio = 20},
+        .mute       = {.Mute = 0},
+    },
+
+    .rec = {
+        .eq        = {
+                        .BandCoef = {
+                            {.Freq = 100,  .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 1000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 10000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 2000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 3000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 4000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                            {.Freq = 5000, .Gain = 0, .Q = 22, .Type = EQ_Type_PEQ, .Bypass = 0},
+                        }
+                      },
+
+        .hpf        = {.Freq = 20, .Type = HLPF_Type_12dBButterworth},
+        .lpf        = {.Freq = 20000, .Type = HLPF_Type_12dBButterworth},
+
+        .musicVol   = {.Vol = 100, .Phase = 0},
+        .dirVol     = {.Vol = 100, .Phase = 0},
+        .echoVol    = {.Vol = 100, .Phase = 0},
+        .reverbVol  = {.Vol = 100, .Phase = 0},
+        .vol        = {.Vol = 100, .Phase = 0},
+
+        .limiter    = {.threshold = -2, .attackTime = 100, .releaseTime = 1000, .ratio = 20},
+        .mute       = {.Mute = 0},
     },
 };
 
@@ -135,9 +243,12 @@ const io_data_t IO_DATA = {
     .tx485_en = 0,
 };
 
-const u16 GEQ2_FREQ[2] = {500, 5000};
+const u16 GEQ2_FREQ[2] = {100, 1000};
 const u16 GEQ3_FREQ[3] = {100, 1000, 10000};
 const u16 PEQ3_FREQ[3] = {1000, 1000, 1000};
-const u16 PEQ7_FREQ[7] = {1000, 1000, 1000, 1000, 1000, 1000, 1000};
+const u16 MUSIC_PEQ7_FREQ[7]  = {1000, 2000, 3000, 4000, 5000, 6000, 7000};
+const u16 MIC_PEQ7_FREQ[7]  = {2000, 3000, 4000, 5000, 6000, 7000, 8000};
+const u16 EFF_PEQ7_FREQ[7] = {1000, 2000, 3000, 4000, 5000, 6000, 7000};
+const u16 OUT_PEQ7_FREQ[7] = {1000, 2000, 3000, 4000, 5000, 6000, 7000};
 
 

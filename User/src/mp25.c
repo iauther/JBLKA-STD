@@ -47,8 +47,8 @@ static void io_config(void)
     sinit.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
     sinit.SPI_Mode = SPI_Mode_Master;
     sinit.SPI_DataSize = SPI_DataSize_8b;
-    sinit.SPI_CPOL = SPI_CPOL_Low;
-    sinit.SPI_CPHA = SPI_CPHA_1Edge;
+    sinit.SPI_CPOL = SPI_CPOL_High;
+    sinit.SPI_CPHA = SPI_CPHA_2Edge;
     sinit.SPI_NSS = SPI_NSS_Soft;
     sinit.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;
     sinit.SPI_FirstBit = SPI_FirstBit_MSB;
@@ -85,19 +85,33 @@ static int write_enable(void)
     
     return 0;
 }
+static int read_id(u8 *id, u8 len)
+{
+    u8 i;
+ 
+    if(len<20) {
+        return -1;
+    }
+
+    set_cs(0);
+    //spi_write_byte(CMD_READ_ID); 
+
+    for(i=0;i<20;i++) {
+        id[i] = spi_write_byte(0); 
+    }
+ 
+    set_cs(1);
+}
 
 
 static int erase_sector(u32 addr)
 {
-    set_cs(0);
-
     write_enable();
     //spi_write_byte(CMD_ERASE);
     spi_write_byte((addr & 0xff0000) >> 16);
 	spi_write_byte((addr & 0xff00) >> 8);
 	spi_write_byte(addr & 0xff);
 
-    set_cs(1);
     wait_busy();
 
     return 0;
@@ -106,7 +120,7 @@ static int erase_sector(u32 addr)
 
 static int write_page(u32 addr, u8 *data, int len)
 {
-    set_cs(0);
+    
     write_enable();
 
     set_cs(1);
@@ -125,12 +139,40 @@ int mp25_init(void)
 
 int mp25_read(u32 addr, u8 *data, int len)
 {
+    int i;
+    set_cs(0);
+
+    read_enable();
+    spi_write_byte((addr & 0xff0000) >> 16);
+	spi_write_byte((addr & 0xff00) >> 8);
+	spi_write_byte(addr & 0xff);
+    for(i=0;i<len;i++) {
+        data[i] = spi_write_byte(0);
+    }
+
+    set_cs(1);
+
     return 0;
 }
 
 
 int mp25_write(u32 addr, u8 *data, int len)
 {
+    int i;
+
+    set_cs(0);
+    write_enable();
+    //spi_write_byte(CMD_PAGE_PROGRAM);
+
+    spi_write_byte((addr & 0xff0000) >> 16);
+	spi_write_byte((addr & 0xff00) >> 8);
+	spi_write_byte(addr & 0xff);
+    for(i=0;i<len;i++) {
+        spi_write_byte(data[i]);
+    }
+    set_cs(1);
+    wait_busy();
+
     return 0;
 }
 

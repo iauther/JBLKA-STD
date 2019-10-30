@@ -356,6 +356,7 @@ typedef struct {
 
 typedef struct {
     TypeS_Gain          *gain;
+    TypeS_EQ            *eq;
     TypeS_EQBand        *geq[3];
     TypeS_EQBand        *peq[7];
     TypeS_HLPFCoef      *hpf;
@@ -367,6 +368,7 @@ typedef struct {
 
 typedef struct {
     TypeS_Gain          *gain;
+    TypeS_EQ            *eq;
     TypeS_EQBand        *geq[2];
     TypeS_EQBand        *peq[7];
     TypeS_HLPFCoef      *hpf;
@@ -377,12 +379,10 @@ typedef struct {
     TypeS_PitchShift    *pitch;
 }music_t;
 
-typedef struct {
-    mic_t               mic;
-    music_t             music;
-}input_t;
+
 //////////////////////////////////////////
 typedef struct {
+    TypeS_EQ            *eq;
     TypeS_EQBand        *peq[3];
 
     TypeS_Vol           *repeat;
@@ -398,11 +398,11 @@ typedef struct {
 }echo_t;
 
 typedef struct {
+    TypeS_EQ            *eq;
     TypeS_EQBand        *peq[3];
 
     TypeS_Vol           *effVol;
     TypeS_Vol           *dirVol;
-    TypeS_Vol           *vol;
 
     TypeS_HLPFCoef      *hpf;
     TypeS_HLPFCoef      *lpf;
@@ -411,14 +411,11 @@ typedef struct {
     TypeS_Delay         *time;           //ªÏœÏ ±º‰0~80 : 0~8000ms
 }reverb_t;
 
-typedef struct {
-    TypeS_Gain          *gain;
-    echo_t              echo;
-    reverb_t            reverb;
-}effect_t;
 /////////////////////////////////////////
 typedef struct {
+    TypeS_EQ            *eq;
     TypeS_EQBand        *peq[7];
+
     TypeS_HLPFCoef      *hpf;
     TypeS_HLPFCoef      *lpf;
 
@@ -433,7 +430,9 @@ typedef struct {
 }rec_t;
 
 typedef struct {
+    TypeS_EQ            *eq;
     TypeS_EQBand        *peq[7];
+
     TypeS_HLPFCoef      *hpf;
     TypeS_HLPFCoef      *lpf;
 
@@ -450,7 +449,9 @@ typedef struct {
 }sub_t;
 
 typedef struct {
+    TypeS_EQ            *eq;
     TypeS_EQBand        *peq[7];
+
     TypeS_HLPFCoef      *hpf;
     TypeS_HLPFCoef      *lpf;
 
@@ -471,17 +472,19 @@ typedef struct {
     TypeS_Mute          *R;
 }main_t;
 
-typedef struct {
-    rec_t               rec;
-    sub_t               sub;
-    main_t              main;
-}output_t;
 
 ////////////////////////////////////////
 typedef struct {
-    input_t             in;
-    output_t            out;
-    effect_t            eff;
+    music_t             music;
+    mic_t               mic;
+
+    TypeS_Gain          *effGain;
+    echo_t              echo;
+    reverb_t            reverb;
+    
+    sub_t               sub;
+    rec_t               rec;
+    main_t              main;
 
     u8                  *pIdx;     //used preset index
 }dsp_paras_t;
