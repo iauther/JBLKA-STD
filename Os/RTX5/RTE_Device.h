@@ -1760,7 +1760,7 @@
 
 // <e> USB Device Full-speed
 // <i> Configuration settings for Driver_USBD0 in component ::Drivers:USB Device
-#define RTE_USB_DEVICE                  0
+#define RTE_USB_DEVICE                  1
 
 //     <e> CON On/Off Pin
 //     <i> Configure Pin for driving D+ pull-up
