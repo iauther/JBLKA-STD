@@ -25,14 +25,13 @@ const adc_info_t adcTab1[2] = {
 
 
 #define GAP             10
-#define ADC_CH_NUM      2
 #define in_range(x,v)   ((v-GAP)<=x && x<=(v+GAP))
 
 u8 adcMode=0;
 u8 adcKey=KEY_NONE;
 u8 adcTrigKey=KEY_NONE;
-u16 adcValue[ADC_CH_NUM];
-
+u16 adcValue[ADC_CH_MAX];
+u8 adcChannel[ADC_CH_MAX]={ADC_Channel_6, ADC_Channel_7, ADC_Channel_10, ADC_Channel_11, ADC_Channel_12, ADC_Channel_13};
 
 static u8 get_key(void)
 {
@@ -80,7 +79,7 @@ static void dma_init(void)
     DMA_InitStructure.DMA_PeripheralBaseAddr = (u32)&ADC1->DR; //DMA外设ADC基地址
     DMA_InitStructure.DMA_MemoryBaseAddr = (u32)&adcValue; //DMA内存基地址
     DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC; //内存作为数据传输的目的地
-    DMA_InitStructure.DMA_BufferSize = ADC_CH_NUM; //DMA通道的DMA缓存的大小
+    DMA_InitStructure.DMA_BufferSize = ADC_CH_MAX; //DMA通道的DMA缓存的大小
     DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable; //外设地址寄存器不变
     DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable; //内存地址寄存器递增
     DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord; //数据宽度为16位
@@ -95,13 +94,20 @@ static void dma_init(void)
 
 int adc_init(u8 mode)
 {
+    u8 i;
+
     GPIO_InitTypeDef GPIO_InitStructure;
     ADC_InitTypeDef ADC_InitStructure;
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_ADC1,ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOC | RCC_APB2Periph_ADC1,ENABLE);
+
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6|GPIO_Pin_7;
     GPIO_Init(GPIOA,&GPIO_InitStructure); 
+
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3;
+    GPIO_Init(GPIOC,&GPIO_InitStructure); 
 
     //第二步：复位ADC1，并设置ADC1的分频因子
     RCC_ADCCLKConfig(RCC_PCLK2_Div6);
@@ -115,8 +121,9 @@ int adc_init(u8 mode)
     ADC_InitStructure.ADC_NbrOfChannel = 2; //顺序进行规则转换的ADC通道的数目
     ADC_Init(ADC1, &ADC_InitStructure); //根据ADC_InitStruct中指定的参数初始化外设ADCx的寄存器
 
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 1, ADC_SampleTime_55Cycles5);
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 2, ADC_SampleTime_55Cycles5);
+    for(i=0; i<ADC_CH_MAX; i++) {
+        ADC_RegularChannelConfig(ADC1, adcChannel[i], i+1, ADC_SampleTime_55Cycles5);
+    }
 
     //第四步：使能ADC1并校准
     ADC_Cmd(ADC1,ENABLE);
@@ -131,37 +138,22 @@ int adc_init(u8 mode)
 
 
 int adc_deinit(void)
-{
-    
-    
+{ 
     return 0;
 }
 
-static void read_adc(void)
-{
-    u16 i,adc_val = 0;
-    u8 channel[ADC_CH_NUM]={ADC_Channel_6, ADC_Channel_7};
-    
-    for(i=0; i<ADC_CH_NUM; i++) {
-        ADC_RegularChannelConfig(ADC1, channel[i], 1, ADC_SampleTime_55Cycles5);
-        ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-        while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC )){};
-        adcValue[i] = ADC_GetConversionValue(ADC1);
-    }
+u16 adc_read(u8 ch)
+{   
+    ADC_RegularChannelConfig(ADC1, adcChannel[ch], ch+1, ADC_SampleTime_55Cycles5);
+    ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+    while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC ));
+
+    return ADC_GetConversionValue(ADC1);
 }
 
 u8 adc_get_key(void)
 {
-    if(adcMode==MODE_POLL) {
-        read_adc();
-        return get_key();
-    }
-    else if(adcMode==MODE_IT) {
-        
-    }
-    else if(adcMode==MODE_DMA) {
-        return adcKey;
-    }
+    
     return KEY_NONE;
 }
 

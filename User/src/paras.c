@@ -8,7 +8,6 @@ paras_data_t gParams;
 paras_ui_t uiParams;
 static void set_to_default(paras_ui_t *ui, const def_dsp_t *def)
 {
-    u8 i,j;
     fw_info_t fw;
     
     e2p_read(0, (u8*)&fw, sizeof(fw_info_t));
