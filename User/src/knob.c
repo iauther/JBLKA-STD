@@ -4,6 +4,9 @@
 #include "config.h"
 
 u8 knobKey=0;
+u8 keyPool[40];
+u16 keyTimes[40];
+
 typedef struct {
     u8      code;
     u8      key;
@@ -41,18 +44,27 @@ const knob_info_t knobTab[] = {
     {0x0c,  KEY_MIC_MIDDLE_DN},
     {0x1d,  KEY_MIC_BASS_UP},
     {0x0d,  KEY_MIC_BASS_DN},
+
+    {0xff,  0},
 };
 
+static void keyPool_init(void)
+{
+    u8 i;
+    for(i=0;; i++) {
+        if(knobTab[i].code==0xff) {
+            break;
+        }
+        
+        keyTimes[i] = 0;
+        keyPool[knobTab[i].code] = knobTab[i].key;
+    }
+}
 
 static void knob_rx_cb(u8 *data, u16 data_len)
-{    
-    //key_t *k=(key_t*)e.data;
-
-    //k->key = knobKey&0x1f;
-    //k->type = KNOB;
-    //k->updown = 0;
-    //k->longPress = 0;
+{
     
+    keyTimes[knobKey]++;
 #if 0
 {
     evt_t e;
@@ -65,14 +77,19 @@ int knob_init(void)
 {
     uart_paras_t para={knob_rx_cb, &knobKey, sizeof(knobKey)};
     
+    keyPool_init();
     return usart_init(KNOB_UART, &para);
 }
 
 
-u8 knob_get_key(void)
+u8 knob_get_key(u16 *times)
 {
-    u8 key=knobKey;
+    u8 key=keyPool[knobKey];
     
+    if(times) *times=keyTimes[knobKey];
+    keyTimes[knobKey] = 0;
     knobKey = 0;
+
     return key;
 }
+

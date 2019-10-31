@@ -6,85 +6,87 @@
 
 paras_data_t gParams;
 paras_ui_t uiParams;
-static void set_to_default(paras_ui_t *ui, paras_data_t *gb, const default_t *df)
+static void set_to_default(paras_ui_t *ui, const def_dsp_t *def)
 {
-    u8 i,j;
     fw_info_t fw;
     
     e2p_read(0, (u8*)&fw, sizeof(fw_info_t));
     strcpy((char*)fw.mcu, (char*)FW_INFO.mcu);
     strcpy((char*)fw.model, (char*)FW_INFO.model);
 
-    //memset(gb, 0, sizeof(paras_data_t));
-    for(i=0; i<Gain_CH_NUM; i++) {
-        gb->dsp.Array_Gain[i] = df->gain;
-    }
+    *ui->dsp.music.gain = def->music.gain;
+    *ui->dsp.music.eq = def->music.eq;
+    *ui->dsp.music.hpf = def->music.hpf;
+    *ui->dsp.music.lpf = def->music.lpf;
+    *ui->dsp.music.noiseGate = def->music.noiseGate;
+    *ui->dsp.music.pitch = def->music.pitch;
+    *ui->dsp.music.input = def->music.input;
 
-    for(i=0; i<Vol_CH_NUM; i++) {
-        gb->dsp.Array_Vol[i] = df->vol;
-    }
+    *ui->dsp.mic.gain = def->mic.gain;
+    *ui->dsp.mic.eq = def->mic.eq;
+    *ui->dsp.mic.hpf = def->mic.hpf;
+    *ui->dsp.mic.lpf = def->mic.lpf;
+    *ui->dsp.mic.feedback = def->mic.feedback;
+    *ui->dsp.mic.limiter = def->mic.limiter;
+    *ui->dsp.mic.noiseGate = def->mic.noiseGate;
+
+    *ui->dsp.effGain = def->effGain;
+    *ui->dsp.echo.eq = def->echo.eq;
+    *ui->dsp.echo.hpf = def->echo.hpf;
+    *ui->dsp.echo.lpf = def->echo.lpf;
+    *ui->dsp.echo.repeat = def->echo.repeat;
+    *ui->dsp.echo.effVol = def->echo.effVol;
+    *ui->dsp.echo.dirVol = def->echo.dirVol;
+    *ui->dsp.echo.preDelay = def->echo.preDelay;
+    *ui->dsp.echo.delay = def->echo.delay;
+
+    *ui->dsp.reverb.eq = def->reverb.eq;
+    *ui->dsp.reverb.hpf = def->reverb.hpf;
+    *ui->dsp.reverb.lpf = def->reverb.lpf;
+    *ui->dsp.reverb.effVol = def->reverb.effVol;
+    *ui->dsp.reverb.dirVol = def->reverb.dirVol;
+    *ui->dsp.reverb.preDelay = def->reverb.preDelay;
+    *ui->dsp.reverb.time = def->reverb.time;
     
-    for(i=0; i<EQ_CH_NUM; i++) {
-        for(j=0; j<MaxEQBand; j++) {
-            gb->dsp.Array_EQ[i].BandCoef[j] = df->eq;
-        }
-    }
+    *ui->dsp.sub.eq = def->sub.eq;
+    *ui->dsp.sub.hpf = def->sub.hpf;
+    *ui->dsp.sub.lpf = def->sub.lpf;
+    *ui->dsp.sub.musicVol = def->sub.musicVol;
+    *ui->dsp.sub.dirVol = def->sub.dirVol;
+    *ui->dsp.sub.echoVol = def->sub.echoVol;
+    *ui->dsp.sub.reverbVol = def->sub.reverbVol;
+    *ui->dsp.sub.vol = def->sub.vol;
+    *ui->dsp.sub.limiter = def->sub.limiter;
+    *ui->dsp.sub.delay = def->sub.delay;
 
-    for(i=0; i<HLPF_CH_NUM; i++) {
-        gb->dsp.Array_HLPF[i].HLPFCoef[HLPF_Hpf] = df->hpf;
-        gb->dsp.Array_HLPF[i].HLPFCoef[HLPF_Lpf] = df->lpf;
-    }
-    
-    for(i=0; i<Delay_CH_NUM; i++) {
-        gb->dsp.Array_Delay[i] = df->delay;
-    }
-    
-    for(i=0; i<FeedBack_CH_NUM; i++) {
-        gb->dsp.Array_FeedBack[i] = df->feedback;
-    }
-    
-    for(i=0; i<Limiter_CH_NUM; i++) {
-        gb->dsp.Array_Limiter[i] = df->limiter;
-    }
+    *ui->dsp.rec.eq = def->rec.eq;
+    *ui->dsp.rec.hpf = def->rec.hpf;
+    *ui->dsp.rec.lpf = def->rec.lpf;
+    *ui->dsp.rec.musicVol = def->rec.musicVol;
+    *ui->dsp.rec.dirVol = def->rec.dirVol;
+    *ui->dsp.rec.echoVol = def->rec.echoVol;
+    *ui->dsp.rec.reverbVol = def->rec.reverbVol;
+    *ui->dsp.rec.vol = def->rec.vol;
+    *ui->dsp.rec.limiter = def->rec.limiter;
 
-    for(i=0; i<Mute_CH_NUM; i++) {
-        gb->dsp.Array_Mute[i] = df->mute;
-    }
+    *ui->dsp.main.eq = def->main.eq;
+    *ui->dsp.main.hpf = def->main.hpf;
+    *ui->dsp.main.lpf = def->main.lpf;
+    *ui->dsp.main.musicVol = def->main.musicVol;
+    *ui->dsp.main.dirVol = def->main.dirVol;
+    *ui->dsp.main.echoVol = def->main.echoVol;
+    *ui->dsp.main.reverbVol = def->main.reverbVol;
+    *ui->dsp.main.lVol = def->main.lVol;
+    *ui->dsp.main.rVol = def->main.rVol;
+    *ui->dsp.main.lDelay = def->main.lDelay;
+    *ui->dsp.main.rDelay = def->main.rDelay;
+    *ui->dsp.main.limiter = def->main.limiter;
+    *ui->dsp.main.L = def->main.L;
+    *ui->dsp.main.R = def->main.R;
 
-    for(i=0; i<NoiseGate_CH_NUM; i++) {
-        gb->dsp.Array_NoiseGate[i] = df->noisegate;
-    }
-    
-    //2GEQ
-    for(i=0; i<2; i++) {
-        ui->dsp.in.music.geq[i]->Freq = GEQ2_FREQ[i];
-    }
-
-    //3GEQ
-    for(i=0; i<3; i++) {
-        ui->dsp.in.mic.geq[i]->Freq = GEQ3_FREQ[i];
-    }
-    
-    //3PEQ
-    for(i=0; i<3; i++) {
-        ui->dsp.eff.echo.peq[i]->Freq = PEQ3_FREQ[i];
-        ui->dsp.eff.reverb.peq[i]->Freq = PEQ3_FREQ[i];
-    }
-
-    //7PEQ
-    for(i=0; i<PEQ_BANDS; i++) {
-        ui->dsp.in.music.peq[i]->Freq = PEQ7_FREQ[i];
-        ui->dsp.in.mic.peq[i]->Freq = PEQ7_FREQ[i];
-        ui->dsp.out.rec.peq[i]->Freq = PEQ7_FREQ[i];
-        ui->dsp.out.sub.peq[i]->Freq = PEQ7_FREQ[i];
-        ui->dsp.out.main.peq[i]->Freq = PEQ7_FREQ[i];
-    }
-
-    gb->dsp.Array_PitchShift = df->pitch;
-    gb->dsp.Array_Input = df->input;
-    gb->fw = fw;
-    gb->iodat = IO_DATA;
-    gb->pre = 0;
+    *ui->pfw = fw;
+    *ui->pio = IO_DATA;
+    *ui->pre = 0;
 }
 
 
@@ -119,7 +121,7 @@ int paras_init(void)
 
     paras_remap();
     if(!check_version()) {
-        set_to_default(&uiParams, &gParams, &gDefault);
+        set_to_default(&uiParams, &dspDefault);
         r = e2p_write(0, (u8*)&gParams, sizeof(gParams));
 
         //the following used for test
@@ -142,50 +144,43 @@ static int reset_peq(u8 ch)
     switch(ch) {
         case EQ_CH_Music:
         for(i=0; i<PEQ_BANDS; i++) {
-            *ui->dsp.in.music.peq[i] = gDefault.eq;
-            ui->dsp.in.music.peq[i]->Freq = PEQ7_FREQ[i];
+            *ui->dsp.music.peq[i] = dspDefault.music.eq.BandCoef[2+i];
         }
         break;
 
         case EQ_CH_Mic:
         for(i=0; i<PEQ_BANDS; i++) {
-            *ui->dsp.in.mic.peq[i] = gDefault.eq;
-            ui->dsp.in.mic.peq[i]->Freq = PEQ7_FREQ[i];
+            *ui->dsp.mic.peq[i] = dspDefault.mic.eq.BandCoef[3+i];
         }
         break;
 
         case EQ_CH_Echo:
         for(i=0; i<3; i++) {
-            *ui->dsp.eff.echo.peq[i] = gDefault.eq;
-            ui->dsp.eff.echo.peq[i]->Freq = PEQ3_FREQ[i];
+            *ui->dsp.echo.peq[i] = dspDefault.echo.eq.BandCoef[i];
         }
         break;
 
         case EQ_CH_Rev:
         for(i=0; i<3; i++) {
-            *ui->dsp.eff.reverb.peq[i] = gDefault.eq;
-            ui->dsp.eff.reverb.peq[i]->Freq = PEQ3_FREQ[i];
+            *ui->dsp.reverb.peq[i] = dspDefault.reverb.eq.BandCoef[i];
         }
         break;
 
         case EQ_CH_Main:
         for(i=0; i<PEQ_BANDS; i++) {
-            *ui->dsp.out.main.peq[i] = gDefault.eq;
-            ui->dsp.out.main.peq[i]->Freq = PEQ7_FREQ[i];
+            *ui->dsp.main.peq[i] = dspDefault.main.eq.BandCoef[i];
         }
         break;
 
         case EQ_CH_Sub:
         for(i=0; i<PEQ_BANDS; i++) {
-            *ui->dsp.out.sub.peq[i] = gDefault.eq;
-            ui->dsp.out.sub.peq[i]->Freq = PEQ7_FREQ[i];
+            *ui->dsp.sub.peq[i] = dspDefault.sub.eq.BandCoef[i];
         }
         break;
 
         case EQ_CH_Rec:
         for(i=0; i<PEQ_BANDS; i++) {
-            *ui->dsp.out.rec.peq[i] = gDefault.eq;
-            ui->dsp.out.rec.peq[i]->Freq = PEQ7_FREQ[i];
+            *ui->dsp.rec.peq[i] = dspDefault.rec.eq.BandCoef[i];
         }
         break;
 
@@ -209,7 +204,7 @@ int paras_reset_peq(eq_reset_t *rst)
 int paras_default(void)
 {
     int r;
-    set_to_default(&uiParams, &gParams, &gDefault);
+    set_to_default(&uiParams, &dspDefault);
     r = e2p_write(0, (u8*)&gParams, sizeof(gParams));
     return r;
 }
@@ -275,7 +270,7 @@ int paras_write(void *p, int len)
 
 int paras_reset(void)
 {
-    set_to_default(&uiParams, &gParams, &gDefault);
+    set_to_default(&uiParams, &dspDefault);
     return e2p_write(0, (u8*)&gParams, sizeof(paras_data_t));
 }
 

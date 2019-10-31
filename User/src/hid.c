@@ -11,7 +11,7 @@
 
 #define USBD_VID                            0xA9B9
 #define USBD_PID                            0x8899
-#define DSP_ONCE_LEN                        256
+#define DSP_ONCE_LEN                        44//256
 #define FLASH_ONCE_LEN                      2048//FLASH_PAGE_SIZE
 
 
@@ -40,7 +40,7 @@ void hid_pkt_init(int mode, u8 nck, packet_t *pkt)
 {
     hid_data_t* hd = (mode == RX) ? &hid.rx : &hid.tx;
 
-    if(hd->started) return;
+    //if(hd->started) return;
     
     hd->type = pkt->type;
     switch(pkt->type) {
@@ -55,6 +55,7 @@ void hid_pkt_init(int mode, u8 nck, packet_t *pkt)
                 hd->onceLen = 0;
             }
             else {
+                if(hd->ptr) free(hd->ptr);
                 hd->ptr = malloc(hd->length);
                 hd->pkts = pkt->pkts;
                 hd->onceLen = hd->length;
@@ -68,6 +69,7 @@ void hid_pkt_init(int mode, u8 nck, packet_t *pkt)
             preset_data_t *pre = (preset_data_t*)pkt->data;
             hd->index = pre->index;
             hd->length = sizeof(Dsp_Paras);
+            if(hd->ptr) free(hd->ptr);
             hd->ptr = malloc(hd->length);
             
             if (mode == TX) {
@@ -88,6 +90,7 @@ void hid_pkt_init(int mode, u8 nck, packet_t *pkt)
         {
             eq_reset_t *rst=(eq_reset_t*)pkt->data;
             hd->length = sizeof(eq_reset_t)+sizeof(TypeS_EQ);
+            if(hd->ptr) free(hd->ptr);
             hd->ptr = malloc(hd->length);
             if(hd->ptr) {
                 eq_reset_t *rs=(eq_reset_t*)hd->ptr;
@@ -108,7 +111,8 @@ void hid_pkt_init(int mode, u8 nck, packet_t *pkt)
             hd->ftype = hdr->head.ftype;
             hd->onceLen = (hd->ftype==FILE_DSP)?DSP_ONCE_LEN:FLASH_ONCE_LEN;
             if (mode == RX) {
-                hd->length = FLASH_ONCE_LEN+0xff;
+                hd->length = hd->onceLen+0xff;
+                if(hd->ptr) free(hd->ptr);
                 hd->ptr = malloc(hd->length);
                 hd->pkts = pkt->pkts;
             }
@@ -171,14 +175,18 @@ int hid_pkt_recv(packet_t *pkt, u8 last)
 
         case TYPE_UPGRADE:
         {
-            while (rbuf_get_dlen(&hd->rb) > 0) { 
+            while (rbuf_get_dlen(&hd->rb) > 0) {
+
                 switch (hd->ftype) {
 #ifdef APP
                     case FILE_DSP:
                     {
-                        u8 tmpBuf[DSP_ONCE_LEN];
+                        u8 tmpBuf[DSP_ONCE_LEN],last=0;
                         len = rbuf_read(&hd->rb, tmpBuf, hd->onceLen);
-                        r = dsp_upgrade(hd->times, tmpBuf, len);
+                        if(len<hd->onceLen || (len==hd->onceLen && rbuf_get_dlen(&hd->rb)==0)) {
+                            last = 1;
+                        }
+                        r = dsp_upgrade(hd->times, tmpBuf, hd->onceLen, last);
                     }
                     break;
 #endif

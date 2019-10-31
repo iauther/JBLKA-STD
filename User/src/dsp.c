@@ -19,7 +19,8 @@
 
 typedef struct {
     TypeS_CmdSt cmd;
-    u16         buf[300];
+    u16         last;
+    u16         buf[200];
     u16         ver;
 }dsp_buf_t;
 
@@ -28,7 +29,6 @@ typedef struct {
 u8 dspRxBuf[RX_BUF_LEN];
 
 
-u8 dspBuf[40];
 u8 dspStarted=0;
 u8 upgrade_ack_flag=0;
 //extern paras_data_t gParams;
@@ -149,11 +149,18 @@ static int dsp_write(dsp_buf_t *db)
     u16 i, crc;
     u16 *ptr = (u16*)db->cmd.DataPtr;
 
+    db->cmd.Len /= 2;   //u16 length
+
     db->buf[0] = 0xFF55;
     db->buf[1] = db->cmd.Len+ComHeadLen;
     db->buf[2] = db->cmd.ID;
     db->buf[3] = db->cmd.Ch;
-    db->buf[4] = db->cmd.No;
+    if(db->cmd.ID==CMD_ID_Download || db->cmd.ID==CMD_ID_UpdataDSP) {
+        db->buf[4] = db->last;
+    }
+    else {
+        db->buf[4] = db->cmd.No;
+    }
 
     for(i=0; i<db->cmd.Len; i++)
         db->buf[5 + i] = *(ptr+i);
@@ -165,9 +172,9 @@ static int dsp_write(dsp_buf_t *db)
 }
 
 
-static int dsp_read(dsp_buf_t *db)
+static int dsp_read(u8 *data, u16 len)
 {
-    return 0;
+    return usart_read(DSP_UART, data, len);
 }
 
 /*
@@ -187,6 +194,7 @@ static int do_download(void *data, u16 len)
 
     gDspBuf.cmd.ID = CMD_ID_Download;
     gDspBuf.cmd.Len = DOWNLOAD_SIZE;
+    gDspBuf.last = 0;
     for(i=0; i<times; i++) {
         gDspBuf.cmd.No = i;
         gDspBuf.cmd.DataPtr = ptr+i*DOWNLOAD_SIZE;
@@ -194,11 +202,14 @@ static int do_download(void *data, u16 len)
     }
 
     if(left>0) {
+        gDspBuf.last = 1;
         gDspBuf.cmd.No = i;
         gDspBuf.cmd.Len = left;
         gDspBuf.cmd.DataPtr = ptr+i*DOWNLOAD_SIZE;
         dsp_write(&gDspBuf);
     }
+
+    dsp_version();
 
     return 0;
 }
@@ -211,15 +222,13 @@ void dsp_reset(void)
     dspStarted = 0;
     init.GPIO_Mode = GPIO_Mode_Out_PP;
     init.GPIO_Pin = GPIO_Pin_8;
-    init.GPIO_Speed = GPIO_Speed_50MHz;
+    init.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(GPIOC, &init);
 
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_RESET);
-    delay_ms(10);
+    delay_ms(50);
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_SET);
-    delay_ms(10);
-
-    
+    delay_ms(50);
 }
 
 static void save_version(dsp_version_t *ver)
@@ -255,8 +264,8 @@ int dsp_init(void)
     uart_paras_t para={dsp_rx_cb, dspRxBuf, RX_BUF_LEN};
     
     dspStarted = 0;
-    dsp_reset();
     usart_init(DSP_UART, &para);
+    dsp_reset();
     do_download(&gParams.dsp, sizeof(gParams.dsp));
 
     return 0;
@@ -273,64 +282,11 @@ int dsp_download(void)
 int dsp_reset_peq(eq_reset_t *rst)
 {
     u8 i;
-    paras_ui_t *ui=&uiParams;
+    int r;
     dsp_data_t dsp={0};
 
-    if(!rst) {
-        return -1;
-    }
-    
-    switch(rst->ch) {
-        case EQ_CH_Music:
-        for(i=0; i<PEQ_BANDS; i++) {
-            *ui->dsp.in.music.peq[i] = gDefault.eq;
-            ui->dsp.in.music.peq[i]->Freq = PEQ7_FREQ[i];
-        }
-        break;
-
-        case EQ_CH_Mic:
-        for(i=0; i<PEQ_BANDS; i++) {
-            *ui->dsp.in.mic.peq[i] = gDefault.eq;
-            ui->dsp.in.mic.peq[i]->Freq = PEQ7_FREQ[i];
-        }
-        break;
-
-        case EQ_CH_Echo:
-        for(i=0; i<3; i++) {
-            *ui->dsp.eff.echo.peq[i] = gDefault.eq;
-            ui->dsp.eff.echo.peq[i]->Freq = PEQ3_FREQ[i];
-        }
-        break;
-
-        case EQ_CH_Rev:
-        for(i=0; i<3; i++) {
-            *ui->dsp.eff.reverb.peq[i] = gDefault.eq;
-            ui->dsp.eff.reverb.peq[i]->Freq = PEQ3_FREQ[i];
-        }
-        break;
-
-        case EQ_CH_Main:
-        for(i=0; i<PEQ_BANDS; i++) {
-            *ui->dsp.out.main.peq[i] = gDefault.eq;
-            ui->dsp.out.main.peq[i]->Freq = PEQ7_FREQ[i];
-        }
-        break;
-
-        case EQ_CH_Sub:
-        for(i=0; i<PEQ_BANDS; i++) {
-            *ui->dsp.out.sub.peq[i] = gDefault.eq;
-            ui->dsp.out.sub.peq[i]->Freq = PEQ7_FREQ[i];
-        }
-        break;
-
-        case EQ_CH_Rec:
-        for(i=0; i<PEQ_BANDS; i++) {
-            *ui->dsp.out.rec.peq[i] = gDefault.eq;
-            ui->dsp.out.rec.peq[i]->Freq = PEQ7_FREQ[i];
-        }
-        break;
-
-        default:
+    r = paras_reset_peq(rst);
+    if(r) {
         return -1;
     }
 
@@ -403,8 +359,10 @@ int dsp_version(void)
 }
 
 
-int dsp_upgrade(u16 index, u8 *data, u16 len)
+int dsp_upgrade(u16 index, u8 *data, u16 len, u8 last)
 {
+    dsp_ack_t ack={0};
+
     if(len>DOWNLOAD_SIZE || len%2) {
         return -1;
     }
@@ -414,10 +372,18 @@ int dsp_upgrade(u16 index, u8 *data, u16 len)
 
     gDspBuf.cmd.No = index;
     gDspBuf.cmd.DataPtr = (u16*)data;
+    
+    gDspBuf.last = last;
+    dsp_write(&gDspBuf);
+    //dsp_read((u8*)&ack, sizeof(ack));
 
     upgrade_ack_flag = 0;
-    dsp_write(&gDspBuf);
     while(upgrade_ack_flag==0);
+
+    if(last) {
+        dsp_reset();
+        dsp_download();
+    }
     
     return 0;
 }
@@ -427,98 +393,112 @@ void dsp_remap(dsp_paras_t *paras, Dsp_Paras *dsp)
 {
     u8 i;
     
-    paras->in.music.gain = &dsp->Array_Gain[Gain_CH_Music];
+    //music
+    paras->music.gain = &dsp->Array_Gain[Gain_CH_Music];
+    paras->music.eq = &dsp->Array_EQ[EQ_CH_Music];
     for(i=0; i<2; i++) {
-        paras->in.music.geq[i] = &dsp->Array_EQ[EQ_CH_Music].BandCoef[i];
+        paras->music.geq[i] = &dsp->Array_EQ[EQ_CH_Music].BandCoef[i];
     }
     for(i=2; i<PEQ_BANDS+2; i++) {
-        paras->in.music.peq[i-2] = &dsp->Array_EQ[EQ_CH_Music].BandCoef[i];
+        paras->music.peq[i-2] = &dsp->Array_EQ[EQ_CH_Music].BandCoef[i];
     }
-    paras->in.music.hpf = &dsp->Array_HLPF[HLPF_CH_Music].HLPFCoef[HLPF_Hpf];
-    paras->in.music.lpf = &dsp->Array_HLPF[HLPF_CH_Music].HLPFCoef[HLPF_Lpf];
-    paras->in.music.noiseGate = &dsp->Array_NoiseGate[NoiseGate_CH_Music];
-    paras->in.music.input = &dsp->Array_Input;
-    paras->in.music.pitch = &dsp->Array_PitchShift;
+    paras->music.hpf = &dsp->Array_HLPF[HLPF_CH_Music].HLPFCoef[HLPF_Hpf];
+    paras->music.lpf = &dsp->Array_HLPF[HLPF_CH_Music].HLPFCoef[HLPF_Lpf];
+    paras->music.noiseGate = &dsp->Array_NoiseGate[NoiseGate_CH_Music];
+    paras->music.input = &dsp->Array_Input;
+    paras->music.pitch = &dsp->Array_PitchShift;
 
-    paras->in.mic.gain = &dsp->Array_Gain[Gain_CH_Mic];
+    //mic
+    paras->mic.gain = &dsp->Array_Gain[Gain_CH_Mic];
+    paras->mic.eq = &dsp->Array_EQ[EQ_CH_Mic];
     for(i=0; i<3; i++) {
-        paras->in.mic.geq[i] = &dsp->Array_EQ[EQ_CH_Mic].BandCoef[i];
+        paras->mic.geq[i] = &dsp->Array_EQ[EQ_CH_Mic].BandCoef[i];
     }
     for(i=3; i<PEQ_BANDS+3; i++) {
-        paras->in.mic.peq[i-3] = &dsp->Array_EQ[EQ_CH_Mic].BandCoef[i];
+        paras->mic.peq[i-3] = &dsp->Array_EQ[EQ_CH_Mic].BandCoef[i];
     }
-    paras->in.mic.hpf = &dsp->Array_HLPF[HLPF_CH_Mic].HLPFCoef[HLPF_Hpf];
-    paras->in.mic.lpf = &dsp->Array_HLPF[HLPF_CH_Mic].HLPFCoef[HLPF_Lpf];
-    paras->in.mic.feedback = &dsp->Array_FeedBack[FeedBack_CH_Mic];
-    paras->in.mic.limiter = &dsp->Array_Limiter[Limiter_CH_Mic];
-    paras->in.mic.noiseGate = &dsp->Array_NoiseGate[NoiseGate_CH_Mic];
+    paras->mic.hpf = &dsp->Array_HLPF[HLPF_CH_Mic].HLPFCoef[HLPF_Hpf];
+    paras->mic.lpf = &dsp->Array_HLPF[HLPF_CH_Mic].HLPFCoef[HLPF_Lpf];
+    paras->mic.feedback = &dsp->Array_FeedBack[FeedBack_CH_Mic];
+    paras->mic.limiter = &dsp->Array_Limiter[Limiter_CH_Mic];
+    paras->mic.noiseGate = &dsp->Array_NoiseGate[NoiseGate_CH_Mic];
 
+    //rec
+    paras->rec.eq = &dsp->Array_EQ[EQ_CH_Rec];
     for(i=0; i<PEQ_BANDS; i++) {
-        paras->out.rec.peq[i] = &dsp->Array_EQ[EQ_CH_Rec].BandCoef[i];
+        paras->rec.peq[i] = &dsp->Array_EQ[EQ_CH_Rec].BandCoef[i];
     }
-    paras->out.rec.hpf = &dsp->Array_HLPF[HLPF_CH_Rec].HLPFCoef[HLPF_Hpf];
-    paras->out.rec.lpf = &dsp->Array_HLPF[HLPF_CH_Rec].HLPFCoef[HLPF_Lpf];
-    paras->out.rec.musicVol = &dsp->Array_Vol[Vol_CH_Rec_MusicVol];
-    paras->out.rec.dirVol = &dsp->Array_Vol[Vol_CH_Rec_DirVol];
-    paras->out.rec.echoVol = &dsp->Array_Vol[Vol_CH_Rec_EchoVol];
-    paras->out.rec.reverbVol = &dsp->Array_Vol[Vol_CH_Rec_RevVol];
-    paras->out.rec.vol = &dsp->Array_Vol[Vol_CH_RecVol];
-    paras->out.rec.limiter = &dsp->Array_Limiter[Limiter_CH_Rec];
-    paras->out.rec.mute = &dsp->Array_Mute[Mute_CH_Rec];
+    paras->rec.hpf = &dsp->Array_HLPF[HLPF_CH_Rec].HLPFCoef[HLPF_Hpf];
+    paras->rec.lpf = &dsp->Array_HLPF[HLPF_CH_Rec].HLPFCoef[HLPF_Lpf];
+    paras->rec.musicVol = &dsp->Array_Vol[Vol_CH_Rec_MusicVol];
+    paras->rec.dirVol = &dsp->Array_Vol[Vol_CH_Rec_DirVol];
+    paras->rec.echoVol = &dsp->Array_Vol[Vol_CH_Rec_EchoVol];
+    paras->rec.reverbVol = &dsp->Array_Vol[Vol_CH_Rec_RevVol];
+    paras->rec.vol = &dsp->Array_Vol[Vol_CH_RecVol];
+    paras->rec.limiter = &dsp->Array_Limiter[Limiter_CH_Rec];
+    paras->rec.mute = &dsp->Array_Mute[Mute_CH_Rec];
 
+    //sub
+    paras->sub.eq = &dsp->Array_EQ[EQ_CH_Sub];
     for(i=0; i<PEQ_BANDS; i++) {
-        paras->out.sub.peq[i] = &dsp->Array_EQ[EQ_CH_Sub].BandCoef[i];
+        paras->sub.peq[i] = &dsp->Array_EQ[EQ_CH_Sub].BandCoef[i];
     }
-    paras->out.sub.hpf = &dsp->Array_HLPF[HLPF_CH_Sub].HLPFCoef[HLPF_Hpf];
-    paras->out.sub.lpf = &dsp->Array_HLPF[HLPF_CH_Sub].HLPFCoef[HLPF_Lpf];
-    paras->out.sub.delay = &dsp->Array_Delay[Delay_CH_Sub_Delay];
-    paras->out.sub.musicVol = &dsp->Array_Vol[Vol_CH_Sub_MusicVol];
-    paras->out.sub.dirVol = &dsp->Array_Vol[Vol_CH_Sub_DirVol];
-    paras->out.sub.echoVol = &dsp->Array_Vol[Vol_CH_Sub_EchoVol];
-    paras->out.sub.reverbVol = &dsp->Array_Vol[Vol_CH_Sub_RevVol];
-    paras->out.sub.vol = &dsp->Array_Vol[Vol_CH_SubVol];
-    paras->out.sub.limiter = &dsp->Array_Limiter[Limiter_CH_Sub];
-    paras->out.sub.mute = &dsp->Array_Mute[Mute_CH_Sub];
+    paras->sub.hpf = &dsp->Array_HLPF[HLPF_CH_Sub].HLPFCoef[HLPF_Hpf];
+    paras->sub.lpf = &dsp->Array_HLPF[HLPF_CH_Sub].HLPFCoef[HLPF_Lpf];
+    paras->sub.delay = &dsp->Array_Delay[Delay_CH_Sub_Delay];
+    paras->sub.musicVol = &dsp->Array_Vol[Vol_CH_Sub_MusicVol];
+    paras->sub.dirVol = &dsp->Array_Vol[Vol_CH_Sub_DirVol];
+    paras->sub.echoVol = &dsp->Array_Vol[Vol_CH_Sub_EchoVol];
+    paras->sub.reverbVol = &dsp->Array_Vol[Vol_CH_Sub_RevVol];
+    paras->sub.vol = &dsp->Array_Vol[Vol_CH_SubVol];
+    paras->sub.limiter = &dsp->Array_Limiter[Limiter_CH_Sub];
+    paras->sub.mute = &dsp->Array_Mute[Mute_CH_Sub];
 
+    //main
+    paras->main.eq = &dsp->Array_EQ[EQ_CH_Main];
     for(i=0; i<PEQ_BANDS; i++) {
-        paras->out.main.peq[i] = &dsp->Array_EQ[EQ_CH_Main].BandCoef[i];
+        paras->main.peq[i] = &dsp->Array_EQ[EQ_CH_Main].BandCoef[i];
     }
-    paras->out.main.hpf = &dsp->Array_HLPF[HLPF_CH_Main].HLPFCoef[HLPF_Hpf];
-    paras->out.main.lpf = &dsp->Array_HLPF[HLPF_CH_Main].HLPFCoef[HLPF_Lpf];
+    paras->main.hpf = &dsp->Array_HLPF[HLPF_CH_Main].HLPFCoef[HLPF_Hpf];
+    paras->main.lpf = &dsp->Array_HLPF[HLPF_CH_Main].HLPFCoef[HLPF_Lpf];
 
-    paras->out.main.musicVol = &dsp->Array_Vol[Vol_CH_Main_MusicVol];
-    paras->out.main.dirVol = &dsp->Array_Vol[Vol_CH_Main_DirVol];
-    paras->out.main.echoVol = &dsp->Array_Vol[Vol_CH_Main_EchoVol];
-    paras->out.main.reverbVol = &dsp->Array_Vol[Vol_CH_Main_RevVol];
-    paras->out.main.lVol = &dsp->Array_Vol[Vol_CH_Main_LVol];
-    paras->out.main.rVol = &dsp->Array_Vol[Vol_CH_Main_RVol];
-    paras->out.main.lDelay = &dsp->Array_Delay[Delay_CH_MainL_Delay];
-    paras->out.main.rDelay = &dsp->Array_Delay[Delay_CH_MainR_Delay];
-    paras->out.main.limiter = &dsp->Array_Limiter[Limiter_CH_Main];
-    paras->out.main.L = &dsp->Array_Mute[Mute_CH_MainL];
-    paras->out.main.R = &dsp->Array_Mute[Mute_CH_MainR];
+    paras->main.musicVol = &dsp->Array_Vol[Vol_CH_Main_MusicVol];
+    paras->main.dirVol = &dsp->Array_Vol[Vol_CH_Main_DirVol];
+    paras->main.echoVol = &dsp->Array_Vol[Vol_CH_Main_EchoVol];
+    paras->main.reverbVol = &dsp->Array_Vol[Vol_CH_Main_RevVol];
+    paras->main.lVol = &dsp->Array_Vol[Vol_CH_Main_LVol];
+    paras->main.rVol = &dsp->Array_Vol[Vol_CH_Main_RVol];
+    paras->main.lDelay = &dsp->Array_Delay[Delay_CH_MainL_Delay];
+    paras->main.rDelay = &dsp->Array_Delay[Delay_CH_MainR_Delay];
+    paras->main.limiter = &dsp->Array_Limiter[Limiter_CH_Main];
+    paras->main.L = &dsp->Array_Mute[Mute_CH_MainL];
+    paras->main.R = &dsp->Array_Mute[Mute_CH_MainR];
 
-    paras->eff.gain = &dsp->Array_Gain[Gain_CH_Eff];
+    //echo
+    paras->effGain = &dsp->Array_Gain[Gain_CH_Eff];
+    paras->echo.eq = &dsp->Array_EQ[EQ_CH_Echo];
     for(i=0; i<3; i++) {
-        paras->eff.echo.peq[i] = &dsp->Array_EQ[EQ_CH_Echo].BandCoef[i];
+        paras->echo.peq[i] = &dsp->Array_EQ[EQ_CH_Echo].BandCoef[i];
     }
-    paras->eff.echo.repeat = &dsp->Array_Vol[Vol_CH_Echo_Repeat];
-    paras->eff.echo.effVol = &dsp->Array_Vol[Vol_CH_Echo_EffVol];
-    paras->eff.echo.dirVol = &dsp->Array_Vol[Vol_CH_Echo_DirVol];
-    paras->eff.echo.hpf = &dsp->Array_HLPF[HLPF_CH_Echo].HLPFCoef[HLPF_Hpf];
-    paras->eff.echo.lpf = &dsp->Array_HLPF[HLPF_CH_Echo].HLPFCoef[HLPF_Lpf];
-    paras->eff.echo.preDelay = &dsp->Array_Delay[Delay_CH_Echo_PreDelay];
-    paras->eff.echo.delay = &dsp->Array_Delay[Delay_CH_Echo_Delay];
+    paras->echo.repeat = &dsp->Array_Vol[Vol_CH_Echo_Repeat];
+    paras->echo.effVol = &dsp->Array_Vol[Vol_CH_Echo_EffVol];
+    paras->echo.dirVol = &dsp->Array_Vol[Vol_CH_Echo_DirVol];
+    paras->echo.hpf = &dsp->Array_HLPF[HLPF_CH_Echo].HLPFCoef[HLPF_Hpf];
+    paras->echo.lpf = &dsp->Array_HLPF[HLPF_CH_Echo].HLPFCoef[HLPF_Lpf];
+    paras->echo.preDelay = &dsp->Array_Delay[Delay_CH_Echo_PreDelay];
+    paras->echo.delay = &dsp->Array_Delay[Delay_CH_Echo_Delay];
     
+    //reverb
+    paras->reverb.eq = &dsp->Array_EQ[EQ_CH_Rev];
     for(i=0; i<3; i++) {
-        paras->eff.reverb.peq[i] = &dsp->Array_EQ[EQ_CH_Rev].BandCoef[i];
+        paras->reverb.peq[i] = &dsp->Array_EQ[EQ_CH_Rev].BandCoef[i];
     }
-    paras->eff.reverb.effVol = &dsp->Array_Vol[Vol_CH_Rev_EffVol];
-    paras->eff.reverb.dirVol = &dsp->Array_Vol[Vol_CH_Rev_DirVol];
-    paras->eff.reverb.hpf = &dsp->Array_HLPF[HLPF_CH_Rev].HLPFCoef[HLPF_Hpf];
-    paras->eff.reverb.lpf = &dsp->Array_HLPF[HLPF_CH_Rev].HLPFCoef[HLPF_Lpf];
-    paras->eff.reverb.preDelay = &dsp->Array_Delay[Delay_CH_Rev_PreDelay];
-    paras->eff.reverb.time = &dsp->Array_Delay[Delay_CH_Rev_Time];
+    paras->reverb.effVol = &dsp->Array_Vol[Vol_CH_Rev_EffVol];
+    paras->reverb.dirVol = &dsp->Array_Vol[Vol_CH_Rev_DirVol];
+    paras->reverb.hpf = &dsp->Array_HLPF[HLPF_CH_Rev].HLPFCoef[HLPF_Hpf];
+    paras->reverb.lpf = &dsp->Array_HLPF[HLPF_CH_Rev].HLPFCoef[HLPF_Lpf];
+    paras->reverb.preDelay = &dsp->Array_Delay[Delay_CH_Rev_PreDelay];
+    paras->reverb.time = &dsp->Array_Delay[Delay_CH_Rev_Time];
 }
 
 

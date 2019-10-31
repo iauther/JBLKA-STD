@@ -38,12 +38,12 @@ static void io_config(eUART uart)
         RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
         RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
         
-        init.GPIO_Mode = GPIO_Mode_AF_PP;
+        init.GPIO_Mode = GPIO_Mode_AF_PP;   //tx
         init.GPIO_Pin = GPIO_Pin_9;
         init.GPIO_Speed = GPIO_Speed_50MHz;
         GPIO_Init(GPIOA, &init);
 
-        init.GPIO_Mode = GPIO_Mode_IPU;
+        init.GPIO_Mode = GPIO_Mode_IN_FLOATING; //rx
         init.GPIO_Pin = GPIO_Pin_10;
         GPIO_Init(GPIOA, &init);
         break;
@@ -57,7 +57,7 @@ static void io_config(eUART uart)
         init.GPIO_Speed = GPIO_Speed_50MHz;
         GPIO_Init(GPIOA, &init);
 
-        init.GPIO_Mode = GPIO_Mode_IPU;
+        init.GPIO_Mode = GPIO_Mode_IN_FLOATING;
         init.GPIO_Pin = GPIO_Pin_3;
         GPIO_Init(GPIOA, &init);
         break;
@@ -71,7 +71,7 @@ static void io_config(eUART uart)
         init.GPIO_Speed = GPIO_Speed_50MHz;
         GPIO_Init(GPIOC, &init);
 
-        init.GPIO_Mode = GPIO_Mode_IPU;
+        init.GPIO_Mode = GPIO_Mode_IN_FLOATING;
         init.GPIO_Pin = GPIO_Pin_11;
         GPIO_Init(GPIOC, &init);
         break;
@@ -85,7 +85,7 @@ static void io_config(eUART uart)
         init.GPIO_Speed = GPIO_Speed_50MHz;
         GPIO_Init(GPIOC, &init);
 
-        init.GPIO_Mode = GPIO_Mode_IPU;
+        init.GPIO_Mode = GPIO_Mode_IN_FLOATING;
         init.GPIO_Pin = GPIO_Pin_11;
         GPIO_Init(GPIOC, &init);
         break;
@@ -100,7 +100,7 @@ static void io_config(eUART uart)
         init.GPIO_Speed = GPIO_Speed_50MHz;
         GPIO_Init(GPIOC, &init);
 
-        init.GPIO_Mode = GPIO_Mode_IPU;
+        init.GPIO_Mode = GPIO_Mode_IN_FLOATING;
         init.GPIO_Pin = GPIO_Pin_2;
         GPIO_Init(GPIOD, &init);
         break;
@@ -160,9 +160,9 @@ int usart_init(eUART uart, uart_paras_t *paras)
 	USART_InitTypeDef USART_InitStruct;
 	NVIC_InitTypeDef NVIC_InitStructure;
 
-        if(paras) {
-            uartParas[uart] = *paras;
-        }
+    if(paras) {
+        uartParas[uart] = *paras;
+    }
 	io_config(uart);
 
 	USART_InitStruct.USART_BaudRate = 115200;
@@ -232,10 +232,10 @@ void uart_rx_callback(void)
 
 int usart_write(eUART uart, u8 *data, u16 len)
 {
-    while(len--) {
-        USART_SendData(uartDef[uart], *data);
+    u16 i;
+    for(i=0; i<len; i++) {
+        USART_SendData(uartDef[uart], data[i]);
         while(USART_GetFlagStatus(uartDef[uart], USART_FLAG_TXE) == RESET);
-        data++;
     }
     return len;
 }
@@ -243,9 +243,12 @@ int usart_write(eUART uart, u8 *data, u16 len)
 
 int usart_read(eUART uart, u8 *data, u16 len)
 {
-    int i=0;
-    
-    data[i] = USART_ReceiveData(uartDef[uart]);
+    u16 i=0;
+    for(i=0; i<len; i++) {
+        while(USART_GetFlagStatus(uartDef[uart], USART_FLAG_RXNE) == RESET);
+        data[i] = USART_ReceiveData(uartDef[uart]);
+    }
+
     return 0;
 }
 

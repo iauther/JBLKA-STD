@@ -561,26 +561,6 @@
           <GroupName>USB-FS-Device_Driver</GroupName>
           <Files>
             <File>
-              <FileName>otgd_fs_cal.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Libraries\STM32_USB-FS-Device_Driver\src\otgd_fs_cal.c</FilePath>
-            </File>
-            <File>
-              <FileName>otgd_fs_dev.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Libraries\STM32_USB-FS-Device_Driver\src\otgd_fs_dev.c</FilePath>
-            </File>
-            <File>
-              <FileName>otgd_fs_int.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Libraries\STM32_USB-FS-Device_Driver\src\otgd_fs_int.c</FilePath>
-            </File>
-            <File>
-              <FileName>otgd_fs_pcd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Libraries\STM32_USB-FS-Device_Driver\src\otgd_fs_pcd.c</FilePath>
-            </File>
-            <File>
               <FileName>usb_core.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Libraries\STM32_USB-FS-Device_Driver\src\usb_core.c</FilePath>

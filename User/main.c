@@ -2,6 +2,7 @@
 #include "delay.h"
 #include "usart.h"
 #include "tmr.h"
+#include "key.h"
 #include "stdint.h"  
 #include "packet.h"  
 #include "hid.h"
@@ -9,6 +10,7 @@
 #include "dsp.h"
 #include "sys.h"
 #include "lcd.h"
+#include "knob.h"
 #include "usbd.h"  
 #include "config.h" 
 #include "queue.h"
@@ -158,7 +160,9 @@ static int hid_multi_proc(packet_t *pkt)
             }
 
             if(pkt->dlen>0 && pkt->pkts>1) {
-                hid_pkt_init(RX, 0, pkt);
+                if(pkt->pid==0) {
+                    hid_pkt_init(RX, 0, pkt);
+                }
 
                 last = (pkt->pkts==pkt->pid+1)?1:0;
                 r = hid_pkt_recv(pkt, last);
@@ -225,8 +229,296 @@ static void e2p_proc(void)
         e2p_flag = 0;
     }
 }
- 
 
+
+static int value_adjust(s16 *ptr, int min, int max, int fac, int val, int step)
+{
+    int ost=val*step;
+
+    if(fac==1) {
+        if(*ptr==max) {
+            return -1;
+        }
+        else if(*ptr+ost > max) {
+            *ptr = max;
+        }
+        else {
+            *ptr += ost;
+        }
+    }
+    else {
+        if(*ptr==min) {
+            return -1;
+        }
+        else if(*ptr+ost< min) {
+            *ptr = min;
+        }
+        else {
+            *ptr += ost;
+        }
+    }
+
+    return 0;
+}
+
+
+
+static void knob_proc(void)
+{
+    u8 key;
+    u16 times;
+    node_t n={0};
+    int r,fac,val;
+    dsp_data_t dd={0};
+    dsp_paras_t *dsp=&uiParams.dsp;
+
+    key = knob_get_key(&times);
+    if(key!=KEY_NONE) {
+        switch(key) {
+            case KEY_MUSIC_UP:      //0~100
+            case KEY_MUSIC_DN:
+            {
+                u16 *gain=&dsp->music.gain->Gain;
+                fac=(key==KEY_MUSIC_UP)?1:-1;
+                val=fac*times;
+                r = value_adjust((s16*)gain, 0, 100, fac, val, 1);
+                if(r) {
+                    return;
+                }
+
+                n.ptr = dsp->music.gain;
+                n.len = sizeof(TypeS_Gain);
+                dd.id = CMD_ID_Gain;
+                dd.ch = Gain_CH_Music;
+            }
+            break;
+
+            case KEY_EFFECT_UP:
+            case KEY_EFFECT_DN:
+            {
+                u16 *gain=&dsp->effGain->Gain;
+                fac=(key==KEY_EFFECT_UP)?1:-1;
+                val=fac*times;
+                r = value_adjust((s16*)gain, 0, 100, fac, val, 1);
+                if(r) {
+                    return;
+                }
+
+                n.ptr = dsp->effGain;
+                n.len = sizeof(TypeS_Gain);
+                dd.id = CMD_ID_Gain;
+                dd.ch = Gain_CH_Eff;
+            }
+            break;
+
+            case KEY_MIC_UP:
+            case KEY_MIC_DN:
+            {
+                u16 *gain=&dsp->mic.gain->Gain;
+                fac=(key==KEY_MIC_UP)?1:-1;
+                val=fac*times;
+                r = value_adjust((s16*)gain, 0, 100, fac, val, 1);
+                if(r) {
+                    return;
+                }
+                
+                n.ptr = dsp->mic.gain;
+                n.len = sizeof(TypeS_Gain);
+                dd.id = CMD_ID_Gain;
+                dd.ch = Gain_CH_Mic;
+            }
+            break;
+            
+            case KEY_MUSIC_TREBLE_UP:
+            case KEY_MUSIC_TREBLE_DN:
+            {
+                s16 *gain=&dsp->music.geq[1]->Gain;
+                fac=(key==KEY_MUSIC_TREBLE_UP)?1:-1;
+                val=fac*times;
+                r = value_adjust(gain, -240, 120, fac, val, 1);
+                if(r) {
+                    return;
+                }
+
+                n.ptr = dsp->music.geq[1];
+                n.len = sizeof(TypeS_EQBand);
+                dd.id = CMD_ID_EQ;
+                dd.ch = EQ_CH_Music;
+                dd.n  = 1;
+            }
+            break;
+            
+            case KEY_MUSIC_BASS_UP:
+            case KEY_MUSIC_BASS_DN:
+            {
+                s16 *gain=&dsp->music.geq[0]->Gain;
+                fac=(key==KEY_MUSIC_BASS_UP)?1:-1;
+                val=fac*times;
+                r = value_adjust(gain, -240, 120, fac, val, 1);
+                if(r) {
+                    return;
+                }
+
+                n.ptr = dsp->music.geq[0];
+                n.len = sizeof(TypeS_EQBand);
+                dd.id = CMD_ID_EQ;
+                dd.ch = EQ_CH_Music;
+                dd.n  = 0;
+            }
+            break;
+            
+            case KEY_ECHO_LEVEL_UP:
+            case KEY_ECHO_LEVEL_DN:
+            {
+                u16 *gain=&dsp->echo.effVol->Vol;
+                fac=(key==KEY_ECHO_LEVEL_UP)?1:-1;
+                val=fac*times;
+                r = value_adjust((s16*)gain, 0, 100, fac, val, 1);
+                if(r) {
+                    return;
+                }
+                
+                n.ptr = dsp->echo.effVol;
+                n.len = sizeof(TypeS_Vol);
+                dd.id = CMD_ID_Vol;
+                dd.ch = Vol_CH_Echo_EffVol;
+            }
+            break;
+
+            case KEY_ECHO_DELAY_UP:
+            case KEY_ECHO_DELAY_DN:
+            {
+                u16 *gain=&dsp->echo.delay->Delay;
+                fac=(key==KEY_ECHO_DELAY_UP)?1:-1;
+                val=fac*times;
+                r = value_adjust((s16*)gain, 0, 14400, fac, val, 48);
+                if(r) {
+                    return;
+                }
+
+                n.ptr = dsp->echo.delay;
+                n.len = sizeof(TypeS_Delay);
+                dd.id = CMD_ID_Delay;
+                dd.ch = Delay_CH_Echo_Delay;
+            }
+            break;
+
+            case KEY_ECHO_REPEAT_UP:
+            case KEY_ECHO_REPEAT_DN:
+            {
+                u16 *gain=&dsp->echo.repeat->Vol;
+                fac=(key==KEY_ECHO_REPEAT_UP)?1:-1;
+                val=fac*times;
+                r = value_adjust((s16*)gain, 0, 90, fac, val, 1);
+                if(r) {
+                    return;
+                }
+
+                n.ptr = dsp->echo.repeat;
+                n.len = sizeof(TypeS_Vol);
+                dd.id = CMD_ID_Vol;
+                dd.ch = Vol_CH_Echo_Repeat;
+            }
+            break;
+            
+            case KEY_REVERB_LEVEL_UP:
+            case KEY_REVERB_LEVEL_DN:
+            {
+                u16 *gain=&dsp->reverb.effVol->Vol;
+                fac=(key==KEY_REVERB_LEVEL_UP)?1:-1;
+                val=fac*times;
+                r = value_adjust((s16*)gain, 0, 100, fac, val, 1);
+                if(r) {
+                    return;
+                }
+                
+                n.ptr = dsp->reverb.effVol;
+                n.len = sizeof(TypeS_Vol);
+                dd.id = CMD_ID_Vol;
+                dd.ch = Vol_CH_Rev_EffVol;
+            }
+            break;
+
+            case KEY_REVERB_TIME_UP:
+            case KEY_REVERB_TIME_DN:
+            {
+                u16 *gain=&dsp->reverb.time->Delay;
+                fac=(key==KEY_REVERB_TIME_UP)?1:-1;
+                val=fac*times;
+                r = value_adjust((s16*)gain, 0, 8000, fac, val, 1);
+                if(r) {
+                    return;
+                }
+
+                n.ptr = dsp->reverb.time;
+                n.len = sizeof(TypeS_Delay);
+                dd.id = CMD_ID_Delay;
+                dd.ch = Delay_CH_Rev_Time;
+            }
+            break;
+            
+            case KEY_MIC_TREBLE_UP:
+            case KEY_MIC_TREBLE_DN:
+            {
+                s16 *gain=&dsp->mic.geq[2]->Gain;
+                fac=(key==KEY_MIC_TREBLE_UP)?1:-1;
+                val=fac*times;
+                r = value_adjust(gain, -240, 120, fac, val, 1);
+                if(r) {
+                    return;
+                }
+
+                n.ptr = dsp->mic.geq[2];
+                n.len = sizeof(TypeS_EQBand);
+                dd.id = CMD_ID_EQ;
+                dd.ch = EQ_CH_Mic;
+                dd.n  = 2;
+            }
+            break;
+
+            case KEY_MIC_MIDDLE_UP:
+            case KEY_MIC_MIDDLE_DN:
+            {
+                s16 *gain=&dsp->mic.geq[1]->Gain;
+                fac=(key==KEY_MIC_MIDDLE_UP)?1:-1;
+                val=fac*times;
+                r = value_adjust(gain, -240, 120, fac, val, 1);
+                if(r) {
+                    return;
+                }
+
+                n.ptr = dsp->mic.geq[1];
+                n.len = sizeof(TypeS_EQBand);
+                dd.id = CMD_ID_EQ;
+                dd.ch = EQ_CH_Mic;
+                dd.n  = 1;
+            }
+            break;
+
+            case KEY_MIC_BASS_UP:               //-24~+12dB
+            case KEY_MIC_BASS_DN:
+            {
+                s16 *gain=&dsp->mic.geq[0]->Gain;
+                fac=(key==KEY_MIC_BASS_UP)?1:-1;
+                val=fac*times;
+                r = value_adjust(gain, -240, 120, fac, val, 1);
+                if(r) {
+                    return;
+                }
+
+                n.ptr = dsp->mic.geq[0];
+                n.len = sizeof(TypeS_EQBand);
+                dd.id = CMD_ID_EQ;
+                dd.ch = EQ_CH_Mic;
+                dd.n  = 0;
+            }
+            break;
+        }
+
+        dsp_send(&dd);
+        queue_put(e2p_q, &n, 1);
+    }
+}
 
 
 
@@ -240,6 +532,7 @@ int main(void)
 	while(1) {
         usb_proc();
         e2p_proc();
+        knob_proc();
 	}
 
     return 0;

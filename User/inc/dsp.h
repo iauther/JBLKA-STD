@@ -45,33 +45,33 @@ enum Gain_CH//三个主音量
 
 enum Vol_CH
 {
-    Vol_CH_Echo_Repeat,//回声重复比例
+    Vol_CH_Echo_Repeat,//回声重复比例0-90
 
-    Vol_CH_Echo_EffVol,//回声效果音量  100
-    Vol_CH_Echo_DirVol,//回声直达声音量
+    Vol_CH_Echo_EffVol,//回声效果音量  0-100
+    Vol_CH_Echo_DirVol,//回声直达声音量0-100
 
-    Vol_CH_Rev_EffVol,
-    Vol_CH_Rev_DirVol,
+    Vol_CH_Rev_EffVol,//混响效果音量0-100
+    Vol_CH_Rev_DirVol,//混响直达声音量0-100
 
-    Vol_CH_Main_MusicVol,   //主输出音乐音量
-    Vol_CH_Main_DirVol, //主输出直达声音量
-    Vol_CH_Main_EchoVol,
-    Vol_CH_Main_RevVol,
+    Vol_CH_Main_MusicVol, //主输出音乐音量0-200
+    Vol_CH_Main_DirVol, //主输出直达声音量0-200
+    Vol_CH_Main_EchoVol,//0-100
+    Vol_CH_Main_RevVol,//0-100
 
-    Vol_CH_Sub_MusicVol,
-    Vol_CH_Sub_DirVol,
-    Vol_CH_Sub_EchoVol,
-    Vol_CH_Sub_RevVol,
+    Vol_CH_Sub_MusicVol,//0-200
+    Vol_CH_Sub_DirVol,//0-200
+    Vol_CH_Sub_EchoVol,//0-100
+    Vol_CH_Sub_RevVol,//0-100
 
-    Vol_CH_Rec_MusicVol,
-    Vol_CH_Rec_DirVol,
-    Vol_CH_Rec_EchoVol,
-    Vol_CH_Rec_RevVol,
+    Vol_CH_Rec_MusicVol,//0-200
+    Vol_CH_Rec_DirVol,//0-200
+    Vol_CH_Rec_EchoVol,//0-100
+    Vol_CH_Rec_RevVol,//0-100
 
-    Vol_CH_Main_LVol,
-    Vol_CH_Main_RVol,
-    Vol_CH_SubVol,
-    Vol_CH_RecVol,
+    Vol_CH_Main_LVol,//0-200
+    Vol_CH_Main_RVol,//0-200
+    Vol_CH_SubVol,//0-200
+    Vol_CH_RecVol,//0-200
 
     Vol_CH_NUM,//计算元素个数
 };
@@ -356,6 +356,7 @@ typedef struct {
 
 typedef struct {
     TypeS_Gain          *gain;
+    TypeS_EQ            *eq;
     TypeS_EQBand        *geq[3];
     TypeS_EQBand        *peq[7];
     TypeS_HLPFCoef      *hpf;
@@ -367,6 +368,7 @@ typedef struct {
 
 typedef struct {
     TypeS_Gain          *gain;
+    TypeS_EQ            *eq;
     TypeS_EQBand        *geq[2];
     TypeS_EQBand        *peq[7];
     TypeS_HLPFCoef      *hpf;
@@ -377,12 +379,10 @@ typedef struct {
     TypeS_PitchShift    *pitch;
 }music_t;
 
-typedef struct {
-    mic_t               mic;
-    music_t             music;
-}input_t;
+
 //////////////////////////////////////////
 typedef struct {
+    TypeS_EQ            *eq;
     TypeS_EQBand        *peq[3];
 
     TypeS_Vol           *repeat;
@@ -398,11 +398,11 @@ typedef struct {
 }echo_t;
 
 typedef struct {
+    TypeS_EQ            *eq;
     TypeS_EQBand        *peq[3];
 
     TypeS_Vol           *effVol;
     TypeS_Vol           *dirVol;
-    TypeS_Vol           *vol;
 
     TypeS_HLPFCoef      *hpf;
     TypeS_HLPFCoef      *lpf;
@@ -411,14 +411,11 @@ typedef struct {
     TypeS_Delay         *time;           //混响时间0~80 : 0~8000ms
 }reverb_t;
 
-typedef struct {
-    TypeS_Gain          *gain;
-    echo_t              echo;
-    reverb_t            reverb;
-}effect_t;
 /////////////////////////////////////////
 typedef struct {
+    TypeS_EQ            *eq;
     TypeS_EQBand        *peq[7];
+
     TypeS_HLPFCoef      *hpf;
     TypeS_HLPFCoef      *lpf;
 
@@ -433,7 +430,9 @@ typedef struct {
 }rec_t;
 
 typedef struct {
+    TypeS_EQ            *eq;
     TypeS_EQBand        *peq[7];
+
     TypeS_HLPFCoef      *hpf;
     TypeS_HLPFCoef      *lpf;
 
@@ -450,7 +449,9 @@ typedef struct {
 }sub_t;
 
 typedef struct {
+    TypeS_EQ            *eq;
     TypeS_EQBand        *peq[7];
+
     TypeS_HLPFCoef      *hpf;
     TypeS_HLPFCoef      *lpf;
 
@@ -471,17 +472,19 @@ typedef struct {
     TypeS_Mute          *R;
 }main_t;
 
-typedef struct {
-    rec_t               rec;
-    sub_t               sub;
-    main_t              main;
-}output_t;
 
 ////////////////////////////////////////
 typedef struct {
-    input_t             in;
-    output_t            out;
-    effect_t            eff;
+    music_t             music;
+    mic_t               mic;
+
+    TypeS_Gain          *effGain;
+    echo_t              echo;
+    reverb_t            reverb;
+    
+    sub_t               sub;
+    rec_t               rec;
+    main_t              main;
 
     u8                  *pIdx;     //used preset index
 }dsp_paras_t;
@@ -515,7 +518,7 @@ int dsp_download(void);
 
 int dsp_version(void);
 
-int dsp_upgrade(u16 index, u8 *data, u16 len);
+int dsp_upgrade(u16 index, u8 *data, u16 len, u8 last);
 
 void dsp_remap(dsp_paras_t *paras, Dsp_Paras *dsp);
 

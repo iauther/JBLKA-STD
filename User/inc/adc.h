@@ -3,7 +3,22 @@
 
 #include "types.h"
 
+enum {
+    ADC_CH_KEY1=0,
+    ADC_CH_KEY2,
+    ADC_CH_AMP_PWR1,
+    ADC_CH_AMP_PWR2,
+    ADC_CH_AMP_TEMP,
+    ADC_CH_PWR_TEMP,
+    
+    ADC_CH_MAX
+};
+
+
+
 int adc_init(u8 mode);
+
+u16 adc_read(u8 ch);
 
 int adc_deinit(void);
 
