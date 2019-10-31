@@ -63,7 +63,7 @@ static void usb_init(void)
 ////////////////////////////////////////////////
 static int do_config(void)
 {
-#if 0
+#if 1
     dsp_reset();
 #else
     dsp_init();
@@ -71,8 +71,6 @@ static int do_config(void)
         delay_ms(10);
     }while(!dsp_is_started());
     
-    dsp_download();
-    dsp_version();
 #endif
     adda_reset();
     rca_mute(0);
@@ -155,7 +153,6 @@ int sys_set_input(u16 input)
 int sys_set_iodat(io_data_t *io)
 {
     io_data_t *pio=io?io:&gParams.iodat;
-
 
     return 0;
 }
