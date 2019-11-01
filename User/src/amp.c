@@ -60,7 +60,7 @@ int amp_pwr(int on)
 
 
 u8 amp_low_flag=0;
-void exti0_callback()
+void exti0_callback(void)
 {
     if(SET == EXTI_GetITStatus(EXTI_Line0)) {   
         EXTI_ClearFlag(EXTI_Line0);

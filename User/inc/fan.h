@@ -3,7 +3,6 @@
 
 #include "types.h"
 
-
 int fan_init(void);
 
 int fan_set(u8 temp);

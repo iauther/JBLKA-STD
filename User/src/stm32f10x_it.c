@@ -21,6 +21,7 @@
 #include "usb_istr.h"
 #include "usb_pwr.h"
 #include "tmr.h"
+#include "amp.h"
 #include "usart.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -73,15 +74,27 @@ void TIM7_IRQHandler(void)
 {
   	tim_callback(TIMER7);
 }
-
+void USART1_IRQHandler(void)
+{
+	uart_rx_callback();	
+}
+void USART2_IRQHandler(void)
+{
+	uart_rx_callback();	
+}
 void UART4_IRQHandler(void)
 {
 	uart_rx_callback();	
 }
+void UART5_IRQHandler(void)
+{
+	uart_rx_callback();	
+}
+
+
 void EXTI0_IRQHandler(void)
 {
-    
-
+    exti0_callback();
 }
 
 /**

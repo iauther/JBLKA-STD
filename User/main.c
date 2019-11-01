@@ -1,22 +1,7 @@
-/* Includes ------------------------------------------------------------------*/
-#include "delay.h"
-#include "usart.h"
-#include "tmr.h"
-#include "key.h"
-#include "adc.h"
-#include "dac.h"
-#include "hdmi.h"
-#include "amp.h" 
-#include "packet.h"  
-#include "hid.h"
-#include "paras.h"
-#include "dsp.h"
+#include "device.h"
 #include "sys.h"
-#include "lcd.h"
-#include "knob.h"
-#include "usbd.h"  
-#include "config.h" 
-#include "queue.h"
+
+//#include "stm32f10x.h"
 
 #define E2P_POLL_TIME       1000        //1000ms
 #define ADC_KEY_POLL_TIME   100         //100ms
@@ -31,14 +16,14 @@ jump_func jump_fn;
 uint32_t jump_addr;
 static void jump_to(u32 addr)
 {
-    if(((*(__IO u32*)addr) & 0x2FFE0000) == 0x20000000) {
+    if(((*(volatile u32*)addr) & 0x2FFE0000) == 0x20000000) {
         
-        jump_addr = *(__IO u32*)(addr+4);
+        jump_addr = *(volatile u32*)(addr+4);
         jump_fn = (jump_func)jump_addr;
         
         __disable_irq();
         __set_CONTROL(0);   //??psp????msp
-        __set_MSP(*(__IO u32*)addr);
+        __set_MSP(*(volatile u32*)addr);
         jump_fn();
     }
 }
@@ -249,10 +234,43 @@ static void e2p_proc(void)
 static void adc_key_proc(void)
 {
     u8 key=adc_get_key();
+    if(key!=KEY_NONE) {
+        switch(key) {
+
+            case KEY_MUSIC:
+            break;
+
+            case KEY_MIC:
+            break;
+
+            case KEY_EFFECT:
+            break;
+
+            case KEY_ENTER:
+            break;
+
+            case KEY_EXIT:
+            break;
+
+            case KEY_SAVE:
+            break;
+
+            case KEY_PRESET:
+            break;
+        }
+    }
 }
 static void pwr_vol_proc(void)
 {
-    
+    u16 amp_pwr1,amp_pwr2;
+    u16 amp_temp, pwr_temp;
+    amp_pwr1 = adc_read(ADC_CH_AMP_PWR1);
+    amp_pwr2 = adc_read(ADC_CH_AMP_PWR2);
+    amp_temp = adc_read(ADC_CH_AMP_TEMP);
+    pwr_temp = adc_read(ADC_CH_PWR_TEMP);
+
+    //do something...
+
 }
 static void amp_proc(u8 *cnt)
 {

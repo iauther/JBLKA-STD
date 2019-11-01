@@ -4,12 +4,12 @@
 #include "types.h"
 
 enum {
-    CHANNEL1,
-    CHANNEL2,
+    DAC_CH1,
+    DAC_CH2,
 };
 
 
-int dac_init();
+int dac_init(u8 ch);
 
 int dac_set(u8 ch, u16 v);
 
