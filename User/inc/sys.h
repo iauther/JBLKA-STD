@@ -25,4 +25,6 @@ int sys_set_default(void);
 
 int sys_mute(u8 on);
 
+int sys_standby(u8 on);
+
 #endif

@@ -163,6 +163,18 @@ int sys_set_iodat(io_data_t *io)
 {
     io_data_t *pio=io?io:&gParams.iodat;
 
+    power_en(DEV_ALL, io->pwr_en);  //????
+    if(io->pwr_en) {
+        if(adc_read(ADC_CH_AMP_PWR1)>0x55) {
+            power_en(DEV_AMP, 1);
+        }
+        else {
+            power_en(DEV_AMP, 0);
+        }
+    }
+
+    sys_mute(0);
+
     return 0;
 }
 
@@ -192,4 +204,27 @@ int sys_mute(u8 on)         //PB9, ∏ﬂæ≤“Ù£¨µÕ»°œ˚æ≤“Ù
     return 0;
 }
 
+
+
+int sys_standby(u8 on)
+{
+    if(on) {
+        //mic mute
+        //music mute
+        //effect mute
+        //HAL_Delay(500);
+        //power_en(0);
+        //lcd_dark();
+    }
+    else {
+        //lcd_on();
+        power_en(DEV_ALL, 1);
+        power_en(DEV_AMP, 1);      //depend on get_amp_pwr()?
+        //mic mute off
+        //music mute off
+        //effect mute off
+    }
+
+    return 0;
+}
 
