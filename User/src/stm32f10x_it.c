@@ -51,20 +51,37 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 }
 void TIM2_IRQHandler(void)
 {
-  	//tim2_callback();
+  	tim_callback(TIMER2);
 }
 void TIM3_IRQHandler(void)
 {
-  	tim3_callback();
+  	tim_callback(TIMER3);
 }
 void TIM4_IRQHandler(void)
 {
-  	tim4_callback();
+  	tim_callback(TIMER4);
+}
+void TIM5_IRQHandler(void)
+{
+  	tim_callback(TIMER5);
+}
+void TIM6_IRQHandler(void)
+{
+  	tim_callback(TIMER6);
+}
+void TIM7_IRQHandler(void)
+{
+  	tim_callback(TIMER7);
 }
 
 void UART4_IRQHandler(void)
 {
 	uart_rx_callback();	
+}
+void EXTI0_IRQHandler(void)
+{
+    
+
 }
 
 /**

@@ -33,23 +33,23 @@ u8 adcTrigKey=KEY_NONE;
 u16 adcValue[ADC_CH_MAX];
 u8 adcChannel[ADC_CH_MAX]={ADC_Channel_6, ADC_Channel_7, ADC_Channel_10, ADC_Channel_11, ADC_Channel_12, ADC_Channel_13};
 
-static u8 get_key(void)
+static u8 get_key(u16 v0, u16 v1)
 {
     u8 i,key,key0,key1;
 
     key=key0=key1=KEY_NONE;
-    if(adcValue[0] < 0x0f00) {
+    if(v0 < 0x0f00) {
         for(i=0; i<5; i++) {
-            if(in_range(adcValue[0], adcTab0[i].code)) {
+            if(in_range(v0, adcTab0[i].code)) {
                 key0 = adcTab0[i].key;
                 break;
             }
         }
     }
 
-    if(adcValue[1] < 0x0f00) {
+    if(v1 < 0x0f00) {
         for(i=0; i<2; i++) {
-            if(in_range(adcValue[1], adcTab1[i].code)) {
+            if(in_range(v1, adcTab1[i].code)) {
                 key1 = adcTab1[i].key;
                 break;
             }
@@ -118,7 +118,7 @@ int adc_init(u8 mode)
     ADC_InitStructure.ADC_ContinuousConvMode = ENABLE; //模数转换工作在连续转换模式
     ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None; //外部触发转换关闭
     ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right; //ADC数据右对齐
-    ADC_InitStructure.ADC_NbrOfChannel = 2; //顺序进行规则转换的ADC通道的数目
+    ADC_InitStructure.ADC_NbrOfChannel = ADC_CH_MAX; //顺序进行规则转换的ADC通道的数目
     ADC_Init(ADC1, &ADC_InitStructure); //根据ADC_InitStruct中指定的参数初始化外设ADCx的寄存器
 
     for(i=0; i<ADC_CH_MAX; i++) {
@@ -153,8 +153,10 @@ u16 adc_read(u8 ch)
 
 u8 adc_get_key(void)
 {
-    
-    return KEY_NONE;
+    u16 v0 = adc_read(ADC_CH_KEY1);
+    u16 v1 = adc_read(ADC_CH_KEY2);
+
+    return get_key(v0, v1);
 }
 
 

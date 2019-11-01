@@ -3,7 +3,10 @@
 #include "usart.h"
 #include "tmr.h"
 #include "key.h"
-#include "stdint.h"  
+#include "adc.h"
+#include "dac.h"
+#include "hdmi.h"
+#include "amp.h" 
 #include "packet.h"  
 #include "hid.h"
 #include "paras.h"
@@ -15,10 +18,12 @@
 #include "config.h" 
 #include "queue.h"
 
-#define E2P_POLL_TIME       1000        //500ms
+#define E2P_POLL_TIME       1000        //1000ms
+#define ADC_KEY_POLL_TIME   100         //100ms
+#define PWR_VOL_POLL_TIME   1000
 #define QUEUE_MAX           20
 
-int ccc=0;
+
 queue_t *e2p_q=0;
 extern paras_data_t gParams;
 typedef void (*jump_func)(void);
@@ -63,9 +68,6 @@ static int hid_single_proc(packet_t *pkt)
     }
     
     r = queue_put(e2p_q, &n, 1);
-    if(r) {
-        ccc++;
-    }
 
     switch(pkt->type) {        
         case TYPE_DSP:
@@ -207,28 +209,92 @@ usb_rx_cnt++;
 }
 
 
-u32 e2p_flag=0;
+extern u8 amp_low_flag;
+u8 e2p_flag=0;
+u8 adc_key_flag=0;
+u8 pwr_vol_flag=0;
 u64 poll_counter=0;
-static void poll_func(void)
+static void amp_proc(u8 *cnt);
+static void poll_cb(void)
 {
     poll_counter++;
+
     if(poll_counter%E2P_POLL_TIME==0) {
         e2p_flag = 1;
     }
+
+    if(poll_counter%ADC_KEY_POLL_TIME==0) {
+        adc_key_flag = 1;
+    }
+
+    if(poll_counter%PWR_VOL_POLL_TIME==0) {
+        pwr_vol_flag = 1;
+    }
+
+    if(amp_low_flag) {
+        amp_proc(&amp_low_flag);
+    }
 }
+
 static void e2p_proc(void)
 {
     int r;
     node_t n;
-    
-    if(e2p_flag) {
-        r = queue_get(e2p_q, &n);
-        if(r==0) {
-            r = paras_write(n.ptr, n.len);
-        }
-        e2p_flag = 0;
+
+    r = queue_get(e2p_q, &n);
+    if(r==0) {
+        r = paras_write(n.ptr, n.len);
     }
 }
+static void adc_key_proc(void)
+{
+    u8 key=adc_get_key();
+}
+static void pwr_vol_proc(void)
+{
+    
+}
+static void amp_proc(u8 *cnt)
+{
+    static u32 amp_low_counter=0;
+        
+    if(amp_get_level()) {
+        amp_low_counter = 0;
+        *cnt = 0;
+    }
+
+    amp_low_counter++;
+    if(amp_low_counter%500) {   //延迟500ml后，如果还是低电平就关功放
+        amp_pwr(0);
+        amp_low_counter = 0;
+        *cnt = 0;
+    }
+}
+
+
+static void poll_proc(void)
+{
+    if(e2p_flag) {
+        e2p_proc();
+        e2p_flag = 0;
+    }
+
+    if(adc_key_flag) {
+        adc_key_proc();
+        adc_key_flag = 0;
+    }
+
+    if(pwr_vol_flag) {
+        pwr_vol_proc();
+        pwr_vol_flag = 0;
+    }
+
+}
+
+
+
+
+
 
 
 static int value_adjust(s16 *ptr, int min, int max, int fac, int val, int step)
@@ -525,14 +591,13 @@ static void knob_proc(void)
 int main(void)
 {
 	sys_init();
-
     e2p_q = queue_init(QUEUE_MAX);
-	tim3_init(poll_func);
+	tim_init(TIMER2, poll_cb);
 
 	while(1) {
         usb_proc();
-        e2p_proc();
         knob_proc();
+        poll_proc();
 	}
 
     return 0;
