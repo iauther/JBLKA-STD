@@ -26,6 +26,7 @@
 
 #include "rtx_lib.h"
 
+
 //  ==== Helper functions ====
 
 /// Put Object into ISR Queue.
@@ -122,8 +123,8 @@ void osRtxTick_Handler (void) {
   OS_Tick_AcknowledgeIRQ();
   osRtxInfo.kernel.tick++;
 
-  extern void HAL_IncTick(void);
-  HAL_IncTick();
+  //extern void HAL_IncTick(void);
+  //HAL_IncTick();
 
   // Process Timers
   if (osRtxInfo.timer.tick != NULL) {

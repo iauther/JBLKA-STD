@@ -2,9 +2,6 @@
 /*
  * Auto generated Run-Time-Environment Configuration File
  *      *** Do not modify ! ***
- *
- * Project: 'RCT6' 
- * Target:  'RCT6' 
  */
 
 #ifndef RTE_COMPONENTS_H

@@ -101,6 +101,8 @@ static int read_id(u8 *id, u8 len)
     }
  
     set_cs(1);
+
+    return 0;
 }
 
 
