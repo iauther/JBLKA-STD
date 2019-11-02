@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F10X_HD,APP</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\Libraries\CMSIS\CM3\CoreSupport;..\User\inc;..\Libraries\STM32_USB-FS-Device_Driver\inc;..\User\USB\inc;..\Os\RTX5</IncludePath>
+              <IncludePath>..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\Libraries\CMSIS\CM3\CoreSupport;..\User\inc;..\Libraries\STM32_USB-FS-Device_Driver\inc;..\User\USB\inc;..\Os\RTX5</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -596,11 +596,6 @@
           <GroupName>USB</GroupName>
           <Files>
             <File>
-              <FileName>hw_config.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\USB\src\hw_config.c</FilePath>
-            </File>
-            <File>
               <FileName>usb_desc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\USB\src\usb_desc.c</FilePath>
@@ -764,6 +759,21 @@
               <FileName>mp25.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\src\mp25.c</FilePath>
+            </File>
+            <File>
+              <FileName>amp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\amp.c</FilePath>
+            </File>
+            <File>
+              <FileName>hdmi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\hdmi.c</FilePath>
+            </File>
+            <File>
+              <FileName>power.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\power.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -18,7 +18,6 @@
 #include "usb_lib.h"
 #include "usb_conf.h"
 #include "usb_pwr.h"
-#include "hw_config.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -52,7 +51,7 @@ RESULT PowerOn(void)
   u16 wRegVal;
 
   /*** cable plugged-in ? ***/
-  USB_Cable_Config(ENABLE);
+  //USB_Cable_Config(ENABLE);
 
   /*** CNTR_PWDN = 0 ***/
   wRegVal = CNTR_FRES;
@@ -86,7 +85,7 @@ RESULT PowerOff()
   /* clear interrupt status register */
   _SetISTR(0);
   /* Disable the Pull-Up*/
-  USB_Cable_Config(DISABLE);
+  //USB_Cable_Config(DISABLE);
   /* switch-off device */
   _SetCNTR(CNTR_FRES + CNTR_PDWN);
   /* sw variables reset */
@@ -133,7 +132,7 @@ void Suspend(void)
 
   /* switch-off the clocks */
   /* ... */
-  Enter_LowPowerMode();
+  //Enter_LowPowerMode();
 
 }
 
@@ -168,7 +167,7 @@ void Resume_Init(void)
   
   /* restore full power */
   /* ... on connected devices */
-  Leave_LowPowerMode();
+  //Leave_LowPowerMode();
 
 #ifndef STM32F10X_CL
   /* reset FSUSP bit */

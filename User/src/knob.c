@@ -3,7 +3,7 @@
 #include "usart.h"
 #include "config.h"
 
-u8 knobKey=0;
+u8 knobValue=0;
 u8 keyPool[40];
 u16 keyTimes[40];
 
@@ -63,19 +63,12 @@ static void keyPool_init(void)
 
 static void knob_rx_cb(u8 *data, u16 data_len)
 {
-    
-    keyTimes[knobKey]++;
-#if 0
-{
-    evt_t e;
-    e.evt = EVT_KEY;
-    ui_send_evt(&e);
-}
-#endif
+    keyTimes[knobValue]++;
+
 }
 int knob_init(void)
 {
-    uart_paras_t para={knob_rx_cb, &knobKey, sizeof(knobKey)};
+    uart_paras_t para={knob_rx_cb, &knobValue, sizeof(knobValue)};
     
     keyPool_init();
     return usart_init(KNOB_UART, &para);
@@ -84,12 +77,17 @@ int knob_init(void)
 
 u8 knob_get_key(u16 *times)
 {
-    u8 key=keyPool[knobKey];
+    u8 kv=knobValue;
     
-    if(times) *times=keyTimes[knobKey];
-    keyTimes[knobKey] = 0;
-    knobKey = 0;
+    if(keyPool[kv]==KEY_NONE || keyTimes[kv]==0) {
+        return KEY_NONE;
+    }
 
-    return key;
+    if(times) *times=keyTimes[kv];
+
+    keyTimes[kv] = 0;
+    knobValue = 0;
+
+    return keyPool[kv];
 }
 

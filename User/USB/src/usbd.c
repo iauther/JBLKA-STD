@@ -1,7 +1,5 @@
-#include <string.h>
-#include "types.h"
-#include "packet.h"
-#include "usbd.h"
+#include "device.h"
+#include "sys.h"
 #include "usb_desc.h"
 #include "usb_lib.h"
 
@@ -121,4 +119,54 @@ int usbd_send_pkt(u8 type, void *data, u16 len, u16 pkts, u16 pid, u8 nck)
 
     return usb_send(usbTxBuf, USBD_CUSTOMHID_OUTREPORT_BUF_SIZE);
 }
+
+
+
+static void usb_dp_reset(void)
+{
+    GPIO_InitTypeDef init={0};
+    
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+
+    init.GPIO_Mode = GPIO_Mode_Out_PP;
+    init.GPIO_Pin = GPIO_Pin_12;
+    init.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_Init(GPIOA, &init);
+
+    GPIO_WriteBit(GPIOA, GPIO_Pin_12, Bit_RESET);
+    delay_ms(10);
+    GPIO_WriteBit(GPIOA, GPIO_Pin_12, Bit_SET);
+    delay_ms(10);
+}
+
+
+static void usb_config(void)
+{
+    NVIC_InitTypeDef NVIC_InitStructure;
+
+    /* 2 bit for pre-emption priority, 2 bits for subpriority */
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+
+    /* Enable the USB interrupt */
+    NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+
+    RCC_USBCLKConfig(RCC_USBCLKSource_PLLCLK_1Div5);
+  
+    /* Enable the USB clock */
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
+}
+
+int usbd_init(void)
+{
+    usb_config();
+    usb_dp_reset();
+	USB_Init();
+
+    return 0;
+}
+
 

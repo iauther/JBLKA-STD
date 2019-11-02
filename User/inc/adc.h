@@ -15,8 +15,7 @@ enum {
 };
 
 
-
-int adc_init(u8 mode);
+int adc_init(void);
 
 u16 adc_read(u8 ch);
 

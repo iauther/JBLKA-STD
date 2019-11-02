@@ -1,24 +1,14 @@
-/* Includes ------------------------------------------------------------------*/
-#include "delay.h"
-#include "usart.h"
-#include "tmr.h"
-#include "key.h"
-#include "stdint.h"  
-#include "packet.h"  
-#include "hid.h"
-#include "paras.h"
-#include "dsp.h"
+#include "device.h"
 #include "sys.h"
-#include "lcd.h"
-#include "knob.h"
-#include "usbd.h"  
-#include "config.h" 
-#include "queue.h"
 
-#define E2P_POLL_TIME       1000        //500ms
+//#include "stm32f10x.h"
+
+#define E2P_POLL_TIME       1000        //1000ms
+#define ADC_KEY_POLL_TIME   100         //100ms
+#define PWR_VOL_POLL_TIME   1000
 #define QUEUE_MAX           20
 
-int ccc=0;
+
 queue_t *e2p_q=0;
 extern paras_data_t gParams;
 typedef void (*jump_func)(void);
@@ -26,14 +16,14 @@ jump_func jump_fn;
 uint32_t jump_addr;
 static void jump_to(u32 addr)
 {
-    if(((*(__IO u32*)addr) & 0x2FFE0000) == 0x20000000) {
+    if(((*(volatile u32*)addr) & 0x2FFE0000) == 0x20000000) {
         
-        jump_addr = *(__IO u32*)(addr+4);
+        jump_addr = *(volatile u32*)(addr+4);
         jump_fn = (jump_func)jump_addr;
         
         __disable_irq();
         __set_CONTROL(0);   //??psp????msp
-        __set_MSP(*(__IO u32*)addr);
+        __set_MSP(*(volatile u32*)addr);
         jump_fn();
     }
 }
@@ -63,9 +53,6 @@ static int hid_single_proc(packet_t *pkt)
     }
     
     r = queue_put(e2p_q, &n, 1);
-    if(r) {
-        ccc++;
-    }
 
     switch(pkt->type) {        
         case TYPE_DSP:
@@ -207,28 +194,125 @@ usb_rx_cnt++;
 }
 
 
-u32 e2p_flag=0;
+extern u8 amp_low_flag;
+u8 e2p_flag=0;
+u8 adc_key_flag=0;
+u8 pwr_vol_flag=0;
 u64 poll_counter=0;
-static void poll_func(void)
+static void amp_proc(u8 *cnt);
+static void poll_cb(void)
 {
     poll_counter++;
+
     if(poll_counter%E2P_POLL_TIME==0) {
         e2p_flag = 1;
     }
+
+    if(poll_counter%ADC_KEY_POLL_TIME==0) {
+        adc_key_flag = 1;
+    }
+
+    if(poll_counter%PWR_VOL_POLL_TIME==0) {
+        pwr_vol_flag = 1;
+    }
+
+    if(amp_low_flag) {
+        amp_proc(&amp_low_flag);
+    }
 }
+
 static void e2p_proc(void)
 {
     int r;
     node_t n;
-    
-    if(e2p_flag) {
-        r = queue_get(e2p_q, &n);
-        if(r==0) {
-            r = paras_write(n.ptr, n.len);
-        }
-        e2p_flag = 0;
+
+    r = queue_get(e2p_q, &n);
+    if(r==0) {
+        r = paras_write(n.ptr, n.len);
     }
 }
+static void adc_key_proc(void)
+{
+    u8 key=adc_get_key();
+    if(key!=KEY_NONE) {
+        switch(key) {
+
+            case KEY_MUSIC:
+            break;
+
+            case KEY_MIC:
+            break;
+
+            case KEY_EFFECT:
+            break;
+
+            case KEY_ENTER:
+            break;
+
+            case KEY_EXIT:
+            break;
+
+            case KEY_SAVE:
+            break;
+
+            case KEY_PRESET:
+            break;
+        }
+    }
+}
+static void pwr_vol_proc(void)
+{
+    u16 amp_pwr1,amp_pwr2;
+    u16 amp_temp, pwr_temp;
+    amp_pwr1 = adc_read(ADC_CH_AMP_PWR1);
+    amp_pwr2 = adc_read(ADC_CH_AMP_PWR2);
+    amp_temp = adc_read(ADC_CH_AMP_TEMP);
+    pwr_temp = adc_read(ADC_CH_PWR_TEMP);
+
+    //do something...
+
+}
+static void amp_proc(u8 *cnt)
+{
+    static u32 amp_low_counter=0;
+        
+    if(amp_get_level()) {
+        amp_low_counter = 0;
+        *cnt = 0;
+    }
+
+    amp_low_counter++;
+    if(amp_low_counter%500) {   //延迟500ml后，如果还是低电平就关功放
+        amp_pwr(0);
+        amp_low_counter = 0;
+        *cnt = 0;
+    }
+}
+
+
+static void poll_proc(void)
+{
+    if(e2p_flag) {
+        e2p_proc();
+        e2p_flag = 0;
+    }
+
+    if(adc_key_flag) {
+        adc_key_proc();
+        adc_key_flag = 0;
+    }
+
+    if(pwr_vol_flag) {
+        pwr_vol_proc();
+        pwr_vol_flag = 0;
+    }
+
+}
+
+
+
+
+
 
 
 static int value_adjust(s16 *ptr, int min, int max, int fac, int val, int step)
@@ -525,14 +609,13 @@ static void knob_proc(void)
 int main(void)
 {
 	sys_init();
-
     e2p_q = queue_init(QUEUE_MAX);
-	tim3_init(poll_func);
+	tim_init(TIMER2, poll_cb);
 
 	while(1) {
         usb_proc();
-        e2p_proc();
         knob_proc();
+        poll_proc();
 	}
 
     return 0;
