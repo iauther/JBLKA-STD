@@ -303,4 +303,3 @@ int hid_pkt_finished(int mode)
     return hd->finished;
 }
 
-

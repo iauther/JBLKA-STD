@@ -524,6 +524,8 @@ void dsp_remap(dsp_paras_t *paras, Dsp_Paras *dsp);
 
 int dsp_update(dsp_data_t *dsp, node_t *node);
 
+int dsp_gain_step(u8 key, u16 times, node_t *n);
+
 void dsp_test(void);
 
 #ifdef __cplusplus

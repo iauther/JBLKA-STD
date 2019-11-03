@@ -8,7 +8,7 @@ enum {
 
     //panel key
     KEY_UP,
-    KEY_DN,
+    KEY_DOWN,
     KEY_MIC,
     KEY_MUSIC,
     KEY_EFFECT,
@@ -85,7 +85,7 @@ enum {  //key type
 
 
 typedef struct {
-    u8      type;       
+    u8      type;
     u8      key;
     u8      longPress;
     u8      updown;       //UP or DOWN
