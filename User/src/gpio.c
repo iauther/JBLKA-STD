@@ -23,10 +23,9 @@ int gpio_init(void)
     GPIO_ResetBits(GPIOB, pins_b);
 
     GPIO_SetBits(GPIOB, GPIO_Pin_9);
-    GPIO_SetBits(GPIOC, GPIO_Pin_8);
+    GPIO_SetBits(GPIOC, GPIO_Pin_6|GPIO_Pin_8);
 
-    pins_c = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_4|GPIO_Pin_5 |GPIO_Pin_6|
-           GPIO_Pin_7|GPIO_Pin_8|GPIO_Pin_9;
+    pins_c = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_7|GPIO_Pin_9;
     GPIO_ResetBits(GPIOC, pins_c);
 
     //gpio a

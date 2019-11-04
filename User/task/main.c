@@ -261,15 +261,17 @@ static void adc_key_proc(void)
         }
     }
 }
+u16 p[4],cnt=0;
 static void pwr_vol_proc(void)
 {
     u16 amp_pwr1,amp_pwr2;
     u16 amp_temp, pwr_temp;
-    amp_pwr1 = adc_read(ADC_CH_AMP_PWR1);
-    amp_pwr2 = adc_read(ADC_CH_AMP_PWR2);
-    amp_temp = adc_read(ADC_CH_AMP_TEMP);
-    pwr_temp = adc_read(ADC_CH_PWR_TEMP);
+    p[0] = adc_read(ADC_CH_AMP_PWR1)*3300/4096;     //20%
+    p[1] = adc_read(ADC_CH_AMP_PWR2)*3300/4096;     //<500mv
 
+    p[2] = adc_read(ADC_CH_AMP_TEMP);
+    p[3] = adc_read(ADC_CH_PWR_TEMP);
+cnt++;
     //do something...
 
 }
@@ -338,6 +340,9 @@ static void knob_proc(void)
 
 int main(void)
 {
+    NVIC_SetVectorTable (NVIC_VectTab_FLASH, APP_OFFSET);
+    __enable_irq();
+
 #if 1
 	sys_init();
     e2p_q = queue_init(QUEUE_MAX);
@@ -351,11 +356,10 @@ int main(void)
 #else
     sys_init();
 
-    SystemCoreClockUpdate();
+    //SystemCoreClockUpdate();
     osKernelInitialize();
-    //osThreadNew(ui_task, NULL, NULL);
-    osThreadNew(dev_task, NULL, NULL);
-    osThreadNew(com_task, NULL, NULL);
+    osThreadNew(ui_task, NULL, NULL);
+    //osThreadNew(dev_task, NULL, NULL);
     osKernelStart();
 
 #endif

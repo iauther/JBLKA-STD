@@ -95,9 +95,6 @@ static int do_config(void)
 
 int sys_init(void)
 {
-    NVIC_SetVectorTable (NVIC_VectTab_FLASH, APP_OFFSET);
-    __enable_irq();
-
     rcc_init();
     paras_init();
 

@@ -1,7 +1,7 @@
 #include "task.h"
 
 
-#define MSG_MAX         8
+#define MSG_MAX         6
 
 osTimerId_t dev_tmr;
 
@@ -220,9 +220,9 @@ void dev_task(void *arg)
                 
                 case EVT_TIMER:
                 {
-                    printf("_____haha_____\n");
-
-                    e2p_proc();
+                    //printf("_____haha_____\n");
+i++;
+                    //e2p_proc();
                 }
                 break;
                 

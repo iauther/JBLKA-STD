@@ -1,6 +1,6 @@
 #include "task.h"
 
-#define MSG_MAX         8
+#define MSG_MAX         6
 
 
 osMessageQueueId_t ui_mq;
@@ -110,8 +110,8 @@ void ui_task(void *arg)
     osStatus_t st;
 
     //menu_init();
-
     ui_mq = osMessageQueueNew(MSG_MAX, sizeof(evt_dev_t), NULL);
+
     while(1) {
         st = osMessageQueueGet(ui_mq, &e, NULL, osWaitForever);
         if(st==osOK) {

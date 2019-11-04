@@ -919,6 +919,11 @@
               <FileType>1</FileType>
               <FilePath>..\Os\RTX5\rtx_timer.c</FilePath>
             </File>
+            <File>
+              <FileName>RTX_Config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Os\RTX5\RTX_Config.h</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

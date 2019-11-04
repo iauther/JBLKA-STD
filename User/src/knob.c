@@ -14,8 +14,8 @@ typedef struct {
 
 const knob_info_t knobTab[] = {
 
-    {0x03,  KEY_MUSIC_UP},
-    {0x13,  KEY_MUSIC_DN},
+    {0x03,  KEY_MUSIC_DN},
+    {0x13,  KEY_MUSIC_UP},
     {0x12,  KEY_EFFECT_UP},
     {0x02,  KEY_EFFECT_DN},
     {0x11,  KEY_MIC_UP},

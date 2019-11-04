@@ -1,6 +1,20 @@
 #include "mp25.h"
 #include "stm32f10x.h"
 
+#define PAGE_SIZE               512
+#define SECTOR_SIZE             (64*1024)       //32 sectors
+#define SECTOR_MAX              32
+
+
+#define CMD_WRITE_EN            0x06
+#define CMD_READ_ID             0x9f
+#define CMD_READ_STATUS         0x05
+#define CMD_WRITE_STATUS        0x01
+#define CMD_READ_BYTES          0x03
+#define CMD_FAST_READ_BYTES     0x0b
+#define CMD_WRITE_PAGE          0x02
+#define CMD_ERASE_SECTOR        0xd8
+#define CMD_ERASE_BULK          0xc7
 
 
 static void set_cs(int v)
@@ -37,13 +51,15 @@ static void io_config(void)
     SPI_InitTypeDef sinit={0};
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
-    RCC_APB1PeriphClockCmd(	RCC_APB1Periph_SPI2,  ENABLE );
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
     
+    set_cs(1);
     init.GPIO_Mode = GPIO_Mode_Out_PP;
     init.GPIO_Pin = GPIO_Pin_6;
     init.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOC, &init);
 
+/*
     sinit.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
     sinit.SPI_Mode = SPI_Mode_Master;
     sinit.SPI_DataSize = SPI_DataSize_8b;
@@ -56,75 +72,48 @@ static void io_config(void)
 
     SPI_Init(SPI2, &sinit);
     SPI_Cmd(SPI2, ENABLE);
+*/
 }
-
-
-static int wait_busy(void)
+static void send_cmd(u8 cmd)
 {
-    u8 st=0x01;
-	set_cs(1);
-   /* 读取状态寄存器中的数据，判断忙标志0x01位 置位代表忙 */
-	//SPI_SendData(W25X_ReadStatusReg);      
-   /* 只读取状态寄存器的BUSY位，即第一位 */
-	//while((st & 0x01) == 1) 
-	//	st=spi_write_byte(0x00); 
-	set_cs(0);
-
-    return 0;
+    set_cs(0);
+    spi_write_byte(cmd);
+    set_cs(1);
 }
 
-static int read_enable(void)
+static void wait_write(void)
 {
-    //spi_write_byte(CMD_READ);
+	while(spi_write_byte(CMD_READ_STATUS)&0x01);
+}
 
-    return 0;
-}
-static int write_enable(void)
-{
-    //spi_write_byte(CMD_WRITE);
-    
-    return 0;
-}
-static int read_id(u8 *id, u8 len)
+
+static void read_id(u8 *id, u8 len)
 {
     u8 i;
  
-    if(len<20) {
-        return -1;
+    if(len<3) {
+        return;
     }
+
+    send_cmd(CMD_READ_ID);
 
     set_cs(0);
-    //spi_write_byte(CMD_READ_ID); 
-
-    for(i=0;i<20;i++) {
+    for(i=0;i<3;i++) {
         id[i] = spi_write_byte(0); 
     }
- 
     set_cs(1);
-
-    return 0;
 }
 
 
 static int erase_sector(u32 addr)
 {
-    write_enable();
-    //spi_write_byte(CMD_ERASE);
+    send_cmd(CMD_ERASE_SECTOR);
+    
+    set_cs(0);
     spi_write_byte((addr & 0xff0000) >> 16);
 	spi_write_byte((addr & 0xff00) >> 8);
 	spi_write_byte(addr & 0xff);
-
-    wait_busy();
-
-    return 0;
-}
-
-
-static int write_page(u32 addr, u8 *data, int len)
-{
-    
-    write_enable();
-
+    wait_write();
     set_cs(1);
 
     return 0;
@@ -134,37 +123,71 @@ static int write_page(u32 addr, u8 *data, int len)
 
 int mp25_init(void)
 {
-    //
+    u8 id[4];
+    io_config();
+    read_id(id, 4);
+
     return 0;
 }
 
 
-int mp25_read(u32 addr, u8 *data, int len)
+static void my_read(u32 addr, u8 *data, int len)
 {
     int i;
-    set_cs(0);
 
-    read_enable();
+    send_cmd(CMD_READ_BYTES);
+    
+    set_cs(0);
     spi_write_byte((addr & 0xff0000) >> 16);
 	spi_write_byte((addr & 0xff00) >> 8);
 	spi_write_byte(addr & 0xff);
     for(i=0;i<len;i++) {
         data[i] = spi_write_byte(0);
     }
+    set_cs(1);
+}
+static void my_write(u32 addr, u8 *data, int len)
+{
+    int i;
 
+    spi_write_byte(CMD_WRITE_PAGE);
+
+    set_cs(0);
+    spi_write_byte((addr & 0xff0000) >> 16);
+	spi_write_byte((addr & 0xff00) >> 8);
+	spi_write_byte(addr & 0xff);
+    for(i=0;i<len;i++) {
+        data[i] = spi_write_byte(0);
+    }
+    set_cs(1);
+}
+
+
+int mp25_read(u32 addr, u8 *data, int len)
+{
+    int i;
+
+    set_cs(0);
+    my_read(addr, data, len);
     set_cs(1);
 
     return 0;
 }
 
-
+static void write_en(void)
+{
+    set_cs(0);
+    spi_write_byte(CMD_WRITE_EN);
+    set_cs(1);
+}
 int mp25_write(u32 addr, u8 *data, int len)
 {
     int i;
 
+    write_en();
+
     set_cs(0);
-    write_enable();
-    //spi_write_byte(CMD_PAGE_PROGRAM);
+    spi_write_byte(CMD_WRITE_PAGE);
 
     spi_write_byte((addr & 0xff0000) >> 16);
 	spi_write_byte((addr & 0xff00) >> 8);
@@ -173,7 +196,7 @@ int mp25_write(u32 addr, u8 *data, int len)
         spi_write_byte(data[i]);
     }
     set_cs(1);
-    wait_busy();
+    wait_write();
 
     return 0;
 }

@@ -797,7 +797,8 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
         default:
         return -1;
     }
-
+    
+    dd.dlen = nd.len;
     dsp_send(&dd);
     
     if(g) {
