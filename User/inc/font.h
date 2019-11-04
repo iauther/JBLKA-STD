@@ -14,7 +14,7 @@ extern const unsigned char font_2412[95][36];
 extern const unsigned char font_3216[95][64];
 extern const unsigned char font_4824[95][144];
 extern const unsigned char font_6432[95][256];
-extern const unsigned char font_8040[95][400];
+extern const unsigned char font_8040[10][400];
 
 enum {
     FONT_16=0,

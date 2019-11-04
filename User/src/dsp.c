@@ -535,7 +535,7 @@ static int val_adjust(s16 *ptr, int min, int max, int fac, int val, int step)
         if(*ptr==min) {
             return -1;
         }
-        else if(*ptr+ost< min) {
+        else if(*ptr+ost < min) {
             *ptr = min;
         }
         else {
@@ -545,12 +545,12 @@ static int val_adjust(s16 *ptr, int min, int max, int fac, int val, int step)
 
     return 0;
 }
-int dsp_gain_step(u8 key, u16 times, node_t *n)
+int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
 {
     s16 *gain;
-    int r,fac,val;
     node_t nd;
     dsp_data_t dd;
+    int r,fac,val,step=1;
     dsp_paras_t *dsp=&uiParams.dsp;
     
     switch(key) {
@@ -560,7 +560,7 @@ int dsp_gain_step(u8 key, u16 times, node_t *n)
             gain=(s16*)&dsp->music.gain->Gain;
             fac=(key==KEY_MUSIC_UP)?1:-1;
             val=fac*times;
-            r = val_adjust(gain, 0, 100, fac, val, 1);
+            r = val_adjust(gain, 0, 100, fac, val, step);
             if(r) {
                 return -1;
             }
@@ -578,7 +578,7 @@ int dsp_gain_step(u8 key, u16 times, node_t *n)
             gain=(s16*)&dsp->effGain->Gain;
             fac=(key==KEY_EFFECT_UP)?1:-1;
             val=fac*times;
-            r = val_adjust(gain, 0, 100, fac, val, 1);
+            r = val_adjust(gain, 0, 100, fac, val, step);
             if(r) {
                 return -1;
             }
@@ -596,7 +596,7 @@ int dsp_gain_step(u8 key, u16 times, node_t *n)
             gain=(s16*)&dsp->mic.gain->Gain;
             fac=(key==KEY_MIC_UP)?1:-1;
             val=fac*times;
-            r = val_adjust(gain, 0, 100, fac, val, 1);
+            r = val_adjust(gain, 0, 100, fac, val, step);
             if(r) {
                 return -1;
             }
@@ -611,10 +611,10 @@ int dsp_gain_step(u8 key, u16 times, node_t *n)
         case KEY_MUSIC_TREBLE_UP:
         case KEY_MUSIC_TREBLE_DN:
         {
-            s16 *gain=&dsp->music.geq[1]->Gain;
+            gain=(s16*)&dsp->music.geq[1]->Gain;
             fac=(key==KEY_MUSIC_TREBLE_UP)?1:-1;
             val=fac*times;
-            r = val_adjust(gain, -240, 120, fac, val, 1);
+            r = val_adjust(gain, -240, 120, fac, val, step);
             if(r) {
                 return -1;
             }
@@ -630,10 +630,10 @@ int dsp_gain_step(u8 key, u16 times, node_t *n)
         case KEY_MUSIC_BASS_UP:
         case KEY_MUSIC_BASS_DN:
         {
-            s16 *gain=&dsp->music.geq[0]->Gain;
+            gain=(s16*)&dsp->music.geq[0]->Gain;
             fac=(key==KEY_MUSIC_BASS_UP)?1:-1;
             val=fac*times;
-            r = val_adjust(gain, -240, 120, fac, val, 1);
+            r = val_adjust(gain, -240, 120, fac, val, step);
             if(r) {
                 return -1;
             }
@@ -652,7 +652,7 @@ int dsp_gain_step(u8 key, u16 times, node_t *n)
             gain=(s16*)&dsp->echo.effVol->Vol;
             fac=(key==KEY_ECHO_LEVEL_UP)?1:-1;
             val=fac*times;
-            r = val_adjust(gain, 0, 100, fac, val, 1);
+            r = val_adjust(gain, 0, 100, fac, val, step);
             if(r) {
                 return -1;
             }
@@ -670,7 +670,8 @@ int dsp_gain_step(u8 key, u16 times, node_t *n)
             gain=(s16*)&dsp->echo.delay->Delay;
             fac=(key==KEY_ECHO_DELAY_UP)?1:-1;
             val=fac*times;
-            r = val_adjust(gain, 0, 14400, fac, val, 48);
+            step = 48;
+            r = val_adjust(gain, 0, 14400, fac, val, step);
             if(r) {
                 return -1;
             }
@@ -688,7 +689,7 @@ int dsp_gain_step(u8 key, u16 times, node_t *n)
             gain=(s16*)&dsp->echo.repeat->Vol;
             fac=(key==KEY_ECHO_REPEAT_UP)?1:-1;
             val=fac*times;
-            r = val_adjust(gain, 0, 90, fac, val, 1);
+            r = val_adjust(gain, 0, 90, fac, val, step);
             if(r) {
                 return -1;
             }
@@ -703,10 +704,10 @@ int dsp_gain_step(u8 key, u16 times, node_t *n)
         case KEY_REVERB_LEVEL_UP:
         case KEY_REVERB_LEVEL_DN:
         {
-            u16 *gain=&dsp->reverb.effVol->Vol;
+            gain=(s16*)&dsp->reverb.effVol->Vol;
             fac=(key==KEY_REVERB_LEVEL_UP)?1:-1;
             val=fac*times;
-            r = val_adjust((s16*)gain, 0, 100, fac, val, 1);
+            r = val_adjust(gain, 0, 100, fac, val, step);
             if(r) {
                 return -1;
             }
@@ -721,10 +722,10 @@ int dsp_gain_step(u8 key, u16 times, node_t *n)
         case KEY_REVERB_TIME_UP:
         case KEY_REVERB_TIME_DN:
         {
-            u16 *gain=&dsp->reverb.time->Delay;
+            gain=(s16*)&dsp->reverb.time->Delay;
             fac=(key==KEY_REVERB_TIME_UP)?1:-1;
             val=fac*times;
-            r = val_adjust((s16*)gain, 0, 8000, fac, val, 1);
+            r = val_adjust(gain, 0, 8000, fac, val, step);
             if(r) {
                 return -1;
             }
@@ -739,10 +740,10 @@ int dsp_gain_step(u8 key, u16 times, node_t *n)
         case KEY_MIC_TREBLE_UP:
         case KEY_MIC_TREBLE_DN:
         {
-            s16 *gain=&dsp->mic.geq[2]->Gain;
+            gain=(s16*)&dsp->mic.geq[2]->Gain;
             fac=(key==KEY_MIC_TREBLE_UP)?1:-1;
             val=fac*times;
-            r = val_adjust(gain, -240, 120, fac, val, 1);
+            r = val_adjust(gain, -240, 120, fac, val, step);
             if(r) {
                 return -1;
             }
@@ -758,10 +759,10 @@ int dsp_gain_step(u8 key, u16 times, node_t *n)
         case KEY_MIC_MIDDLE_UP:
         case KEY_MIC_MIDDLE_DN:
         {
-            s16 *gain=&dsp->mic.geq[1]->Gain;
+            gain=(s16*)&dsp->mic.geq[1]->Gain;
             fac=(key==KEY_MIC_MIDDLE_UP)?1:-1;
             val=fac*times;
-            r = val_adjust(gain, -240, 120, fac, val, 1);
+            r = val_adjust(gain, -240, 120, fac, val, step);
             if(r) {
                 return -1;
             }
@@ -777,10 +778,10 @@ int dsp_gain_step(u8 key, u16 times, node_t *n)
         case KEY_MIC_BASS_UP:               //-24~+12dB
         case KEY_MIC_BASS_DN:
         {
-            s16 *gain=&dsp->mic.geq[0]->Gain;
+            gain=(s16*)&dsp->mic.geq[0]->Gain;
             fac=(key==KEY_MIC_BASS_UP)?1:-1;
             val=fac*times;
-            r = val_adjust(gain, -240, 120, fac, val, 1);
+            r = val_adjust(gain, -240, 120, fac, val, step);
             if(r) {
                 return -1;
             }
@@ -798,6 +799,10 @@ int dsp_gain_step(u8 key, u16 times, node_t *n)
     }
 
     dsp_send(&dd);
+    
+    if(g) {
+        *g = *gain/step;
+    }
 
     if(n) {
         *n = nd;

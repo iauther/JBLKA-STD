@@ -575,11 +575,6 @@
               <FilePath>..\User\src\i2c2.c</FilePath>
             </File>
             <File>
-              <FileName>key.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\src\key.c</FilePath>
-            </File>
-            <File>
               <FileName>knob.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\src\knob.c</FilePath>

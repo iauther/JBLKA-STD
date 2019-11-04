@@ -38,6 +38,7 @@ static void panel_key_proc(u8 key)
 static void remote_key_proc(u8 key)
 {
     int r;
+    s16 g;
     node_t n;
 
     switch(key) {
@@ -74,7 +75,7 @@ static void remote_key_proc(u8 key)
         case KEY_EFFECT_DN:
         case KEY_MIC_UP:
         case KEY_MIC_DN:
-        r = dsp_gain_step(key, 1, &n);
+        r = dsp_gain_step(key, 1, &g, &n);
         if(r==0) {
             //queue_put(e2p_q, &n, 1);
         }
@@ -91,9 +92,10 @@ static void remote_key_proc(u8 key)
 static void knob_key_proc(u8 key)
 {
     int r;
+    s16 g;
     node_t n;
 
-    r = dsp_gain_step(key, 1, &n);
+    r = dsp_gain_step(key, 1, &g, &n);
     if(r==0) {
         //queue_put(e2p_q, &n, 1);
     }

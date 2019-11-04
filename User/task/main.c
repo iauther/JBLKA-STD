@@ -315,15 +315,22 @@ static void knob_proc(void)
 {
     int r;
     u8 key;
+    u8 tmp[20];
     u16 times;
+    s16 gain;
     node_t n={0};
 
     key = knob_get_key(&times);
     if(key!=KEY_NONE) {
-        r = dsp_gain_step(key, times, &n);
-        if(r==0) {
-            queue_put(e2p_q, &n, 1);
+        r = dsp_gain_step(key, times, &gain, &n);
+        if(r) {
+            return;
         }
+
+        queue_put(e2p_q, &n, 1);
+
+        sprintf((char*)tmp, "%d", gain);
+        lcd_draw_string_center(0, 100, LCD_WIDTH, 60, tmp, FONT_32, LCD_FC, LCD_BC);
     }
 }
 
