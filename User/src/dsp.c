@@ -19,7 +19,6 @@
 
 typedef struct {
     TypeS_CmdSt cmd;
-    u16         last;
     u16         buf[200];
     u16         ver;
 }dsp_buf_t;
@@ -43,14 +42,13 @@ dsp_buf_t gDspBuf;
 u16 crc_calc(u16 *data, u16 length)
 {
     u16 i;
-    u16 sum;
+    u16 sum=0;
 
-    sum = 0;
     for (i = 0; i < length; i++) {
         sum += data[i];
     }
 
-    return (sum & 0xFFFF);
+    return sum;
 }
 
 
@@ -155,12 +153,7 @@ static int dsp_write(dsp_buf_t *db)
     db->buf[1] = db->cmd.Len+ComHeadLen;
     db->buf[2] = db->cmd.ID;
     db->buf[3] = db->cmd.Ch;
-    if(db->cmd.ID==CMD_ID_Download || db->cmd.ID==CMD_ID_UpdataDSP) {
-        db->buf[4] = db->last;
-    }
-    else {
-        db->buf[4] = db->cmd.No;
-    }
+    db->buf[4] = db->cmd.No;
 
     for(i=0; i<db->cmd.Len; i++)
         db->buf[5 + i] = *(ptr+i);
@@ -194,17 +187,18 @@ static int do_download(void *data, u16 len)
 
     gDspBuf.cmd.ID = CMD_ID_Download;
     gDspBuf.cmd.Len = DOWNLOAD_SIZE;
-    gDspBuf.last = 0;
+    gDspBuf.cmd.No = 0;
     for(i=0; i<times; i++) {
-        gDspBuf.cmd.No = i;
+        gDspBuf.cmd.Ch = i;
         gDspBuf.cmd.DataPtr = ptr+i*DOWNLOAD_SIZE;
         dsp_write(&gDspBuf);
     }
 
+    
     if(left>0) {
-        gDspBuf.last = 1;
-        gDspBuf.cmd.No = i;
-        gDspBuf.cmd.Len = left;
+        gDspBuf.cmd.No = 1;
+        gDspBuf.cmd.Ch = i;
+        gDspBuf.cmd.Len = DOWNLOAD_SIZE;
         gDspBuf.cmd.DataPtr = ptr+i*DOWNLOAD_SIZE;
         dsp_write(&gDspBuf);
     }
@@ -226,9 +220,11 @@ void dsp_reset(void)
     GPIO_Init(GPIOC, &init);
 
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_RESET);
-    delay_ms(50);
+    delay_ms(10);
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_SET);
-    delay_ms(50);
+    delay_ms(10);
+
+    while(!dsp_is_started());
 }
 
 static void save_version(dsp_version_t *ver)
@@ -263,7 +259,6 @@ int dsp_init(void)
 {
     uart_paras_t para={dsp_rx_cb, dspRxBuf, RX_BUF_LEN};
     
-    dspStarted = 0;
     usart_init(DSP_UART, &para);
     dsp_reset();
     do_download(&gParams.dsp, sizeof(gParams.dsp));
@@ -292,7 +287,9 @@ int dsp_reset_peq(eq_reset_t *rst)
 
     dsp.ch = rst->ch;
     dsp.id = CMD_ID_EQ;
+    dsp.dlen = sizeof(TypeS_EQBand);
     for(i=0; i<MaxEQBand; i++) {
+        dsp.n = i;
         dsp_send(&dsp);
     }
 
@@ -370,10 +367,10 @@ int dsp_upgrade(u16 index, u8 *data, u16 len, u8 last)
     gDspBuf.cmd.ID = CMD_ID_UpdataDSP;
     gDspBuf.cmd.Len = len;
 
-    gDspBuf.cmd.No = index;
+    gDspBuf.cmd.Ch = index;
     gDspBuf.cmd.DataPtr = (u16*)data;
+    gDspBuf.cmd.No = last;
     
-    gDspBuf.last = last;
     dsp_write(&gDspBuf);
     //dsp_read((u8*)&ack, sizeof(ack));
 

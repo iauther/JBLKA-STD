@@ -9,14 +9,12 @@
 #include "packet.h"
 
 
-#define USBD_VID                            0xA9B9
-#define USBD_PID                            0x8899
 #define DSP_ONCE_LEN                        44//256
 #define FLASH_ONCE_LEN                      2048//FLASH_PAGE_SIZE
 
 
-hid_t hid;
-//u8 hidTxBuf[100];
+hid_t hid={0};
+u8 hidBuf[3000];
 //paras_data_t gParams;
 //Dsp_Paras    gPresets[PRESET_MAX];
 //packet_t     *pTx = (packet_t*)&hidTxBuf[1];
@@ -55,8 +53,8 @@ void hid_pkt_init(int mode, u8 nck, packet_t *pkt)
                 hd->onceLen = 0;
             }
             else {
-                if(hd->ptr) free(hd->ptr);
-                hd->ptr = malloc(hd->length);
+                
+                hd->ptr = hidBuf;
                 hd->pkts = pkt->pkts;
                 hd->onceLen = hd->length;
             }
@@ -69,9 +67,8 @@ void hid_pkt_init(int mode, u8 nck, packet_t *pkt)
             preset_data_t *pre = (preset_data_t*)pkt->data;
             hd->index = pre->index;
             hd->length = sizeof(Dsp_Paras);
-            if(hd->ptr) free(hd->ptr);
-            hd->ptr = malloc(hd->length);
-            
+
+            hd->ptr = hidBuf;
             if (mode == TX) {
                 preset_read(pre->index, (Dsp_Paras*)hd->ptr);
                 int more = (hd->length%PAYLOAD_LEN)>0?1:0;
@@ -90,12 +87,11 @@ void hid_pkt_init(int mode, u8 nck, packet_t *pkt)
         {
             eq_reset_t *rst=(eq_reset_t*)pkt->data;
             hd->length = sizeof(eq_reset_t)+sizeof(TypeS_EQ);
-            if(hd->ptr) free(hd->ptr);
-            hd->ptr = malloc(hd->length);
-            if(hd->ptr) {
+            hd->ptr = hidBuf;
+            {
                 eq_reset_t *rs=(eq_reset_t*)hd->ptr;
                 rs->ch = rst->ch;
-                memcpy(rs->eq, &gParams.dsp.Array_EQ[rst->ch], sizeof(TypeS_EQ));
+                *rs->eq = gParams.dsp.Array_EQ[rst->ch];
             }
             
             int more = (hd->length%PAYLOAD_LEN)>0?1:0;
@@ -112,8 +108,7 @@ void hid_pkt_init(int mode, u8 nck, packet_t *pkt)
             hd->onceLen = (hd->ftype==FILE_DSP)?DSP_ONCE_LEN:FLASH_ONCE_LEN;
             if (mode == RX) {
                 hd->length = hd->onceLen+0xff;
-                if(hd->ptr) free(hd->ptr);
-                hd->ptr = malloc(hd->length);
+                hd->ptr = hidBuf;
                 hd->pkts = pkt->pkts;
             }
             else {
@@ -275,10 +270,6 @@ int hid_pkt_reset(int mode)
 
     hd->started = 0;
     //hd->times = 0;
-    if(hd->ptr) {
-        free(hd->ptr);
-        hd->ptr = NULL;
-    }
     rbuf_free(&hd->rb);
 
     return 0;

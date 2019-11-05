@@ -174,13 +174,6 @@ void OTG_FS_WKUP_IRQHandler(void)
 }
 
 
-#ifdef STM32F10X_CL
-void OTG_FS_IRQHandler(void)
-{
-  STM32_PCD_OTG_ISR_Handler(); 
-}
-#endif /* STM32F10X_CL */
-
 
 #ifndef RTX
 void SVC_Handler(void)

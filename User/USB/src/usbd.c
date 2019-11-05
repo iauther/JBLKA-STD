@@ -67,9 +67,9 @@ int usbd_recv(void)
 {
     if(!usbRxFlag) {
         PMAToUserBufferCopy(usbRxBuf, ENDP1_RXADDR, REPORT_COUNT);
-        SetEPRxStatus(ENDP1, EP_RX_VALID);
         usbRxFlag = 1;
     }
+    SetEPRxStatus(ENDP1, EP_RX_VALID);
 
 #if 0//def APP
 {

@@ -205,7 +205,6 @@ int paras_default(void)
 {
     int r;
     set_to_default(&uiParams, &dspDefault);
-    r = e2p_write(0, (u8*)&gParams, sizeof(gParams));
     return r;
 }
 
@@ -237,7 +236,7 @@ int paras_update(packet_t *pkt, node_t *node)
         case TYPE_PRESET:
         //n.ptr = &gPreset;
         //n.len = sizeof(preset_t);
-        if(pkt->dlen != n.len) return -1;
+        //if(pkt->dlen != n.len) return -1;
         memcpy(n.ptr, pkt->data, n.len);
         break;
         

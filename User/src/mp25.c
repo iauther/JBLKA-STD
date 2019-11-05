@@ -80,6 +80,13 @@ static void send_cmd(u8 cmd)
     spi_write_byte(cmd);
     set_cs(1);
 }
+static void send_addr(u32 addr)
+{
+    spi_write_byte((addr & 0xff0000) >> 16);
+	spi_write_byte((addr & 0xff00) >> 8);
+	spi_write_byte(addr & 0xff);
+}
+
 
 static void wait_write(void)
 {
@@ -110,9 +117,7 @@ static int erase_sector(u32 addr)
     send_cmd(CMD_ERASE_SECTOR);
     
     set_cs(0);
-    spi_write_byte((addr & 0xff0000) >> 16);
-	spi_write_byte((addr & 0xff00) >> 8);
-	spi_write_byte(addr & 0xff);
+    send_addr(addr);
     wait_write();
     set_cs(1);
 
@@ -138,24 +143,22 @@ static void my_read(u32 addr, u8 *data, int len)
     send_cmd(CMD_READ_BYTES);
     
     set_cs(0);
-    spi_write_byte((addr & 0xff0000) >> 16);
-	spi_write_byte((addr & 0xff00) >> 8);
-	spi_write_byte(addr & 0xff);
+    send_addr(addr);
     for(i=0;i<len;i++) {
         data[i] = spi_write_byte(0);
     }
     set_cs(1);
 }
+
 static void my_write(u32 addr, u8 *data, int len)
 {
     int i;
 
-    spi_write_byte(CMD_WRITE_PAGE);
+    send_cmd(CMD_WRITE_EN);
+    send_cmd(CMD_WRITE_PAGE);
 
     set_cs(0);
-    spi_write_byte((addr & 0xff0000) >> 16);
-	spi_write_byte((addr & 0xff00) >> 8);
-	spi_write_byte(addr & 0xff);
+    send_addr(addr);
     for(i=0;i<len;i++) {
         data[i] = spi_write_byte(0);
     }
@@ -174,29 +177,13 @@ int mp25_read(u32 addr, u8 *data, int len)
     return 0;
 }
 
-static void write_en(void)
-{
-    set_cs(0);
-    spi_write_byte(CMD_WRITE_EN);
-    set_cs(1);
-}
+
 int mp25_write(u32 addr, u8 *data, int len)
 {
-    int i;
+    int pages,left;
 
-    write_en();
-
-    set_cs(0);
-    spi_write_byte(CMD_WRITE_PAGE);
-
-    spi_write_byte((addr & 0xff0000) >> 16);
-	spi_write_byte((addr & 0xff00) >> 8);
-	spi_write_byte(addr & 0xff);
-    for(i=0;i<len;i++) {
-        spi_write_byte(data[i]);
-    }
-    set_cs(1);
-    wait_write();
+    pages = len/PAGE_SIZE;
+    left  = len%PAGE_SIZE;
 
     return 0;
 }

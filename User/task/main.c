@@ -39,6 +39,21 @@ static void reboot(void)
     NVIC_SystemReset();
 }
 
+static int set_default(void)
+{
+    node_t n;
+    paras_default();
+    //dsp_reset();
+    dsp_download();
+    sys_set_input(gParams.dsp.Array_Input.input);
+    
+    n.ptr = &gParams;
+    n.len = sizeof(gParams);
+    queue_put(e2p_q, &n, 1);
+    
+    return 0;
+}
+
 static int hid_single_proc(packet_t *pkt)
 {
     int r=0;
@@ -65,7 +80,7 @@ static int hid_single_proc(packet_t *pkt)
         
         case TYPE_DEFAULT:
         {
-            r = sys_set_default();
+            r = set_default();
         }
         break;
 
@@ -143,7 +158,6 @@ static int hid_multi_proc(packet_t *pkt)
         {
             if(pkt->type==TYPE_EQRESET) {
                 eq_reset_t *rst=(eq_reset_t*)pkt->data;
-                paras_reset_peq(rst);
                 dsp_reset_peq(rst);
             }
 
@@ -176,7 +190,7 @@ static int hid_multi_proc(packet_t *pkt)
     return 0;
 }
 
-u32 usb_rx_cnt=0;
+
 static void usb_proc(void)
 {
     extern u8 usbRxBuf[];
@@ -190,7 +204,6 @@ static void usb_proc(void)
             hid_single_proc(pkt);
         }
         usbRxFlag = 0;
-usb_rx_cnt++;
     }
 }
 
@@ -261,17 +274,17 @@ static void adc_key_proc(void)
         }
     }
 }
-u16 p[4],cnt=0;
+
 static void pwr_vol_proc(void)
 {
     u16 amp_pwr1,amp_pwr2;
     u16 amp_temp, pwr_temp;
-    p[0] = adc_read(ADC_CH_AMP_PWR1)*3300/4096;     //20%
-    p[1] = adc_read(ADC_CH_AMP_PWR2)*3300/4096;     //<500mv
+    amp_pwr1 = adc_read(ADC_CH_AMP_PWR1)*3300/4096;     //20%
+    amp_pwr2 = adc_read(ADC_CH_AMP_PWR2)*3300/4096;     //<500mv
 
-    p[2] = adc_read(ADC_CH_AMP_TEMP);
-    p[3] = adc_read(ADC_CH_PWR_TEMP);
-cnt++;
+    amp_temp = adc_read(ADC_CH_AMP_TEMP);
+    pwr_temp = adc_read(ADC_CH_PWR_TEMP);
+
     //do something...
 
 }

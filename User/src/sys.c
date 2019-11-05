@@ -80,10 +80,6 @@ static int do_config(void)
     dsp_reset();
 #else
     dsp_init();
-    do {
-        delay_ms(10);
-    }while(!dsp_is_started());
-    
 #endif
     adda_reset(1000);
     sys_mute(0);
@@ -172,16 +168,6 @@ int sys_set_iodat(io_data_t *io)
 
     sys_mute(0);
 
-    return 0;
-}
-
-
-int sys_set_default(void)
-{
-    paras_default();
-    dsp_download();
-    sys_set_input(gParams.dsp.Array_Input.input);
-    
     return 0;
 }
 

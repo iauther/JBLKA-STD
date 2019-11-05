@@ -73,7 +73,7 @@ static int hid_single_proc(packet_t *pkt)
         
         case TYPE_DEFAULT:
         {
-            r = sys_set_default();
+            //r = sys_set_default();
         }
         break;
 
