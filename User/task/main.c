@@ -282,6 +282,13 @@ static void pwr_vol_proc(void)
     amp_pwr1 = adc_read(ADC_CH_AMP_PWR1)*3300/4096;     //20%
     amp_pwr2 = adc_read(ADC_CH_AMP_PWR2)*3300/4096;     //<500mv
 
+    if(amp_pwr1<(1760-176*2) || amp_pwr1>(1760+176*2) || (amp_pwr2>500)) {
+        power_en(DEV_AMP, 0);
+    }
+    else {
+        power_en(DEV_AMP, 1);
+    }
+
     amp_temp = adc_read(ADC_CH_AMP_TEMP);
     pwr_temp = adc_read(ADC_CH_PWR_TEMP);
 

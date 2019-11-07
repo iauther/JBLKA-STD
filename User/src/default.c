@@ -234,7 +234,7 @@ const fw_info_t FW_INFO = {
 const io_data_t IO_DATA = {
     .amp_en = 1,
     .pwr_en = 1,
-    .rca_mute = 1,
+    .rca_mute = 0,
     .input = 0,
     
     .amp_ppwr = 1,

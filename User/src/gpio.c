@@ -15,17 +15,16 @@ int gpio_init(void)
 
     /*Configure GPIO pin Output Level */
     pins_a = GPIO_Pin_1|GPIO_Pin_5|GPIO_Pin_8|GPIO_Pin_15;
-    GPIO_ResetBits(GPIOA, pins_a);
+    GPIO_ResetBits(GPIOA, HDMI_RESET_PIN);
+    //GPIO_SetBits(GPIOA, POWER_PIN);
 
     /*Configure GPIO pin Output Level */
     pins_b = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_10|GPIO_Pin_12 
-                      |GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5;
+                      |GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_8;
     GPIO_ResetBits(GPIOB, pins_b);
-
-    GPIO_SetBits(GPIOB, GPIO_Pin_9);
-    GPIO_SetBits(GPIOC, GPIO_Pin_6|GPIO_Pin_8);
-
-    pins_c = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_7|GPIO_Pin_9;
+    GPIO_SetBits(GPIOB, AMP_POWER_PIN|RCA_MUTE_PIN);
+    
+    pins_c = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7|GPIO_Pin_9;
     GPIO_ResetBits(GPIOC, pins_c);
 
     //gpio a
@@ -42,11 +41,6 @@ int gpio_init(void)
     //gpio b
     init.GPIO_Pin = GPIO_Pin_11;
     init.GPIO_Mode = GPIO_Mode_AF_PP;
-    init.GPIO_Speed = GPIO_Speed_2MHz;
-    GPIO_Init(GPIOB, &init);
-    
-    init.GPIO_Pin = GPIO_Pin_8;
-    init.GPIO_Mode = GPIO_Mode_IPD;
     init.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(GPIOB, &init);
 

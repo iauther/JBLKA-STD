@@ -2,12 +2,14 @@
 #include "sys.h"
 
 
-static void adda_reset(u16 ms)      //PB5, 低电平复位，时间至少1秒，(开机默认低电平)
+static void adda_reset(void)      //PB5, 低电平复位，时间至少1秒，(开机默认低电平)
 {
     GPIO_ResetBits(GPIOB, GPIO_Pin_5);
-    delay_ms(ms);        //for test
+    delay_ms(10);
     GPIO_SetBits(GPIOB, GPIO_Pin_5);
 }
+
+
 static void rcc_init(void)
 {
     ErrorStatus HSEStartUpStatus;
@@ -81,8 +83,11 @@ static int do_config(void)
 #else
     dsp_init();
 #endif
-    adda_reset(1000);
+    adda_reset();
+    delay_ms(2000);
+    //hdmi_reset(200);
     sys_mute(0);
+
     sys_set_iodat(0);
     sys_set_input(gParams.dsp.Array_Input.input);
     
@@ -92,9 +97,9 @@ static int do_config(void)
 int sys_init(void)
 {
     rcc_init();
-    paras_init();
-
     gpio_init();
+
+    paras_init();
     adc_init();
     knob_init();
     amp_init();
@@ -155,7 +160,11 @@ int sys_set_input(u16 input)
 int sys_set_iodat(io_data_t *io)
 {
     io_data_t *pio=io?io:&gParams.iodat;
-
+    
+    power_en(DEV_ALL, 1);
+    power_en(DEV_AMP, 1);
+    
+#if 0
     power_en(DEV_ALL, io->pwr_en);  //????
     if(io->pwr_en) {
         if(adc_read(ADC_CH_AMP_PWR1)>0x55) {
@@ -165,8 +174,8 @@ int sys_set_iodat(io_data_t *io)
             power_en(DEV_AMP, 0);
         }
     }
-
-    sys_mute(0);
+#endif
+    //sys_mute(0);
 
     return 0;
 }

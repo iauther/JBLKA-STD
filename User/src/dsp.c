@@ -23,13 +23,10 @@ typedef struct {
     u16         ver;
 }dsp_buf_t;
 
-
 #define RX_BUF_LEN 100
 u8 dspRxBuf[RX_BUF_LEN];
-
-
 u8 dspStarted=0;
-u8 upgrade_ack_flag=0;
+u8 dsp_ack_flag=0;
 //extern paras_data_t gParams;
 //extern paras_ui_t uiParams;
 #if 0
@@ -144,24 +141,26 @@ static int get_node(dsp_data_t *dd, node_t *node)
 
 static int dsp_write(dsp_buf_t *db)
 {
+    int r;
     u16 i, crc;
     u16 *ptr = (u16*)db->cmd.DataPtr;
-
-    db->cmd.Len /= 2;   //u16 length
+    u16 u16Len = db->cmd.Len/2;
 
     db->buf[0] = 0xFF55;
-    db->buf[1] = db->cmd.Len+ComHeadLen;
+    db->buf[1] = u16Len+ComHeadLen;
     db->buf[2] = db->cmd.ID;
     db->buf[3] = db->cmd.Ch;
     db->buf[4] = db->cmd.No;
+    memcpy(&db->buf[5], ptr, db->cmd.Len);
 
-    for(i=0; i<db->cmd.Len; i++)
-        db->buf[5 + i] = *(ptr+i);
+    crc = crc_calc(&db->buf[1], u16Len+ComHeadLen);
+    db->buf[5 + u16Len] = crc;
 
-    crc = crc_calc(&db->buf[1], db->cmd.Len+ComHeadLen);
-    db->buf[5 + db->cmd.Len] = crc;
+    r = usart_write(DSP_UART, (u8*)db->buf, sizeof(u16)*(6+u16Len));
+    dsp_ack_flag = 0;
+    while(dsp_ack_flag==0);
 
-    return usart_write(DSP_UART, (u8*)db->buf, sizeof(u16)*(6+db->cmd.Len));
+    return r;
 }
 
 
@@ -175,8 +174,7 @@ case CMD_ID_UpdataDSP:
 case CMD_ID_Download:
 cmd.Len = 128;//每次下载128个双字节，即256字节
 cmd.No = No;//表示发送了第几个128个双字节
-//cmd.DataPtr = buf;//buf用来存储128个双字节
-*/
+//cmd.DataPtr = buf;//buf用来存储128个双字节*/
 static int do_download(void *data, u16 len)
 {
     u32 i,left,times;
@@ -193,12 +191,11 @@ static int do_download(void *data, u16 len)
         gDspBuf.cmd.DataPtr = ptr+i*DOWNLOAD_SIZE;
         dsp_write(&gDspBuf);
     }
-
     
     if(left>0) {
         gDspBuf.cmd.No = 1;
         gDspBuf.cmd.Ch = i;
-        gDspBuf.cmd.Len = DOWNLOAD_SIZE;
+        gDspBuf.cmd.Len = left;
         gDspBuf.cmd.DataPtr = ptr+i*DOWNLOAD_SIZE;
         dsp_write(&gDspBuf);
     }
@@ -220,9 +217,8 @@ void dsp_reset(void)
     GPIO_Init(GPIOC, &init);
 
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_RESET);
-    delay_ms(10);
+    delay_ms(20);
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_SET);
-    delay_ms(10);
 
     while(!dsp_is_started());
 }
@@ -250,8 +246,8 @@ static void dsp_rx_cb(u8 *data, u16 len)
     }
     else if(len==sizeof(dsp_ack_t)){
         dsp_ack_t *ack=(dsp_ack_t*)data;
-        upgrade_ack_flag = 1;
     }
+    dsp_ack_flag = 1;
 }
 
 
@@ -344,9 +340,6 @@ int dsp_upload(void *data, u16 len)
 }
 
 
-
-
-
 int dsp_version(void)
 {
     dsp_data_t dsp={0};
@@ -373,9 +366,6 @@ int dsp_upgrade(u16 index, u8 *data, u16 len, u8 last)
     
     dsp_write(&gDspBuf);
     //dsp_read((u8*)&ack, sizeof(ack));
-
-    upgrade_ack_flag = 0;
-    while(upgrade_ack_flag==0);
 
     if(last) {
         dsp_reset();
