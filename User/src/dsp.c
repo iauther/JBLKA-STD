@@ -151,6 +151,8 @@ static int dsp_write(dsp_buf_t *db)
     db->buf[2] = db->cmd.ID;
     db->buf[3] = db->cmd.Ch;
     db->buf[4] = db->cmd.No;
+    //for(i=0; i<u16Len; i++)
+    //    db->buf[5 + i] = *(ptr+i);
     memcpy(&db->buf[5], ptr, db->cmd.Len);
 
     crc = crc_calc(&db->buf[1], u16Len+ComHeadLen);
@@ -200,8 +202,6 @@ static int do_download(void *data, u16 len)
         dsp_write(&gDspBuf);
     }
 
-    dsp_version();
-
     return 0;
 }
 
@@ -217,10 +217,11 @@ void dsp_reset(void)
     GPIO_Init(GPIOC, &init);
 
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_RESET);
-    delay_ms(20);
+    delay_ms(100);
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_SET);
-
+    
     while(!dsp_is_started());
+    dsp_version();
 }
 
 static void save_version(dsp_version_t *ver)

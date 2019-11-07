@@ -26,6 +26,7 @@ int gpio_init(void)
     
     pins_c = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7|GPIO_Pin_9;
     GPIO_ResetBits(GPIOC, pins_c);
+    GPIO_SetBits(GPIOC, DSP_RESET_PIN);
 
     //gpio a
     init.GPIO_Pin = GPIO_Pin_0;
