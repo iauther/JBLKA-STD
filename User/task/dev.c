@@ -3,6 +3,7 @@
 
 #define MSG_MAX         6
 
+#ifdef RTX
 osTimerId_t dev_tmr;
 
 osMessageQueueId_t dev_mq;
@@ -246,6 +247,7 @@ void dev_post_evt(evt_dev_t *e)
     osMessageQueuePut(dev_mq, e, 0, 0);
 }
 
+#endif
 
 
 

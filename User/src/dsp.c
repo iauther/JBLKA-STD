@@ -156,7 +156,7 @@ static int dsp_write(dsp_buf_t *db)
     memcpy(&db->buf[5], ptr, db->cmd.Len);
 
     crc = crc_calc(&db->buf[1], u16Len+ComHeadLen);
-    db->buf[5 + u16Len] = crc;
+    db->buf[5+u16Len] = crc;
 
     r = usart_write(DSP_UART, (u8*)db->buf, sizeof(u16)*(6+u16Len));
     dsp_ack_flag = 0;
@@ -180,17 +180,17 @@ cmd.No = No;//表示发送了第几个128个双字节
 static int do_download(void *data, u16 len)
 {
     u32 i,left,times;
-    u16 *ptr = (u16*)data;
+    u8 *ptr = (u8*)data;
 
     left = len%DOWNLOAD_SIZE;
     times = len/DOWNLOAD_SIZE;
 
     gDspBuf.cmd.ID = CMD_ID_Download;
     gDspBuf.cmd.Len = DOWNLOAD_SIZE;
-    gDspBuf.cmd.No = 0;
     for(i=0; i<times; i++) {
         gDspBuf.cmd.Ch = i;
-        gDspBuf.cmd.DataPtr = ptr+i*DOWNLOAD_SIZE;
+        gDspBuf.cmd.No = (left==0 && i==times-1);
+        gDspBuf.cmd.DataPtr = (u16*)(ptr+i*DOWNLOAD_SIZE);
         dsp_write(&gDspBuf);
     }
     
@@ -198,7 +198,7 @@ static int do_download(void *data, u16 len)
         gDspBuf.cmd.No = 1;
         gDspBuf.cmd.Ch = i;
         gDspBuf.cmd.Len = left;
-        gDspBuf.cmd.DataPtr = ptr+i*DOWNLOAD_SIZE;
+        gDspBuf.cmd.DataPtr = (u16*)(ptr+i*DOWNLOAD_SIZE);
         dsp_write(&gDspBuf);
     }
 
@@ -217,7 +217,7 @@ void dsp_reset(void)
     GPIO_Init(GPIOC, &init);
 
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_RESET);
-    delay_ms(100);
+    delay_ms(20);
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_SET);
     
     while(!dsp_is_started());
@@ -258,6 +258,8 @@ int dsp_init(void)
     
     usart_init(DSP_UART, &para);
     dsp_reset();
+
+    dsp_version();
     do_download(&gParams.dsp, sizeof(gParams.dsp));
 
     return 0;

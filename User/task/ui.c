@@ -2,7 +2,7 @@
 
 #define MSG_MAX         6
 
-
+#ifdef RTX
 osMessageQueueId_t ui_mq;
 static void panel_key_proc(u8 key)
 {
@@ -154,7 +154,7 @@ void ui_post_evt(evt_ui_t *e)
     osMessageQueuePut(ui_mq, e, NULL, 0);
 }
 
-
+#endif
 
 
 
