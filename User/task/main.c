@@ -363,8 +363,16 @@ int main(void)
     NVIC_SetVectorTable (NVIC_VectTab_FLASH, APP_OFFSET);
     __enable_irq();
 
-#if 1
+#ifdef RTX
 	sys_init();
+
+    //SystemCoreClockUpdate();
+    osKernelInitialize();
+    osThreadNew(ui_task, NULL, NULL);
+    //osThreadNew(dev_task, NULL, NULL);
+    osKernelStart();
+#else
+    sys_init();
     e2p_q = queue_init(QUEUE_MAX);
 	tim_init(TIMER2, poll_cb);
 
@@ -373,15 +381,6 @@ int main(void)
         knob_proc();
         poll_proc();
 	}
-#else
-    sys_init();
-
-    //SystemCoreClockUpdate();
-    osKernelInitialize();
-    osThreadNew(ui_task, NULL, NULL);
-    //osThreadNew(dev_task, NULL, NULL);
-    osKernelStart();
-
 #endif
 
 

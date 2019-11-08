@@ -92,7 +92,7 @@ static void lcd_spi_init(void)
     SPI_Cmd(SPI2, ENABLE);
 }
 
-static void spi_write(u8 *data, u16 len)
+static inline void spi_write(u8 *data, u16 len)
 {
     u16 i;
 
@@ -110,7 +110,7 @@ static void lcd_pre_init(void)
     lcd_spi_init();
 }
 
-static void lcd_write(u8 *data, u16 len)
+static inline lcd_write(u8 *data, u16 len)
 {
     LCD_CS(0);
     spi_write(data, len);
@@ -131,7 +131,7 @@ static void lcd_write_data(u8 data)
 }
 
 
-static void lcd_set_address(u16 x1, u16 y1, u16 x2, u16 y2)
+static inline void lcd_set_address(u16 x1, u16 y1, u16 x2, u16 y2)
 {
     lcd_write_cmd(0x2a);
     lcd_write_data(x1 >> 8);
@@ -285,7 +285,7 @@ void lcd_clear(u16 color)
 }
 
 
-void lcd_draw_point(u16 x, u16 y, u16 color)
+inline void lcd_draw_point(u16 x, u16 y, u16 color)
 {
     u8 tmp[2];
 
@@ -313,46 +313,39 @@ void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
     /* 画斜线（Bresenham算法） */
     delta_x = x2 - x1;
     delta_y = y2 - y1;
-    if(delta_x > 0)
-    {
+    if(delta_x > 0) {
         //斜线(从左到右)
         incx = 1;
     }
-    else if(delta_x == 0)
-    {
+    else if(delta_x == 0) {
         //垂直斜线(竖线)
         incx = 0;
     }
-    else
-    {
+    else{
         //斜线(从右到左)
         incx = -1;
         delta_x = -delta_x;
     }
-    if(delta_y > 0)
-    {
+
+    if(delta_y > 0) {
         //斜线(从左到右)
         incy = 1;
     }
-    else if(delta_y == 0)
-    {
+    else if(delta_y == 0) {
         //水平斜线(水平线)
         incy = 0;
     }
-    else
-    {
+    else {
         //斜线(从右到左)
         incy = -1;
         delta_y = -delta_y;
     }           
     
     /* 计算画笔打点距离(取两个间距中的最大值) */
-    if(delta_x > delta_y)
-    {
+    if(delta_x > delta_y) {
         distance = delta_x;
     }
-    else
-    {
+    else {
         distance = delta_y;
     }
     
@@ -360,14 +353,12 @@ void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
     x = x1;
     y = y1;
     //第一个点无效，所以t的次数加一
-    for(t = 0; t <= distance + 1;t++)
-    {
+    for(t = 0; t <= distance + 1;t++) {
         lcd_draw_point(x, y, color);
     
         /* 判断离实际值最近的像素点 */
         x_temp += delta_x;  
-        if(x_temp > distance)
-        {
+        if(x_temp > distance) {
             //x方向越界，减去距离值，为下一次检测做准备
             x_temp -= distance;     
             //在x方向递增打点
@@ -375,8 +366,7 @@ void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
                 
         }
         y_temp += delta_y;
-        if(y_temp > distance)
-        {
+        if(y_temp > distance) {
             //y方向越界，减去距离值，为下一次检测做准备
             y_temp -= distance;
             //在y方向递增打点
@@ -395,24 +385,19 @@ void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor)
     c = c - ' ';    /* 得到偏移后的值（ASCII字库是从空格开始取模，所以-' '就是对应字符的字库） */
     for(t = 0; t < inf.size; t++)  /*遍历打印所有像素点到LCD */
     {   
-        if(FONT_16 == font)
-        {
+        if(FONT_16 == font) {
             temp = font_1608[c][t];   /* 调用1608字体 */
         }
-        else if(FONT_24 == font)
-        {
+        else if(FONT_24 == font) {
             temp = font_2412[c][t];   /* 调用2412字体 */
         }
-        else if(FONT_32 == font)
-        {
+        else if(FONT_32 == font) {
             temp = font_3216[c][t];   /* 调用3216数码管字体 */
         }
-        else if(FONT_48 == font)
-        {
+        else if(FONT_48 == font){
             temp = font_4824[c][t];   /* 调用4824数码管字体 */
         }
-        else
-        {   
+        else {   
             return;     /* 没有找到对应的字库 */
         }
         for(t1 = 0; t1 < 8; t1++)   /* 打印一个像素点到液晶 */

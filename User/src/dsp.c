@@ -138,8 +138,16 @@ static int get_node(dsp_data_t *dd, node_t *node)
     return 0;
 }
 
+static void dsp_wait_started(void)
+{
+    u16 i;
+    for(i=0; i<200; i++) {
+        delay_ms(10);
+        if(dspStarted) break;
+    }
+}
 
-static int dsp_write(dsp_buf_t *db)
+static int dsp_write(dsp_buf_t *db, u8 wait)
 {
     int r;
     u16 i, crc;
@@ -159,9 +167,10 @@ static int dsp_write(dsp_buf_t *db)
     db->buf[5+u16Len] = crc;
 
     r = usart_write(DSP_UART, (u8*)db->buf, sizeof(u16)*(6+u16Len));
-    dsp_ack_flag = 0;
-    while(dsp_ack_flag==0);
-
+    if(wait) {
+        dsp_ack_flag = 0;while(dsp_ack_flag==0);
+    }
+    
     return r;
 }
 
@@ -191,15 +200,15 @@ static int do_download(void *data, u16 len)
         gDspBuf.cmd.Ch = i;
         gDspBuf.cmd.No = (left==0 && i==times-1);
         gDspBuf.cmd.DataPtr = (u16*)(ptr+i*DOWNLOAD_SIZE);
-        dsp_write(&gDspBuf);
+        dsp_write(&gDspBuf, 1);
     }
     
     if(left>0) {
         gDspBuf.cmd.No = 1;
         gDspBuf.cmd.Ch = i;
-        gDspBuf.cmd.Len = left;
+        gDspBuf.cmd.Len = (left%2==0)?left:(left+1);
         gDspBuf.cmd.DataPtr = (u16*)(ptr+i*DOWNLOAD_SIZE);
-        dsp_write(&gDspBuf);
+        dsp_write(&gDspBuf, 1);
     }
 
     return 0;
@@ -219,6 +228,9 @@ void dsp_reset(void)
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_RESET);
     delay_ms(20);
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_SET);
+
+    dsp_wait_started();
+    dsp_version();
 }
 
 static void save_version(dsp_version_t *ver)
@@ -255,9 +267,6 @@ int dsp_init(void)
     
     usart_init(DSP_UART, &para);
     dsp_reset();
-    while(!dsp_is_started());
-    dsp_version();
-    
     do_download(&gParams.dsp, sizeof(gParams.dsp));
 
     return 0;
@@ -333,7 +342,7 @@ int dsp_send(dsp_data_t *dsp)
         sys_set_input(input->input);
     }
 
-    return dsp_write(&gDspBuf);
+    return dsp_write(&gDspBuf, 0);
 }
 
 
@@ -345,17 +354,21 @@ int dsp_upload(void *data, u16 len)
 
 int dsp_version(void)
 {
-    dsp_data_t dsp={0};
-    dsp.id = CMD_ID_DSPVer;
-    dsp.dlen = 1;
-    return dsp_send(&dsp);
+    u16 tmp[10];
+
+    gDspBuf.cmd.ID = CMD_ID_UpdataDSP;
+    gDspBuf.cmd.Len = 1;
+    gDspBuf.cmd.Ch = 0;
+    gDspBuf.cmd.DataPtr = tmp;
+    gDspBuf.cmd.No = 0;
+    
+    dsp_write(&gDspBuf, 0);
+    return 0;
 }
 
 
 int dsp_upgrade(u16 index, u8 *data, u16 len, u8 last)
 {
-    dsp_ack_t ack={0};
-
     if(len>DOWNLOAD_SIZE || len%2) {
         return -1;
     }
@@ -367,9 +380,7 @@ int dsp_upgrade(u16 index, u8 *data, u16 len, u8 last)
     gDspBuf.cmd.DataPtr = (u16*)data;
     gDspBuf.cmd.No = last;
     
-    dsp_write(&gDspBuf);
-    //dsp_read((u8*)&ack, sizeof(ack));
-
+    dsp_write(&gDspBuf, 0);
     if(last) {
         //dsp_reset();
         //dsp_download();
