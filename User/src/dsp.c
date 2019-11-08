@@ -219,9 +219,6 @@ void dsp_reset(void)
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_RESET);
     delay_ms(20);
     GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_SET);
-    
-    while(!dsp_is_started());
-    dsp_version();
 }
 
 static void save_version(dsp_version_t *ver)
@@ -258,17 +255,20 @@ int dsp_init(void)
     
     usart_init(DSP_UART, &para);
     dsp_reset();
-
+    while(!dsp_is_started());
     dsp_version();
+    
     do_download(&gParams.dsp, sizeof(gParams.dsp));
 
     return 0;
 }
 
-
+extern int sys_mute(u8 on);
 int dsp_download(void)
 {
+    sys_mute(1);
     do_download(&gParams.dsp, sizeof(gParams.dsp));
+    sys_mute(0);
 
     return 0;
 }
@@ -371,8 +371,8 @@ int dsp_upgrade(u16 index, u8 *data, u16 len, u8 last)
     //dsp_read((u8*)&ack, sizeof(ack));
 
     if(last) {
-        dsp_reset();
-        dsp_download();
+        //dsp_reset();
+        //dsp_download();
     }
     
     return 0;

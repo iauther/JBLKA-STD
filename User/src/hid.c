@@ -9,7 +9,7 @@
 #include "packet.h"
 
 
-#define DSP_ONCE_LEN                        44//256
+#define DSP_ONCE_LEN                        256
 #define FLASH_ONCE_LEN                      2048//FLASH_PAGE_SIZE
 
 

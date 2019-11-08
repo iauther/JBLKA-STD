@@ -95,6 +95,7 @@ int usbd_send_ack(packet_t *p, int r)
 
     *pTx = *p;
     pTx->type = TYPE_ACK;
+    pTx->pkts = 1;
     pTx->nck  = 0;
     pTx->dlen = sizeof(ack_data_t);
     ack->type = p->type;

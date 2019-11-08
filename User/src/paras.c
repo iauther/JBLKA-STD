@@ -120,9 +120,9 @@ int paras_init(void)
     e2p_init();
 
     paras_remap();
-    if(1){//(!check_version()) {
+    if(!check_version()) {
         set_to_default(&uiParams, &dspDefault);
-        //r = e2p_write(0, (u8*)&gParams, sizeof(gParams));
+        r = e2p_write(0, (u8*)&gParams, sizeof(gParams));
 
         //the following used for test
         //memset(&gParams, 0, sizeof(gParams));
