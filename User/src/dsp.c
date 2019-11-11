@@ -272,12 +272,49 @@ int dsp_init(void)
     return 0;
 }
 
-extern int sys_mute(u8 on);
+
+static void pre_download(TypeS_Gain *g)
+{
+    u8 i;
+    TypeS_Gain gain;
+
+    gDspBuf.cmd.ID = CMD_ID_Gain;
+    gDspBuf.cmd.Len = sizeof(TypeS_Gain);
+    gDspBuf.cmd.No = 0;
+    gDspBuf.cmd.DataPtr = (u16*)&gain;
+    
+    gain.Mute = 1;
+    for(i=0; i<Gain_CH_NUM; i++) {
+        gain.Gain = g[i].Gain;  //??
+        gDspBuf.cmd.Ch = i;
+        dsp_write(&gDspBuf, 0);
+    }
+}
+static void post_download(TypeS_Gain *g)
+{
+    u8 i;
+    TypeS_Gain gain;
+
+    gDspBuf.cmd.ID = CMD_ID_Gain;
+    gDspBuf.cmd.Len = sizeof(TypeS_Gain);
+    gDspBuf.cmd.No = 0;
+    gDspBuf.cmd.DataPtr = (u16*)&gain;
+    
+    for(i=0; i<Gain_CH_NUM; i++) {
+        gain = g[i];
+        gDspBuf.cmd.Ch = i;
+        dsp_write(&gDspBuf, 0);
+    }
+}
+
 int dsp_download(void)
 {
-    sys_mute(1);
+    TypeS_Gain *g=gParams.dsp.Array_Gain;
+    pre_download(g);
+    delay_ms(1000);
     do_download(&gParams.dsp, sizeof(gParams.dsp));
-    sys_mute(0);
+    delay_ms(1000);
+    post_download(g);
 
     return 0;
 }

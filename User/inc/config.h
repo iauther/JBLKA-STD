@@ -3,7 +3,7 @@
 
 
 #define BOOT_VERSION "V01.0"
-#define MCU_VERSION  "V001.01"
+#define MCU_VERSION  "V001.02"
 
 
 //#define BOARD_ALIENTEK

@@ -49,7 +49,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\OBJS\</OutputDirectory>
-          <OutputName>MCU</OutputName>
+          <OutputName>APP</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -72,7 +72,7 @@
           <BeforeMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>conv dsp ../DSP.ldr ../DSP.bin</UserProg1Name>
+            <UserProg1Name>conv dsp ../FW/DSP.ldr ../DSP.bin</UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
@@ -82,8 +82,8 @@
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>1</RunUserProg2>
-            <UserProg1Name>fromelf --bin --output ../MCU.bin OBJS/MCU.axf</UserProg1Name>
-            <UserProg2Name>conv mcu ../MCU.bin ../UPG.bin</UserProg2Name>
+            <UserProg1Name>fromelf --bin --output ../FW/APP.bin OBJS/APP.axf</UserProg1Name>
+            <UserProg2Name>conv mcu ../FW/APP.bin ../MCU.bin</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopA1X>0</nStopA1X>
