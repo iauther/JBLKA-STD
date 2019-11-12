@@ -77,16 +77,16 @@ enum {  //up or down
     DOWN,
 };
 
-enum {  //key type
-    KNOB,
-    PANEL,
-    REMOTE,
+enum {  //key src
+    SRC_IR,
+    SRC_KEY,
+    SRC_KNOB,
 };
 
 
 typedef struct {
-    u8      type;
-    u8      key;
+    u8      src;
+    u8      value;
     u8      longPress;
     u8      updown;       //UP or DOWN
 }key_t;

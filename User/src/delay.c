@@ -1,4 +1,7 @@
 #include "delay.h"
+#ifdef RTX
+#include "cmsis_os2.h"
+#endif
 
 void delay_us(u32 us)
 {
@@ -16,7 +19,16 @@ void delay_us(u32 us)
 void delay_ms(u32 ms)
 {
     u32 i;
-    for(i=0; i<ms; i++) {
-        delay_us(1000);
+
+#ifdef RTX
+    if(osKernelGetState()==osKernelRunning) {
+        osDelay(ms);
+    }
+    else
+#endif
+    {
+        for(i=0; i<ms; i++) {
+            delay_us(1000);
+        }
     }
 }

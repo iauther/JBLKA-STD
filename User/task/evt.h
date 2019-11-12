@@ -2,11 +2,11 @@
 #define __EVT_H__
 
 #include "key.h"
+#include "packet.h"
 
 enum {
     EVT_KEY,
     EVT_DSP,
-    //EVT_E2P,
 
     EVT_HID,
     EVT_RS485,
@@ -16,19 +16,22 @@ enum {
 };
 
 typedef struct {
-    u8      evt;
-    key_t   k;
+    u8              evt;
+    key_t           key;
+}evt_gui_t;
+
+typedef struct {
+    u8              evt;
+    packet_t        pkt;
 }evt_dev_t;
 
 typedef struct {
-    u8      evt;
-    u8      data[64];
+    u8              evt;
+    union {
+        u8          hid[64];
+    }param;
 }evt_com_t;
 
-typedef struct {
-    u32     evt;
-    void    *ptr;
-    u8      data[32];
-}evt_ui_t;
+
 
 #endif

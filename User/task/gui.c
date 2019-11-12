@@ -3,8 +3,8 @@
 #define MSG_MAX         6
 
 #ifdef RTX
-osMessageQueueId_t ui_mq;
-static void panel_key_proc(u8 key)
+msg_t *gui_msg=NULL;
+static void key_proc(u8 key)
 {
     switch(key) {
         case KEY_UP:
@@ -35,7 +35,7 @@ static void panel_key_proc(u8 key)
         break;
     }
 }
-static void remote_key_proc(u8 key)
+static void ir_proc(u8 key)
 {
     int r;
     s16 g;
@@ -76,9 +76,6 @@ static void remote_key_proc(u8 key)
         case KEY_MIC_UP:
         case KEY_MIC_DN:
         r = dsp_gain_step(key, 1, &g, &n);
-        if(r==0) {
-            //queue_put(e2p_q, &n, 1);
-        }
         break;
 
         default:
@@ -86,10 +83,10 @@ static void remote_key_proc(u8 key)
     }
 
     if(r==0) {
-        //queue_put(e2p_q, &n, 1);
+        e2p_put(&n);
     }
 }
-static void knob_key_proc(u8 key)
+static void knob_proc(u8 key)
 {
     int r;
     s16 g;
@@ -97,39 +94,40 @@ static void knob_key_proc(u8 key)
 
     r = dsp_gain_step(key, 1, &g, &n);
     if(r==0) {
-        //queue_put(e2p_q, &n, 1);
+        e2p_put(&n);
     }
 }
 
 
 
-void ui_task(void *arg)
+void gui_task(void *arg)
 {
-    evt_dev_t e;
-    key_t     *k=&e.k;
+    int r;
+    evt_gui_t e;
     osStatus_t st;
 
     //menu_init();
-    ui_mq = osMessageQueueNew(MSG_MAX, sizeof(evt_dev_t), NULL);
-
+    gui_msg = msg_init(MSG_MAX, sizeof(e));
     while(1) {
-        st = osMessageQueueGet(ui_mq, &e, NULL, osWaitForever);
-        if(st==osOK) {
+        r = msg_recv(gui_msg, &e, NULL);
+        if(r==0) {
             switch(e.evt) {
                 
                 case EVT_KEY:
                 {
-                    switch(k->type) {
-                        case PANEL:
-                        panel_key_proc(k->key);
+                    key_t *k = &e.key;
+                    switch(k->src) {
+                        
+                        case SRC_IR:
+                        ir_proc(k->value);
                         break;
 
-                        case REMOTE:
-                        remote_key_proc(k->key);
+                        case SRC_KEY:
+                        key_proc(k->value);
                         break;
                     
-                        case KNOB:
-                        knob_key_proc(k->key);
+                        case SRC_KNOB:
+                        knob_proc(k->value);
                         break;
                     }
                     //menu_handle(k);
@@ -145,13 +143,13 @@ void ui_task(void *arg)
         }
     }
 
-    osMessageQueueDelete(ui_mq);
+    msg_free(&gui_msg);
 }
 
 
-void ui_post_evt(evt_ui_t *e)
+void gui_post_evt(evt_gui_t *e)
 {
-    osMessageQueuePut(ui_mq, e, NULL, 0);
+    msg_post(gui_msg, e, sizeof(*e));
 }
 
 #endif

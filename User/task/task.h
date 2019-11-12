@@ -4,10 +4,11 @@
 #include "device.h"
 #include "sys.h"
 #include "evt.h"
+#include "msg.h"
 #include "cmsis_os2.h"
 
-void ui_task(void *arg);
-void ui_post_evt(evt_ui_t *e);
+void gui_task(void *arg);
+void gui_post_evt(evt_gui_t *e);
 
 void dev_task(void *arg);
 void dev_post_evt(evt_dev_t *e);

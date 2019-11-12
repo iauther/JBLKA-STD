@@ -1,5 +1,7 @@
 #include "string.h"
 #include "e2p.h"
+#include "lock.h"
+#include "queue.h"
 #include "delay.h"
 #include "config.h"
 #ifdef APP
@@ -14,6 +16,9 @@
 #endif
 
 
+#define QUEUE_MAX           30
+
+
 #define USE_HAL
 //#define USE_STD
 #ifdef USE_STD
@@ -22,6 +27,7 @@
 #endif
 
 
+queue_t *eq=0;
 #ifdef USE_HAL
 #include "i2c.h"
 static I2C_HandleTypeDef *i2c_handle=0;
@@ -41,8 +47,32 @@ int e2p_init(void)
     i2c_handle = i2c_get_handle(E2P_I2C);
 
     r = i2c_init(E2P_I2C, &init);
-    //e2p_test();
+    eq = queue_init(QUEUE_MAX);
     
+    return r;
+}
+
+
+int e2p_put(node_t *n)
+{
+    int r;
+
+    lock_on(LOCK_E2P);
+    r = queue_put(eq, n, 1);
+    lock_off(LOCK_E2P);
+
+    return r;
+}
+
+
+int e2p_get(node_t *n)
+{
+    int r;
+
+    lock_on(LOCK_E2P);
+    r = queue_get(eq, n);
+    lock_off(LOCK_E2P);
+
     return r;
 }
 

@@ -7,6 +7,8 @@
 #include "types.h"
 #include "font.h"
 #include "rbuf.h"
+#include "msg.h"
+#include "lock.h"
 #include "default.h"
 #include "queue.h"
 #include "delay.h"
@@ -24,5 +26,7 @@ int sys_set_iodat(io_data_t *io);
 int sys_mute(u8 on);
 
 int sys_standby(u8 on);
+
+void sys_reboot(void);
 
 #endif

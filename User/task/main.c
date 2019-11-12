@@ -368,8 +368,10 @@ int main(void)
 
     //SystemCoreClockUpdate();
     osKernelInitialize();
-    osThreadNew(ui_task, NULL, NULL);
+    
     osThreadNew(dev_task, NULL, NULL);
+    osThreadNew(gui_task, NULL, NULL);
+    osThreadNew(com_task, NULL, NULL);
     osKernelStart();
 #else
     sys_init();

@@ -1,10 +1,9 @@
-#include <string.h>
 #include "dsp.h"
-#include "e2p.h"
-#include "usbd.h"
 #include "sys.h"
 #include "usart.h"
 #include "delay.h"
+#include "e2p.h"
+#include "lock.h"
 #include "paras.h"
 #include "packet.h"
 #include "config.h"
@@ -35,7 +34,6 @@ UART_HandleTypeDef *hdsp;
 #endif
 
 dsp_buf_t gDspBuf;
-
 u16 crc_calc(u16 *data, u16 length)
 {
     u16 i;
@@ -236,11 +234,15 @@ void dsp_reset(void)
 static void save_version(dsp_version_t *ver)
 {
     u8 tmp[20];
+    node_t n;
     
     sprintf((char*)tmp, "V%04d", ver->ver);
     if(strcmp((char*)tmp, (char*)gParams.fw.dsp)) {
         strcpy((char*)gParams.fw.dsp, (char*)tmp);
-        e2p_write(0, (u8*)&gParams.fw, sizeof(gParams.fw));
+
+        n.ptr = &gParams.fw;
+        n.len = sizeof(gParams.fw);
+        e2p_put(&n);
     }
 }
 static void dsp_rx_cb(u8 *data, u16 len)
@@ -310,11 +312,16 @@ static void post_download(TypeS_Gain *g)
 int dsp_download(void)
 {
     TypeS_Gain *g=gParams.dsp.Array_Gain;
+
+    lock_on(LOCK_DSP);
+
     pre_download(g);
     delay_ms(1000);
     do_download(&gParams.dsp, sizeof(gParams.dsp));
     delay_ms(1000);
     post_download(g);
+
+    lock_off(LOCK_DSP);
 
     return 0;
 }
@@ -325,9 +332,10 @@ int dsp_reset_peq(eq_reset_t *rst)
     int r;
     dsp_data_t dsp={0};
 
+    lock_on(LOCK_DSP);
     r = paras_reset_peq(rst);
     if(r) {
-        return -1;
+        goto quit;
     }
 
     dsp.ch = rst->ch;
@@ -338,7 +346,10 @@ int dsp_reset_peq(eq_reset_t *rst)
         dsp_send(&dsp);
     }
 
-    return 0;
+quit:
+    lock_off(LOCK_DSP);
+
+    return r;
 }
 
 
@@ -362,10 +373,11 @@ int dsp_send(dsp_data_t *dsp)
 {
     int r;
     node_t n;
-
+    
+    lock_on(LOCK_DSP);
     r = get_node(dsp, &n);
     if(r) {
-        return r;
+        goto quit;
     }
 
     gDspBuf.cmd.ID = dsp->id;
@@ -379,7 +391,12 @@ int dsp_send(dsp_data_t *dsp)
         sys_set_input(input->input);
     }
 
-    return dsp_write(&gDspBuf, 0);
+    r = dsp_write(&gDspBuf, 0);
+
+quit:
+    lock_off(LOCK_DSP);
+
+    return r;
 }
 
 
@@ -392,7 +409,8 @@ int dsp_upload(void *data, u16 len)
 int dsp_version(void)
 {
     u16 tmp[10];
-
+    
+    lock_on(LOCK_DSP);
     gDspBuf.cmd.ID = CMD_ID_UpdataDSP;
     gDspBuf.cmd.Len = 1;
     gDspBuf.cmd.Ch = 0;
@@ -400,6 +418,8 @@ int dsp_version(void)
     gDspBuf.cmd.No = 0;
     
     dsp_write(&gDspBuf, 0);
+    lock_off(LOCK_DSP);
+
     return 0;
 }
 
@@ -410,6 +430,7 @@ int dsp_upgrade(u16 index, u8 *data, u16 len, u8 last)
         return -1;
     }
 
+    lock_on(LOCK_DSP);
     gDspBuf.cmd.ID = CMD_ID_UpdataDSP;
     gDspBuf.cmd.Len = len;
 
@@ -422,6 +443,7 @@ int dsp_upgrade(u16 index, u8 *data, u16 len, u8 last)
         //dsp_reset();
         //dsp_download();
     }
+    lock_off(LOCK_DSP);
     
     return 0;
 }
@@ -545,11 +567,14 @@ int dsp_update(dsp_data_t *dsp, node_t *node)
     int r;
     node_t n;
 
+    lock_on(LOCK_DSP);
     r = get_node(dsp, &n);
     if(r==0) {
         memcpy(n.ptr, dsp->data, n.len);
         *node = n;
     }
+    lock_off(LOCK_DSP);
+
     return r;
 }
 
@@ -591,6 +616,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
     int r,fac,val,step=1;
     dsp_paras_t *dsp=&uiParams.dsp;
     
+    lock_on(LOCK_DSP);
     switch(key) {
         case KEY_MUSIC_UP:      //0~100
         case KEY_MUSIC_DN:
@@ -600,7 +626,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
             val=fac*times;
             r = val_adjust(gain, 0, 100, fac, val, step);
             if(r) {
-                return -1;
+                goto quit;
             }
 
             nd.ptr = dsp->music.gain;
@@ -618,7 +644,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
             val=fac*times;
             r = val_adjust(gain, 0, 100, fac, val, step);
             if(r) {
-                return -1;
+                goto quit;
             }
 
             nd.ptr = dsp->effGain;
@@ -636,7 +662,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
             val=fac*times;
             r = val_adjust(gain, 0, 100, fac, val, step);
             if(r) {
-                return -1;
+                goto quit;
             }
             
             nd.ptr = dsp->mic.gain;
@@ -654,7 +680,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
             val=fac*times;
             r = val_adjust(gain, -240, 120, fac, val, step);
             if(r) {
-                return -1;
+                goto quit;
             }
 
             nd.ptr = dsp->music.geq[1];
@@ -673,7 +699,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
             val=fac*times;
             r = val_adjust(gain, -240, 120, fac, val, step);
             if(r) {
-                return -1;
+                goto quit;
             }
 
             nd.ptr = dsp->music.geq[0];
@@ -692,7 +718,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
             val=fac*times;
             r = val_adjust(gain, 0, 100, fac, val, step);
             if(r) {
-                return -1;
+                goto quit;
             }
             
             nd.ptr = dsp->echo.effVol;
@@ -711,7 +737,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
             step = 48;
             r = val_adjust(gain, 0, 14400, fac, val, step);
             if(r) {
-                return -1;
+                goto quit;
             }
 
             nd.ptr = dsp->echo.delay;
@@ -729,7 +755,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
             val=fac*times;
             r = val_adjust(gain, 0, 90, fac, val, step);
             if(r) {
-                return -1;
+                goto quit;
             }
 
             nd.ptr = dsp->echo.repeat;
@@ -747,7 +773,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
             val=fac*times;
             r = val_adjust(gain, 0, 100, fac, val, step);
             if(r) {
-                return -1;
+                goto quit;
             }
             
             nd.ptr = dsp->reverb.effVol;
@@ -765,7 +791,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
             val=fac*times;
             r = val_adjust(gain, 0, 8000, fac, val, step);
             if(r) {
-                return -1;
+                goto quit;
             }
 
             nd.ptr = dsp->reverb.time;
@@ -783,7 +809,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
             val=fac*times;
             r = val_adjust(gain, -240, 120, fac, val, step);
             if(r) {
-                return -1;
+                goto quit;
             }
 
             nd.ptr = dsp->mic.geq[2];
@@ -802,7 +828,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
             val=fac*times;
             r = val_adjust(gain, -240, 120, fac, val, step);
             if(r) {
-                return -1;
+                goto quit;
             }
 
             nd.ptr = dsp->mic.geq[1];
@@ -821,7 +847,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
             val=fac*times;
             r = val_adjust(gain, -240, 120, fac, val, step);
             if(r) {
-                return -1;
+                goto quit;
             }
 
             nd.ptr = dsp->mic.geq[0];
@@ -833,7 +859,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
         break;
         
         default:
-        return -1;
+        goto quit;
     }
     
     dd.dlen = nd.len;
@@ -847,7 +873,10 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
         *n = nd;
     }
 
-    return 0;
+quit:
+    lock_off(LOCK_DSP);
+
+    return r;
 }
 
 

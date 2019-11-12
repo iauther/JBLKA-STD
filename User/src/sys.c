@@ -98,7 +98,8 @@ int sys_init(void)
 {
     rcc_init();
     gpio_init();
-
+    
+    lock_init();
     paras_init();
     adc_init();
     knob_init();
@@ -220,4 +221,33 @@ int sys_standby(u8 on)
 
     return 0;
 }
+
+
+typedef void (*j_func)(void);
+j_func j_fn;
+u32 j_addr;
+static void jump_to(u32 addr)
+{
+    if(((*(volatile u32*)addr) & 0x2FFE0000) == 0x20000000) {
+        
+        j_addr = *(volatile u32*)(addr+4);
+        j_fn = (j_func)j_addr;
+        
+        __disable_irq();
+        __set_CONTROL(0);   //??psp????msp
+        __set_MSP(*(volatile u32*)addr);
+        j_fn();
+    }
+}
+static void jump2Boot(void)
+{
+    jump_to(0);
+}
+
+void sys_reboot(void)
+{
+    __disable_fiq();
+    NVIC_SystemReset();
+}
+
 

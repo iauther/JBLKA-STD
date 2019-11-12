@@ -5,6 +5,10 @@
 
 int e2p_init(void);
 
+int e2p_put(node_t *n);
+
+int e2p_get(node_t *n);
+
 int e2p_read_byte(u32 addr, u8* data);
 
 int e2p_write_byte(u32 addr, u8* data);

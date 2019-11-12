@@ -1,6 +1,7 @@
 #include "knob.h"
 #include "key.h"
 #include "usart.h"
+#include "task.h"
 #include "config.h"
 
 u8 knobValue=0;
@@ -63,7 +64,13 @@ static void keyPool_init(void)
 
 static void knob_rx_cb(u8 *data, u16 data_len)
 {
+    evt_gui_t e={0};
     keyTimes[knobValue]++;
+
+    e.evt = EVT_KEY;
+    e.key.src = SRC_KNOB;
+    e.key.value = keyPool[knobValue];
+    gui_post_evt(&e);
 
 }
 int knob_init(void)
