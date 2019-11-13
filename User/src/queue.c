@@ -94,7 +94,7 @@ int queue_put(queue_t *q, void *n, iterater iter)
 }
 
  
-int queue_get(queue_t *q, void *n, iterater iter)
+int queue_get(queue_t *q, void *n, qiterater iter)
 {
     int i;
 
@@ -124,7 +124,7 @@ int queue_get(queue_t *q, void *n, iterater iter)
 }
 
 
-int queue_iterate(queue_t *q, void *n, iterater iter)
+int queue_iterate(queue_t *q, void *n, qiterater iter)
 {
     int r;
 

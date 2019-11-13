@@ -17,7 +17,7 @@ typedef struct {
 }queue_t;
 
 
-typedef int (*iterater)(queue_t *q, int index, void *n, void *n2);
+typedef int (*qiterater)(queue_t *q, int index, void *n, void *n2);
 
 
 queue_t* queue_init(int max, int node_size);
@@ -28,11 +28,11 @@ int queue_size(queue_t *q);
 
 int queue_capacity(queue_t *q);
 
-int queue_get(queue_t *q, void *n, iterater iter);
+int queue_get(queue_t *q, void *n, qiterater iter);
 
-int queue_put(queue_t *q, void *n, iterater iter);
+int queue_put(queue_t *q, void *n, qiterater iter);
 
-int queue_iterate(queue_t *q, void *n, iterater iter);
+int queue_iterate(queue_t *q, void *n, qiterater iter);
 
 int queue_clear(queue_t *q);
 

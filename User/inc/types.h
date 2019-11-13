@@ -18,6 +18,10 @@ extern "C" {
 #define f32     float
 #define f64     double
 
+#define MAX(a,b)    (a>b)?a:b
+#define MIN(a,b)    (a<b)?b:a
+
+
 
 typedef enum {
     MODE_IT,

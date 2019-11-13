@@ -613,6 +613,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\src\ir.c</FilePath>
             </File>
+            <File>
+              <FileName>list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\list.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
