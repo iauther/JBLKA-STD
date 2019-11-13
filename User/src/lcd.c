@@ -482,18 +482,14 @@ void lcd_fill_rect(u16 x1, u16 y1, u16 w, u16 h, u16 color)
     y2 = y1 + h;
     size = (x2 - x1 + 1) * (y2 - y1 + 1) * 2;
 
-    if(size > LCD_BUF_SIZE)
-    {
+    if(size > LCD_BUF_SIZE) {
         size_remain = size - LCD_BUF_SIZE;
         size = LCD_BUF_SIZE;
     }
 
     lcd_set_address(x1, y1, x2, y2);
-
-    while(1)
-    {
-        for(i = 0; i < size / 2; i++)
-        {
+    while(1) {
+        for(i = 0; i < size / 2; i++) {
             lcd_buf[2 * i] = color >> 8;
             lcd_buf[2 * i + 1] = color & 0xff;
         }
@@ -504,13 +500,11 @@ void lcd_fill_rect(u16 x1, u16 y1, u16 w, u16 h, u16 color)
         if(size_remain == 0)
             break;
 
-        if(size_remain > LCD_BUF_SIZE)
-        {
+        if(size_remain > LCD_BUF_SIZE) {
             size_remain = size_remain - LCD_BUF_SIZE;
         }
 
-        else
-        {
+        else {
             size = size_remain;
             size_remain = 0;
         }
@@ -526,7 +520,7 @@ void lcd_draw_string_center(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 co
     inf = font_get(font);
     w1 = strlen((char*)str)*inf.width;
     
-    lcd_fill_rect(x, y, w, h, LCD_BC);
+    //lcd_fill_rect(x, y, w, h, LCD_BC);
     lcd_draw_string(x+(w-w1)/2, y+(h-inf.height)/2, w1, inf.height, str, font, color, bgcolor);
 }
 

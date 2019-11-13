@@ -39,6 +39,10 @@ static void reboot(void)
     NVIC_SystemReset();
 }
 
+static int qfind(queue_t *q, int index, void *n, void *n2)
+{
+    return 0;
+}
 static int set_default(void)
 {
     node_t n;
@@ -49,7 +53,7 @@ static int set_default(void)
     
     n.ptr = &gParams;
     n.len = sizeof(gParams);
-    queue_put(e2p_q, &n, 1);
+    queue_put(e2p_q, &n, qfind);
     
     return 0;
 }
@@ -240,7 +244,7 @@ static void e2p_proc(void)
     int r;
     node_t n;
     
-    r = queue_get(e2p_q, &n);
+    r = queue_get(e2p_q, &n, NULL);
     if(r==0) {
         r = paras_write(n.ptr, n.len);
     }
@@ -349,7 +353,7 @@ static void knob_proc(void)
             return;
         }
 
-        queue_put(e2p_q, &n, 1);
+        queue_put(e2p_q, &n, qfind);
 
         sprintf((char*)tmp, "%d", gain);
         lcd_draw_string_center(0, 100, LCD_WIDTH, 60, tmp, FONT_32, LCD_FC, LCD_BC);
@@ -375,7 +379,7 @@ int main(void)
     osKernelStart();
 #else
     sys_init();
-    e2p_q = queue_init(QUEUE_MAX);
+    e2p_q = queue_init(QUEUE_MAX, sizeof(node_t));
 	tim_init(TIMER2, poll_cb);
 
 	while(1) {

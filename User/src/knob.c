@@ -1,5 +1,6 @@
 #include "knob.h"
 #include "key.h"
+#include "tmr.h"
 #include "usart.h"
 #include "task.h"
 #include "config.h"
@@ -63,21 +64,34 @@ static void keyPool_init(void)
 }
 
 static void knob_rx_cb(u8 *data, u16 data_len)
-{
-    evt_gui_t e={0};
+{ 
     keyTimes[knobValue]++;
 
-    e.evt = EVT_KEY;
-    e.key.src = SRC_KNOB;
-    e.key.value = keyPool[knobValue];
-    gui_post_evt(&e);
+#ifdef RTX
+    {
+        evt_gui_t e={0};
+        e.evt = EVT_KEY;
+        e.key.src = SRC_KNOB;
+        e.key.value = keyPool[knobValue];
+        e.key.times = keyTimes[knobValue];
+        gui_post_evt(&e);
+        keyTimes[knobValue] = 0;
+    }
+#endif
+}
+static void knob_tmr_cb(void)
+{
+    
 
 }
+
 int knob_init(void)
 {
     uart_paras_t para={knob_rx_cb, &knobValue, sizeof(knobValue)};
     
     keyPool_init();
+    //tim_init(TIMER3, knob_tmr_cb);
+
     return usart_init(KNOB_UART, &para);
 }
 

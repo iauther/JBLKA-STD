@@ -2,6 +2,7 @@
 #define __DEVICE_H__
 
 #include "types.h"
+#include "ir.h"
 #include "tmr.h"
 #include "key.h"
 #include "adc.h"

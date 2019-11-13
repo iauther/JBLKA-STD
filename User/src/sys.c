@@ -108,6 +108,7 @@ int sys_init(void)
 
     fan_init();
     lcd_init();
+    ir_init();
 
     usbd_init();
 
@@ -222,7 +223,7 @@ int sys_standby(u8 on)
     return 0;
 }
 
-
+#if 0
 typedef void (*j_func)(void);
 j_func j_fn;
 u32 j_addr;
@@ -243,6 +244,7 @@ static void jump2Boot(void)
 {
     jump_to(0);
 }
+#endif
 
 void sys_reboot(void)
 {

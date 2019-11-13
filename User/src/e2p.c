@@ -47,18 +47,22 @@ int e2p_init(void)
     i2c_handle = i2c_get_handle(E2P_I2C);
 
     r = i2c_init(E2P_I2C, &init);
-    eq = queue_init(QUEUE_MAX);
+    eq = queue_init(QUEUE_MAX, sizeof(node_t));
     
     return r;
 }
 
 
+static int ifind(queue_t *q, int index, void *n, void *n2)
+{
+    return 0;
+}
 int e2p_put(node_t *n)
 {
     int r;
 
     lock_on(LOCK_E2P);
-    r = queue_put(eq, n, 1);
+    r = queue_put(eq, n, ifind);
     lock_off(LOCK_E2P);
 
     return r;
@@ -70,7 +74,7 @@ int e2p_get(node_t *n)
     int r;
 
     lock_on(LOCK_E2P);
-    r = queue_get(eq, n);
+    r = queue_get(eq, n, NULL);
     lock_off(LOCK_E2P);
 
     return r;

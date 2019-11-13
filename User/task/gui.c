@@ -86,16 +86,21 @@ static void ir_proc(u8 key)
         e2p_put(&n);
     }
 }
-static void knob_proc(u8 key)
+static void knob_proc(u8 key, u16 times)
 {
     int r;
     s16 g;
+    u8 tmp[20];
     node_t n;
 
     r = dsp_gain_step(key, 1, &g, &n);
-    if(r==0) {
-        e2p_put(&n);
+    if(r) {
+        return;
     }
+
+    e2p_put(&n);
+    sprintf((char*)tmp, "%d", g);
+    lcd_draw_string_center(0, 100, LCD_WIDTH, 60, tmp, FONT_32, LCD_FC, LCD_BC);
 }
 
 
@@ -127,7 +132,7 @@ void gui_task(void *arg)
                         break;
                     
                         case SRC_KNOB:
-                        knob_proc(k->value);
+                        knob_proc(k->value, 1);
                         break;
                     }
                     //menu_handle(k);

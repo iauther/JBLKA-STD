@@ -3,20 +3,42 @@
 #include <string.h>
 #include "queue.h"
 
-
-queue_t* queue_init(int max)
+static int do_iterate(queue_t *q, void *n, iterater iter)
 {
+    int i,o;
+    void *n2;
+
+    for(i=0; i<q->size; i++) {
+        o = (q->head+i)%q->max;
+        n2 = &q->nodes[o];
+        if(q->quit || iter(q, i, n, n2)) {
+            break;
+        }
+    }
+
+    return 0;
+}
+queue_t* queue_init(int max, int node_size)
+{
+    int i;
+    void *p;
 	queue_t *q = (queue_t*)malloc(sizeof(queue_t));
 	if(!q) {
         return 0;
     }
     
-	q->nodes = (node_t*)calloc(1, max * sizeof(node_t));
+    p = calloc(1, max*node_size);
+    for(i=0; i<max; i++) {
+        q->nodes[i] = p+i*node_size;
+    }
 	q->max  = max;
-	q->cnt = 0;
+	q->size = 0;
 	q->head = 0;
 	q->tail = 0;
+
+    q->quit = 0;
     q->locked = 0;
+    q->node_size = node_size;
 
 	return q;
 }
@@ -35,69 +57,88 @@ int queue_free(queue_t **q)
 }
 
 
-int queue_cnt(queue_t *q)
+int queue_size(queue_t *q)
 {
-	return q?q->cnt:-1;
+	return q?q->size:-1;
 }
 
 
-static int find_node(queue_t *q, node_t *n)
+int queue_capacity(queue_t *q)
 {
-    int i,o;
-    node_t *n2;
-
-    for(i=0; i<q->cnt; i++) {
-        o = (q->head+i)%q->max;
-        n2 = &q->nodes[o];
-        if(n2->ptr==n->ptr && n2->len==n->len) {
-            return o;
-        }
-    }
-
-    return -1;
+	return q?q->max:-1;
 }
-int queue_put(queue_t *q, node_t *n, int unique)
+
+
+int queue_put(queue_t *q, void *n, iterater iter)
 {
     int x=-1;
 
-	if (!q || !n || q->cnt==q->max || q->locked) {
+	if (!q || !n || q->size==q->max || q->locked) {
 		return -1;      //queue full
 	}
     
     q->locked = 1;
-    if(unique>0) {
-        x = find_node(q, n);
+    if(iter) {
+        x = do_iterate(q, n, iter);
     }
 
     if(x<0) {       //not find
         x = q->tail;
         q->tail = (q->tail+1)%q->max;
-        q->cnt++;
+        q->size++;
     }
-	q->nodes[x] = *n;
+    memcpy(q->nodes[x], n, q->node_size);
     q->locked = 0;
 	
 	return 0;
 }
 
  
-int queue_get(queue_t *q, node_t *n)
+int queue_get(queue_t *q, void *n, iterater iter)
 {
-    node_t *n2;
+    int i;
 
-	if (!q || !n || q->cnt==0 || q->locked) {
+	if (!q || !n || q->size==0 || q->locked) {
 		return -1;
 	}
     
     q->locked = 1;
-    n2 = &q->nodes[q->head];
-    *n = *n2;
-    n2->ptr=0;n2->len=0;
-	q->head = (q->head + 1) % q->max;	// circular queue
-	q->cnt--;
+    if(iter) {
+        i = do_iterate(q, n, iter);
+        if(i<0) {
+            q->locked = 0;
+            return -1;
+        }
+    }
+    else {
+        i = q->head;
+        q->head = (q->head + 1) % q->max;	// circular queue
+    }
+    
+    memcpy(n, q->nodes[i], q->node_size);
+	
+	q->size--;
     q->locked = 0;
 	
 	return 0;
+}
+
+
+int queue_iterate(queue_t *q, void *n, iterater iter)
+{
+    int r;
+
+    if (!q || !iter || q->size==0 || q->locked) {
+		return -1;
+	}
+
+    q->locked = 1;
+    if(iter) {
+        r = do_iterate(q, n, iter);
+    }
+    q->locked = 0;
+
+    return r;
 }
 
 
@@ -107,9 +148,11 @@ int queue_clear(queue_t *q)
 		return -1;
 	}
     
-    q->cnt = 0;
+    q->size = 0;
 	q->head = 0;
 	q->tail = -1;
+    q->locked = 0;
+    q->quit = 0;
 
     return 0;
 }

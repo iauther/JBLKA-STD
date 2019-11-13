@@ -89,6 +89,7 @@ typedef struct {
     u8      value;
     u8      longPress;
     u8      updown;       //UP or DOWN
+    u16     times;
 }key_t;
 
 #endif
