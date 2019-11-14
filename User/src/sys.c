@@ -85,7 +85,7 @@ static int do_config(void)
 #endif
     adda_reset();
     delay_ms(2000);
-//hdmi_reset(200);
+    //hdmi_reset(200);
     sys_mute(0);
 
     sys_set_iodat(0);

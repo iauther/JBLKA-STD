@@ -152,50 +152,66 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>127</LineNumber>
+          <LineNumber>177</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134275602</Address>
+          <Address>134281554</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\User\task\gui.c</Filename>
+          <Filename>..\User\task\main.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\APP\../User/task/gui.c\127</Expression>
+          <Expression>\\APP\../User/task/main.c\177</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>80</LineNumber>
+          <LineNumber>180</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134266806</Address>
+          <Address>134281562</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\User\src\ir.c</Filename>
+          <Filename>..\User\task\main.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\APP\../User/src/ir.c\80</Expression>
+          <Expression>\\APP\../User/task/main.c\180</Expression>
         </Bp>
         <Bp>
           <Number>2</Number>
           <Type>0</Type>
-          <LineNumber>114</LineNumber>
+          <LineNumber>147</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134260212</Address>
+          <Address>134275288</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\User\src\stm32f10x_it.c</Filename>
+          <Filename>..\User\src\knob.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\APP\../User/src/stm32f10x_it.c\114</Expression>
+          <Expression>\\APP\../User/src/knob.c\147</Expression>
+        </Bp>
+        <Bp>
+          <Number>3</Number>
+          <Type>0</Type>
+          <LineNumber>146</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134275274</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\User\src\knob.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\APP\../User/src/knob.c\146</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>

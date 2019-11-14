@@ -3,7 +3,6 @@
 
 #include "types.h"
 
-
 typedef struct _lnode {
     node_t          data;
     struct _lnode   *prev;
@@ -18,26 +17,23 @@ typedef struct _list {
     
     void            *pool;
     lnode_t         *lfree;
+    u8              quit;
 }list_t;
-
-typedef int (*literater)(list_t *l, int index, void *n1, void *n2);
 
 list_t* list_init(int max, int node_size);
 
-int list_add(list_t *l, node_t *n, int index);
+int list_add(list_t *l, int index, node_t *n);
 
-int list_append(list_t *l, node_t *n);
+int list_remove(list_t *l, int index);
 
-int list_rmv(list_t *l, node_t *n, int index);
+int list_get(list_t *l, int index, node_t *n);
 
-int list_get(list_t *l, node_t *n, int index);
+int list_set(list_t *l, int index, node_t *n);
 
-int list_set(list_t *l, node_t *n, int index);
-
-int list_iterate(list_t *l, node_t *n, literater iter);
+int list_quit(list_t *l);
 
 int list_clear(list_t *l);
 
-int list_free(list_t *l);
+int list_free(list_t **l);
 
 #endif

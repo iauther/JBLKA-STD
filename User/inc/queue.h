@@ -4,7 +4,7 @@
 #include "types.h"
 
 typedef struct {
-	void       **nodes;		// array to store queue elements
+	node_t     **nodes;		// array to store queue elements
 	int         max;	    // maximum capacity of the queue
 	int         size;		// element counter in the queue
 	int         head;		// head points to head element in the queue (if any)
@@ -17,7 +17,7 @@ typedef struct {
 }queue_t;
 
 
-typedef int (*qiterater)(queue_t *q, int index, void *n, void *n2);
+typedef int (*qiterater)(queue_t *q, int index, node_t *n, node_t *n2);
 
 
 queue_t* queue_init(int max, int node_size);
@@ -28,11 +28,11 @@ int queue_size(queue_t *q);
 
 int queue_capacity(queue_t *q);
 
-int queue_get(queue_t *q, void *n, qiterater iter);
+int queue_get(queue_t *q, node_t *n, qiterater iter);
 
-int queue_put(queue_t *q, void *n, qiterater iter);
+int queue_put(queue_t *q, node_t *n, qiterater iter);
 
-int queue_iterate(queue_t *q, void *n, qiterater iter);
+int queue_iterate(queue_t *q, node_t *n, qiterater iter);
 
 int queue_clear(queue_t *q);
 

@@ -18,7 +18,7 @@ enum {
 
 typedef void (*tim_cb)(void);
 
-void tim_init(u8 timer, tim_cb cb);
+void tim_init(u8 timer, u16 ms, tim_cb cb);
 
 void tim_callback(u8 timer);
 

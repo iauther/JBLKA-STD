@@ -1,13 +1,18 @@
 #include "knob.h"
 #include "key.h"
 #include "tmr.h"
+#include "queue.h"
 #include "usart.h"
 #include "task.h"
 #include "config.h"
 
+#define KQ_MAX      10
+
+
 u8 knobValue=0;
 u8 keyPool[40];
 u16 keyTimes[40];
+queue_t *kq=NULL;
 
 typedef struct {
     u8      code;
@@ -63,26 +68,60 @@ static void keyPool_init(void)
     }
 }
 
+
+static int kfind(queue_t *q, int index, node_t *n, node_t *n2)
+{
+    key_t *k1=(key_t*)n->ptr, *k2=(key_t*)n2->ptr;
+
+    if(k1->value==k2->value) {
+        k1->times += k2->times;
+        return index;
+    }
+
+    return -1;
+}
 static void knob_rx_cb(u8 *data, u16 data_len)
-{ 
+{
     keyTimes[knobValue]++;
 
 #ifdef RTX
     {
-        evt_gui_t e={0};
-        e.evt = EVT_KEY;
-        e.key.src = SRC_KNOB;
-        e.key.value = keyPool[knobValue];
-        e.key.times = keyTimes[knobValue];
-        gui_post_evt(&e);
+        key_t k;
+        node_t n;
+
+        k.src = SRC_KNOB;
+        k.value = keyPool[knobValue];
+        k.times = keyTimes[knobValue];
+        k.updown = 0;
+        k.longPress = 0;
+
+        n.ptr = &k;
+        n.len = sizeof(k);
+        queue_put(kq, &n, kfind);
         keyTimes[knobValue] = 0;
     }
 #endif
 }
 static void knob_tmr_cb(void)
 {
-    
+#ifdef RTX
+    {
+        int r;
+        node_t n;
+        evt_gui_t e={0};
 
+        n.ptr = &e.key;
+        n.len = sizeof(e.key);
+        r = queue_get(kq, &n);
+        if(r==0) {
+            e.evt = EVT_KEY;
+            e.key.src = SRC_KNOB;
+            e.key.value = keyPool[knobValue];
+            e.key.times = keyTimes[knobValue];
+            gui_post_evt(&e);
+        }
+    }
+#endif
 }
 
 int knob_init(void)
@@ -90,7 +129,11 @@ int knob_init(void)
     uart_paras_t para={knob_rx_cb, &knobValue, sizeof(knobValue)};
     
     keyPool_init();
-    //tim_init(TIMER3, knob_tmr_cb);
+
+#ifdef RTX
+    kq = queue_init(KQ_MAX, sizeof(key_t));
+    tim_init(TIMER4, 10, knob_tmr_cb);
+#endif
 
     return usart_init(KNOB_UART, &para);
 }

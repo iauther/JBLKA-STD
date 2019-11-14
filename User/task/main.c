@@ -4,45 +4,18 @@
 
 //#include "stm32f10x.h"
 
-#define E2P_POLL_TIME       1000        //1000ms
-#define ADC_KEY_POLL_TIME   100         //100ms
-#define PWR_VOL_POLL_TIME   1000
-#define QUEUE_MAX           20
+#define E2P_POLL_TIME       10        //1000ms
+#define ADC_KEY_POLL_TIME   1         //100ms
+#define PWR_VOL_POLL_TIME   10
 
 
-queue_t *e2p_q=0;
 extern paras_data_t gParams;
-typedef void (*jump_func)(void);
-jump_func jump_fn;
-uint32_t jump_addr;
-static void jump_to(u32 addr)
-{
-    if(((*(volatile u32*)addr) & 0x2FFE0000) == 0x20000000) {
-        
-        jump_addr = *(volatile u32*)(addr+4);
-        jump_fn = (jump_func)jump_addr;
-        
-        __disable_irq();
-        __set_CONTROL(0);   //??psp????msp
-        __set_MSP(*(volatile u32*)addr);
-        jump_fn();
-    }
-}
-
-static void jumpToBoot(void)
-{
-    jump_to(0);
-}
 static void reboot(void)
 {
     __disable_fiq();
     NVIC_SystemReset();
 }
 
-static int qfind(queue_t *q, int index, void *n, void *n2)
-{
-    return 0;
-}
 static int set_default(void)
 {
     node_t n;
@@ -53,7 +26,7 @@ static int set_default(void)
     
     n.ptr = &gParams;
     n.len = sizeof(gParams);
-    queue_put(e2p_q, &n, qfind);
+    e2p_put(&n);
     
     return 0;
 }
@@ -72,8 +45,7 @@ static int hid_single_proc(packet_t *pkt)
         return r;
     }
     
-    r = queue_put(e2p_q, &n, 1);
-
+    e2p_put(&n);
     switch(pkt->type) {        
         case TYPE_DSP:
         {
@@ -244,7 +216,7 @@ static void e2p_proc(void)
     int r;
     node_t n;
     
-    r = queue_get(e2p_q, &n, NULL);
+    r = e2p_get(&n);
     if(r==0) {
         r = paras_write(n.ptr, n.len);
     }
@@ -353,8 +325,7 @@ static void knob_proc(void)
             return;
         }
 
-        queue_put(e2p_q, &n, qfind);
-
+        e2p_put(&n);
         sprintf((char*)tmp, "%d", gain);
         lcd_draw_string_center(0, 100, LCD_WIDTH, 60, tmp, FONT_32, LCD_FC, LCD_BC);
     }
@@ -379,8 +350,7 @@ int main(void)
     osKernelStart();
 #else
     sys_init();
-    e2p_q = queue_init(QUEUE_MAX, sizeof(node_t));
-	tim_init(TIMER2, poll_cb);
+	tim_init(TIMER3, 100, poll_cb);
 
 	while(1) {
         usb_proc();

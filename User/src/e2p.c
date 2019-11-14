@@ -53,9 +53,13 @@ int e2p_init(void)
 }
 
 
-static int ifind(queue_t *q, int index, void *n, void *n2)
+static int ifind(queue_t *q, int index, node_t *n, node_t *n2)
 {
-    return 0;
+    if(n->ptr==n2->ptr && n->len==n2->len) {
+        return index;
+    }
+
+    return -1;
 }
 int e2p_put(node_t *n)
 {

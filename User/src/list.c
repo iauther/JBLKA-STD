@@ -3,10 +3,6 @@
 #include "list.h"
 
 
-static int do_iterater(list_t *l, int index, node_t *n1, node_t *n2)
-{
-
-}
 
 list_t* list_init(int max, int node_size)
 {
@@ -43,7 +39,7 @@ list_t* list_init(int max, int node_size)
 }
 
 
-int list_add(list_t *l, node_t *n, int index)
+int list_add(list_t *l, int index, node_t *n)
 {
     lnode_t *lf;
 
@@ -52,21 +48,33 @@ int list_add(list_t *l, node_t *n, int index)
         return -1;
     }
 
-    if(l->lfree->next) {
-        l->lfree = lf->next;
-        l->lfree->prev = NULL;
-    }
-    else {
-        l->lfree = NULL;
-    }
-    lf->next = NULL;
-    
-    if(0) {
-        //ld->next = lf;
-        //ld->prev = lf;
-    }
-    else {
-        
+    switch(index) {
+        case 0:
+        {
+        #if 0
+            if(l->lfree->next) {
+                l->lfree = lf->next;
+                l->lfree->prev = NULL;
+            }
+            else {
+                l->lfree = NULL;
+            }
+            lf->next = NULL;
+        #endif
+        }
+        break;
+
+        case -1:
+        {
+            //
+        }
+        break;
+
+        default:
+        {
+            //
+        }
+        break;
     }
 
     memcpy(lf->data.ptr, n->ptr, MIN(lf->data.len,n->len));
@@ -76,44 +84,39 @@ int list_add(list_t *l, node_t *n, int index)
 }
 
 
-int list_append(list_t *l, node_t *n)
+int list_remove(list_t *l, int index)
 {
+    //
+}
 
+int list_get(list_t *l, int index, node_t *n)
+{
+    //
 }
 
 
-int list_rmv(list_t *l, node_t *n, int index)
+int list_set(list_t *l, int index, node_t *n)
 {
-
-}
-
-int list_get(list_t *l, node_t *n, int index)
-{
-
+    //
 }
 
 
-int list_set(list_t *l, node_t *n, int index)
+int list_quit(list_t *l)
 {
-
-}
-
-
-int list_iterate(list_t *l, node_t *n, literater iter)
-{
-
+    l->quit = 1;
+    return 0;
 }
 
 
 int list_clear(list_t *l)
 {
-
+    return 0;
 }
 
 
-int list_free(list_t *l)
+int list_free(list_t **l)
 {
-
+    return 0;
 }
 
 

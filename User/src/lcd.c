@@ -16,7 +16,6 @@
 #define LCD_BUF_SIZE 1000
 u8 lcd_buf[LCD_BUF_SIZE];
 
-
 static void gpio_output_set(GPIO_TypeDef  *grp, u32 pin)
 {
     GPIO_InitTypeDef init;
@@ -110,7 +109,7 @@ static void lcd_pre_init(void)
     lcd_spi_init();
 }
 
-static inline lcd_write(u8 *data, u16 len)
+static inline void lcd_write(u8 *data, u16 len)
 {
     LCD_CS(0);
     spi_write(data, len);
@@ -514,14 +513,24 @@ void lcd_fill_rect(u16 x1, u16 y1, u16 w, u16 h, u16 color)
 
 void lcd_draw_string_center(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u16 bgcolor)
 {
-    u16  w1;
     font_info_t inf;
+    u16 x2,y2,w2,h2;
     
     inf = font_get(font);
-    w1 = strlen((char*)str)*inf.width;
+    w2 = strlen((char*)str)*inf.width;
     
-    //lcd_fill_rect(x, y, w, h, LCD_BC);
-    lcd_draw_string(x+(w-w1)/2, y+(h-inf.height)/2, w1, inf.height, str, font, color, bgcolor);
+    x2 = x+(w-w2)/2;
+    y2 = y+(h-inf.height)/2;
+    h2 = inf.height;
+
+    //lcd_fill_rect(x, y, x2-x, h, LCD_BC);
+    //lcd_fill_rect(x2+w2, y, w-w2-(x2-x), h, LCD_BC);
+
+    //lcd_fill_rect(x2, y, w2, y2-y, LCD_BC);
+    //lcd_fill_rect(x2, y2+h2, w2, h-h2-(y2-y), LCD_BC);
+    
+    lcd_draw_string(x2, y2, w2, h2, str, font, color, bgcolor);
 }
+
 
 

@@ -3,20 +3,21 @@
 #include <string.h>
 #include "queue.h"
 
-static int do_iterate(queue_t *q, void *n, iterater iter)
+static int do_iterate(queue_t *q, node_t *n, qiterater iter)
 {
-    int i,o;
+    int i,o,r=-1;
     void *n2;
 
     for(i=0; i<q->size; i++) {
         o = (q->head+i)%q->max;
         n2 = &q->nodes[o];
-        if(q->quit || iter(q, i, n, n2)) {
+        r = iter(q, i, n, n2);
+        if(q->quit || r>=0) {
             break;
         }
     }
 
-    return 0;
+    return r;
 }
 queue_t* queue_init(int max, int node_size)
 {
@@ -24,12 +25,17 @@ queue_t* queue_init(int max, int node_size)
     void *p;
 	queue_t *q = (queue_t*)malloc(sizeof(queue_t));
 	if(!q) {
-        return 0;
+        return NULL;
     }
     
     p = calloc(1, max*node_size);
+    if(!p) {
+        return NULL;
+    }
+
+    q->nodes = (node_t**)p;
     for(i=0; i<max; i++) {
-        q->nodes[i] = p+i*node_size;
+        q->nodes[i] = (node_t*)(p+i*node_size);
     }
 	q->max  = max;
 	q->size = 0;
@@ -69,7 +75,7 @@ int queue_capacity(queue_t *q)
 }
 
 
-int queue_put(queue_t *q, void *n, iterater iter)
+int queue_put(queue_t *q, node_t *n, qiterater iter)
 {
     int x=-1;
 
@@ -94,7 +100,7 @@ int queue_put(queue_t *q, void *n, iterater iter)
 }
 
  
-int queue_get(queue_t *q, void *n, qiterater iter)
+int queue_get(queue_t *q, node_t *n, qiterater iter)
 {
     int i;
 
@@ -116,6 +122,7 @@ int queue_get(queue_t *q, void *n, qiterater iter)
     }
     
     memcpy(n, q->nodes[i], q->node_size);
+    //memset(q->nodes[i]->ptr, 0, q->nodes[i]->len);
 	
 	q->size--;
     q->locked = 0;
@@ -124,7 +131,7 @@ int queue_get(queue_t *q, void *n, qiterater iter)
 }
 
 
-int queue_iterate(queue_t *q, void *n, qiterater iter)
+int queue_iterate(queue_t *q, node_t *n, qiterater iter)
 {
     int r;
 

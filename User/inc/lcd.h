@@ -22,6 +22,15 @@
 #define LCD_WIDTH        320
 #define LCD_HEIGHT       240
 
+typedef struct {
+    u16 x;
+    u16 y;
+    u16 w;
+    u16 h;
+}rect_t;
+
+
+
 void lcd_init(void);
 void lcd_clear(u16 color);
 void lcd_draw_point(u16 x, u16 y, u16 color);
