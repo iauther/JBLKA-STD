@@ -411,7 +411,7 @@ int dsp_version(void)
     u16 tmp[10];
     
     lock_on(LOCK_DSP);
-    gDspBuf.cmd.ID = CMD_ID_UpdataDSP;
+    gDspBuf.cmd.ID = CMD_ID_DSPVer;
     gDspBuf.cmd.Len = 1;
     gDspBuf.cmd.Ch = 0;
     gDspBuf.cmd.DataPtr = tmp;
