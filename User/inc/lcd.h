@@ -33,6 +33,7 @@ typedef struct {
 
 void lcd_init(void);
 void lcd_clear(u16 color);
+void lcd_set_bright(u8 bright);
 void lcd_draw_point(u16 x, u16 y, u16 color);
 void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color);
 void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor);

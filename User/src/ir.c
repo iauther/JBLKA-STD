@@ -23,7 +23,6 @@
 #define in_range(v,min,max) (v>min && v<max)
 #define IR_ADDR             0x88
 #define IR_TIM              TIM2
-#define IR_LEVEL()          GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_11)
 
 
 ircode_t irCode;
@@ -68,27 +67,39 @@ static u8 get_addr(u32 v)
         return 0;
 }
 
+static void ir_reset(void)
+{
+    pIR->htime = 0;
+    pIR->ltime = 0;
+    pIR->started = 0;
+    pIR->polarity = TIM_ICPolarity_Falling;
+}
+
 	 
 void TIM2_IRQHandler(void)
 {
+    u16 polarity;
+
     if(TIM_GetITStatus(IR_TIM, TIM_IT_Update)!=RESET) {
-		pIR->htime = 0;
-        pIR->ltime = 0;
-        pIR->started = 0;
+		ir_reset();
 	}
 
     if(TIM_GetITStatus(IR_TIM, TIM_IT_CC4)!=RESET) {
-		if(IR_LEVEL()) {//上升沿捕获，//红外数据输入脚
-            TIM_OC4PolarityConfig(IR_TIM, TIM_ICPolarity_Falling);	
+    //if(TIM_GetITStatus(IR_TIM, TIM_IT_CC1|TIM_IT_CC2|TIM_IT_CC3|TIM_IT_CC4) == SET) {
+
+		if(pIR->polarity==TIM_ICPolarity_Falling) {
+            polarity = TIM_ICPolarity_Rising;
             if(pIR->started==1) {
-                pIR->ltime = TIM_GetCapture4(IR_TIM);
+                pIR->htime = TIM_GetCapture4(IR_TIM);
             }
         }
         else {
-            TIM_OC4PolarityConfig(IR_TIM, TIM_ICPolarity_Rising);
-            pIR->htime = TIM_GetCapture4(IR_TIM);
+            polarity = TIM_ICPolarity_Falling;
             if(pIR->started==0) pIR->started = 1;
+            pIR->ltime = TIM_GetCapture4(IR_TIM);
         }
+        TIM_SetCounter(IR_TIM, 0);
+        TIM_OC4PolarityConfig(IR_TIM, polarity);
 
         if(in_range(pIR->htime, 8500, 9500) && in_range(pIR->ltime, 4000, 5000) ) {         //判断是否为引导码(高9ms, 低4.5ms)
             pIR->key = 0;  //同步码
@@ -99,14 +110,12 @@ void TIM2_IRQHandler(void)
              pIR->repeat = 1;
         }
 
-        /********************************* 接收数据 *********************************/
-        if(IR_LEVEL()==0) {
-            if(in_range(pIR->htime, 450, 650) && in_range(pIR->ltime, 450, 650) ) {           //高低电平时间都为560us, 则该位为0
-                pIR->key &= ~(1<pIR->bits++);
-            }
-            else if(in_range(pIR->htime, 450, 650) && in_range(pIR->ltime, 1450, 1750) ) {    //高电平时间560ms,低电平1690us, 则该位为1
-                pIR->key |= 1<<pIR->bits++;
-            }
+        /********************************* 处理数据 *********************************/
+        if(in_range(pIR->htime, 450, 650) && in_range(pIR->ltime, 450, 650) ) {           //高低电平时间都为560us, 则该位为0
+            pIR->key &= ~(1<pIR->bits++);
+        }
+        else if(in_range(pIR->htime, 450, 650) && in_range(pIR->ltime, 1450, 1750) ) {    //高电平时间560ms,低电平1690us, 则该位为1
+            pIR->key |= 1<<pIR->bits++;
         }
         
         if(pIR->bits==32 || pIR->repeat==1) {
@@ -123,11 +132,10 @@ void TIM2_IRQHandler(void)
             e.evt = EVT_KEY;
             gui_post_evt(&e);
 #endif
-        }
-
-        TIM_SetCounter(IR_TIM, 0);	
+        }  
     }
 
+    pIR->polarity = polarity;
 	TIM_ClearITPendingBit(IR_TIM, TIM_IT_Update|TIM_IT_CC4);	 	    
 }
 
@@ -138,15 +146,18 @@ int ir_init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
-	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 	TIM_ICInitTypeDef  TIM_ICInitStructure;  
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); //使能PORTB时钟 
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);	//TIM2 时钟使能 
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);	//TIM2 时钟使能 
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO|RCC_APB2Periph_GPIOB, ENABLE); //使能PORTB时钟 
+
+    ir_reset();
+    TIM_DeInit(IR_TIM);  
 
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;				 //PB11 输入 
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; 		    //上拉输入 
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; 
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 	//GPIO_SetBits(GPIOB, GPIO_Pin_11);	//初始化GPIOB11
 
@@ -156,22 +167,29 @@ int ir_init(void)
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  //TIM向上计数模式
 	TIM_TimeBaseInit(IR_TIM, &TIM_TimeBaseStructure); //根据指定的参数初始化TIMx
 
-	TIM_ICInitStructure.TIM_Channel = TIM_Channel_4;  // 选择输入端 IC4映射到TI4上
-	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//上升沿捕获
+    TIM_ICInitStructure.TIM_Channel = TIM_Channel_4;
+	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Falling;//TIM_ICPolarity_Falling;
 	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
-	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //配置输入分频,不分频 
-	TIM_ICInitStructure.TIM_ICFilter = 0x03;//IC4F=0011 配置输入滤波器 8个定时器时钟周期滤波
-	TIM_ICInit(IR_TIM, &TIM_ICInitStructure);//初始化定时器输入捕获通道
-	TIM_Cmd(IR_TIM,ENABLE ); 	//使能定时器4
+	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
+	TIM_ICInitStructure.TIM_ICFilter = 0;//IC4F=0011 配置输入滤波器 8个定时器时钟周期滤波
+	TIM_ICInit(IR_TIM, &TIM_ICInitStructure);
 
-	NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn;  //TIM3中断
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;  //先占优先级0级
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;  //从优先级3级
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQ通道被使能
-	NVIC_Init(&NVIC_InitStructure);  //根据NVIC_InitStruct中指定的参数初始化外设NVIC寄存器	
+    //TIM_SelectInputTrigger(IR_TIM, TIM_TS_TI1FP1);  //选择输入触发源---TIM经滤波定时器输入2
+    //TIM_SelectSlaveMode(IR_TIM, TIM_SlaveMode_Reset);                       //复位模式为从模式
+    //TIM_SelectMasterSlaveMode(IR_TIM, TIM_MasterSlaveMode_Enable);          //
 
-	TIM_ITConfig(IR_TIM, TIM_IT_Update|TIM_IT_CC4,ENABLE);//允许更新中断 ,允许CC4IE捕获中断	
+	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
 
+    //TIM_ClearFlag(IR_TIM, TIM_FLAG_Update|TIM_IT_CC4);
+    //TIM_ClearITPendingBit(IR_TIM, TIM_IT_Update|TIM_IT_CC4);
+	//TIM_ITConfig(IR_TIM, TIM_IT_Update|TIM_IT_CC1|TIM_IT_CC2|TIM_IT_CC3|TIM_IT_CC4, ENABLE);
+    TIM_ITConfig(IR_TIM, TIM_IT_Update|TIM_IT_CC4, ENABLE);
+	TIM_Cmd(IR_TIM, ENABLE);
+    
     return 0;
 }
 

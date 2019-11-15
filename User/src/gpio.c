@@ -39,12 +39,6 @@ int gpio_init(void)
     init.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(GPIOA, &init);
 
-    //gpio b
-    init.GPIO_Pin = GPIO_Pin_11;
-    init.GPIO_Mode = GPIO_Mode_AF_PP;
-    init.GPIO_Speed = GPIO_Speed_2MHz;
-    GPIO_Init(GPIOB, &init);
-
     init.GPIO_Pin = GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15;
     init.GPIO_Mode = GPIO_Mode_AF_PP;
     init.GPIO_Speed = GPIO_Speed_50MHz;

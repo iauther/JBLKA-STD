@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include "dac.h"
 #include "lcd.h"
 #include "font.h"
 #include "delay.h"
@@ -31,9 +32,9 @@ static void lcd_gpio_init(void)
     RCC_APB2PeriphClockCmd(	RCC_APB2Periph_GPIOB, ENABLE );
     RCC_APB2PeriphClockCmd(	RCC_APB2Periph_GPIOC, ENABLE );
 
-    LCD_PWR(0);LCD_CS(0);LCD_RST(0);LCD_RS(0);
+    LCD_CS(0);LCD_RST(0);LCD_RS(0);
 
-  	gpio_output_set(LCD_PWR_GRP, LCD_PWR_PIN);
+  	//gpio_output_set(LCD_PWR_GRP, LCD_PWR_PIN);
     gpio_output_set(LCD_RST_GRP, LCD_RST_PIN);
     gpio_output_set(LCD_RS_GRP, LCD_RS_PIN);
     gpio_output_set(LCD_CS_GRP, LCD_CS_PIN);
@@ -152,10 +153,10 @@ static void lcd_display(int on)
 {
     if(on) {
         lcd_write_cmd(0x29);
-        LCD_PWR(1); 
+        lcd_set_bright(200); 
     }
     else {
-        LCD_PWR(0); 
+        lcd_set_bright(0);
         lcd_write_cmd(0x28);
     }
 }
@@ -284,6 +285,13 @@ void lcd_clear(u16 color)
 }
 
 
+void lcd_set_bright(u8 bright)
+{
+    dac_set(DAC_CH2, (bright*4096)/256);
+}
+
+
+
 inline void lcd_draw_point(u16 x, u16 y, u16 color)
 {
     u8 tmp[2];
@@ -382,8 +390,7 @@ void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor)
     font_info_t inf = font_get(font);
     
     c = c - ' ';    /* 得到偏移后的值（ASCII字库是从空格开始取模，所以-' '就是对应字符的字库） */
-    for(t = 0; t < inf.size; t++)  /*遍历打印所有像素点到LCD */
-    {   
+    for(t = 0; t < inf.size; t++) { /*遍历打印所有像素点到LCD */
         if(FONT_16 == font) {
             temp = font_1608[c][t];   /* 调用1608字体 */
         }
@@ -399,8 +406,8 @@ void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor)
         else {   
             return;     /* 没有找到对应的字库 */
         }
-        for(t1 = 0; t1 < 8; t1++)   /* 打印一个像素点到液晶 */
-        {               
+        for(t1 = 0; t1 < 8; t1++) { /* 打印一个像素点到液晶 */
+                       
             if(temp & 0x80) {
                 lcd_draw_point(x, y, color);
             }
@@ -411,16 +418,13 @@ void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor)
             temp <<= 1;
             y++;
             
-            if(y >= LCD_HEIGHT)
-            {
+            if(y >= LCD_HEIGHT) {
                 return;     /* 超区域了 */
             }
-            if((y - y0) == inf.height)
-            {
+            if((y - y0) == inf.height) {
                 y = y0;
                 x++;
-                if(x >= LCD_WIDTH)
-                {
+                if(x >= LCD_WIDTH) {
                     return; /* 超区域了 */
                 }
                 break;
@@ -437,17 +441,13 @@ void lcd_draw_string(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u1
     
     w += x;
     h += y;
-    
-    while((*str<='~') && (*str>=' '))       /* 判断是不是非法字符! */
-    {       
-        if(x >= w)
-        {
+    while((*str<='~') && (*str>=' ')) {       /* 判断是不是非法字符! */
+        if(x >= w) {
             x = x0; 
             y += inf.height;
         }
         
-        if(y >= h)
-        {   
+        if(y >= h) {   
             break;
         }
         lcd_draw_char(x, y, *str, font, color, bgcolor);

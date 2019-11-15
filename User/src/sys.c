@@ -108,11 +108,9 @@ int sys_init(void)
 
     fan_init();
     lcd_init();
-    ir_init();
-
     usbd_init();
-
     do_config();
+    ir_init();
 
     return 0;
 }

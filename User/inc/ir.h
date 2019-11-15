@@ -9,7 +9,8 @@ typedef struct {
     u16  ltime;     //低电平时间,单位us
 	u8   bits;
 	u8   started;
-    u8   repeat;	
+    u8   repeat;
+    u16  polarity;
 }ircode_t;
  
 typedef struct {
