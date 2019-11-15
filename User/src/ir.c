@@ -146,9 +146,9 @@ int ir_init(void)
 
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;				 //PB11 输入 
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; 		    //上拉输入 
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
-	GPIO_SetBits(GPIOB, GPIO_Pin_11);	//初始化GPIOB11
+	//GPIO_SetBits(GPIOB, GPIO_Pin_11);	//初始化GPIOB11
 
 	TIM_TimeBaseStructure.TIM_Period = 0xFFFF;//10000; //设定计数器自动重装值 最大值  
 	TIM_TimeBaseStructure.TIM_Prescaler = 71; 	//预分频器,1M的计数频率,1us加1.

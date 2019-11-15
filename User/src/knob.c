@@ -110,14 +110,11 @@ static void knob_tmr_cb(void)
         node_t n;
         evt_gui_t e={0};
 
+        e.evt = EVT_KEY;
         n.ptr = &e.key;
         n.len = sizeof(e.key);
         r = queue_get(kq, &n);
         if(r==0) {
-            e.evt = EVT_KEY;
-            e.key.src = SRC_KNOB;
-            e.key.value = keyPool[knobValue];
-            e.key.times = keyTimes[knobValue];
             gui_post_evt(&e);
         }
     }

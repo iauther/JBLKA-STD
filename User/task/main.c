@@ -337,10 +337,9 @@ int main(void)
 {
     NVIC_SetVectorTable (NVIC_VectTab_FLASH, APP_OFFSET);
     __enable_irq();
+    sys_init();
 
 #ifdef RTX
-	sys_init();
-
     //SystemCoreClockUpdate();
     osKernelInitialize();
     
@@ -349,7 +348,6 @@ int main(void)
     osThreadNew(com_task, NULL, NULL);
     osKernelStart();
 #else
-    sys_init();
 	tim_init(TIMER3, 100, poll_cb);
 
 	while(1) {

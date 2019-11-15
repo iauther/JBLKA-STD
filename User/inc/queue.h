@@ -12,7 +12,7 @@ typedef struct {
 
     int         quit;
     int         locked;
-    int         node_size;
+    int         bsz;
     
 }queue_t;
 
@@ -20,7 +20,7 @@ typedef struct {
 typedef int (*qiterater)(queue_t *q, int index, node_t *n, node_t *n2);
 
 
-queue_t* queue_init(int max, int node_size);
+queue_t* queue_init(int max, int bsz);
 
 int queue_free(queue_t **q);
 

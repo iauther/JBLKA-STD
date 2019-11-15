@@ -96,7 +96,7 @@ static int do_config(void)
 
 int sys_init(void)
 {
-    rcc_init();
+    //rcc_init();
     gpio_init();
     
     lock_init();
