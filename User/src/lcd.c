@@ -8,6 +8,8 @@
 #include "stm32f10x_gpio.h"
 #include "config.h"
 
+#define BACKLIGHT_USE_DAC
+
 #define LCD_PWR(n)  (n?GPIO_WriteBit(LCD_PWR_GRP, LCD_PWR_PIN, Bit_SET):GPIO_WriteBit(LCD_PWR_GRP, LCD_PWR_PIN, Bit_RESET))
 #define LCD_RST(n)  (n?GPIO_WriteBit(LCD_RST_GRP, LCD_RST_PIN, Bit_SET):GPIO_WriteBit(LCD_RST_GRP, LCD_RST_PIN, Bit_RESET))
 #define LCD_RS(n)   (n?GPIO_WriteBit(LCD_RS_GRP, LCD_RS_PIN, Bit_SET):GPIO_WriteBit(LCD_RS_GRP, LCD_RS_PIN, Bit_RESET))
@@ -34,7 +36,11 @@ static void lcd_gpio_init(void)
 
     LCD_CS(0);LCD_RST(0);LCD_RS(0);
 
-  	//gpio_output_set(LCD_PWR_GRP, LCD_PWR_PIN);
+#ifdef BACKLIGHT_USE_DAC
+    dac_init(DAC_CH2);
+#else
+  	gpio_output_set(LCD_PWR_GRP, LCD_PWR_PIN);
+#endif
     gpio_output_set(LCD_RST_GRP, LCD_RST_PIN);
     gpio_output_set(LCD_RS_GRP, LCD_RS_PIN);
     gpio_output_set(LCD_CS_GRP, LCD_CS_PIN);
@@ -153,7 +159,7 @@ static void lcd_display(int on)
 {
     if(on) {
         lcd_write_cmd(0x29);
-        lcd_set_bright(200); 
+        lcd_set_bright(20);
     }
     else {
         lcd_set_bright(0);
@@ -285,9 +291,17 @@ void lcd_clear(u16 color)
 }
 
 
-void lcd_set_bright(u8 bright)
+void lcd_set_bright(u8 percent)
 {
-    dac_set(DAC_CH2, (bright*4096)/256);
+    if(percent>100) {
+        return;
+    }
+
+#ifdef BACKLIGHT_USE_DAC
+    dac_set(DAC_CH2, (percent*4096)/100);
+#else
+    LCD_PWR(percent);
+#endif
 }
 
 

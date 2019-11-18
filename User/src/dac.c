@@ -6,7 +6,7 @@ int dac_init(u8 ch)
 {
     u32 chn;
     GPIO_InitTypeDef x1={0};
-    DAC_InitTypeDef x2={0};
+    DAC_InitTypeDef  x2={0};
     
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
@@ -17,9 +17,9 @@ int dac_init(u8 ch)
     GPIO_Init(GPIOA, &x1);
     //DAC_DeInit();
     
-    x2.DAC_Trigger = DAC_Trigger_Software;
+    x2.DAC_Trigger = DAC_Trigger_None;//DAC_Trigger_Software;
     x2.DAC_WaveGeneration = DAC_WaveGeneration_None;
-    x2.DAC_LFSRUnmask_TriangleAmplitude = DAC_LFSRUnmask_Bits11_0;
+    x2.DAC_LFSRUnmask_TriangleAmplitude = DAC_LFSRUnmask_Bit0;//DAC_LFSRUnmask_Bits11_0;
     x2.DAC_OutputBuffer = DAC_OutputBuffer_Enable ;
 
     chn = (ch==DAC_CH1)?DAC_Channel_1:DAC_Channel_2;
@@ -32,19 +32,17 @@ int dac_init(u8 ch)
 
 int dac_set(u8 ch, u16 v)
 {
-    u32  chn;
-    u32 tmp;
-
-    if(v>3300) {
+    if(v>0xfff) {
         return -1;
     }
 
-    tmp = v*4096;
-    tmp /= 3300;
-
-    chn = (ch==DAC_CH1)?DAC_Channel_1:DAC_Channel_2;
-    DAC_SetChannel1Data(DAC_Align_12b_R, (u16)tmp);
-    DAC_SoftwareTriggerCmd(chn, ENABLE);
+    if(ch==DAC_CH1) {
+        DAC_SetChannel1Data(DAC_Align_12b_R, v);
+    }
+    else {
+        DAC_SetChannel2Data(DAC_Align_12b_R, v);
+    }
+    //DAC_SoftwareTriggerCmd(chn, ENABLE);
     return 0;
 }
 

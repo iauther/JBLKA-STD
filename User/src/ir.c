@@ -23,6 +23,7 @@
 #define in_range(v,min,max) (v>min && v<max)
 #define IR_ADDR             0x88
 #define IR_TIM              TIM2
+#define IR_TIM_CCx          TIM_IT_CC4
 
 
 ircode_t irCode;
@@ -84,7 +85,7 @@ void TIM2_IRQHandler(void)
 		ir_reset();
 	}
 
-    if(TIM_GetITStatus(IR_TIM, TIM_IT_CC4)!=RESET) {
+    if(TIM_GetITStatus(IR_TIM, IR_TIM_CCx)!=RESET) {
     //if(TIM_GetITStatus(IR_TIM, TIM_IT_CC1|TIM_IT_CC2|TIM_IT_CC3|TIM_IT_CC4) == SET) {
 
 		if(pIR->polarity==TIM_ICPolarity_Falling) {
@@ -99,7 +100,7 @@ void TIM2_IRQHandler(void)
             pIR->ltime = TIM_GetCapture4(IR_TIM);
         }
         TIM_SetCounter(IR_TIM, 0);
-        TIM_OC4PolarityConfig(IR_TIM, polarity);
+        //TIM_OC4PolarityConfig(IR_TIM, polarity);
 
         if(in_range(pIR->htime, 8500, 9500) && in_range(pIR->ltime, 4000, 5000) ) {         //判断是否为引导码(高9ms, 低4.5ms)
             pIR->key = 0;  //同步码
@@ -136,7 +137,7 @@ void TIM2_IRQHandler(void)
     }
 
     pIR->polarity = polarity;
-	TIM_ClearITPendingBit(IR_TIM, TIM_IT_Update|TIM_IT_CC4);	 	    
+	TIM_ClearITPendingBit(IR_TIM, TIM_IT_Update|IR_TIM_CCx);	 	    
 }
 
 
@@ -149,34 +150,35 @@ int ir_init(void)
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 	TIM_ICInitTypeDef  TIM_ICInitStructure;  
 
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);	//TIM2 时钟使能 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO|RCC_APB2Periph_GPIOB, ENABLE); //使能PORTB时钟 
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 
     ir_reset();
-    TIM_DeInit(IR_TIM);  
+    //TIM_DeInit(IR_TIM);
+    //NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;				 //PB11 输入 
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
-	//GPIO_SetBits(GPIOB, GPIO_Pin_11);	//初始化GPIOB11
+	//GPIO_SetBits(GPIOB, GPIO_Pin_11);
 
-	TIM_TimeBaseStructure.TIM_Period = 0xFFFF;//10000; //设定计数器自动重装值 最大值  
-	TIM_TimeBaseStructure.TIM_Prescaler = 71; 	//预分频器,1M的计数频率,1us加1.
-	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; //设置时钟分割:TDTS = Tck_tim
-	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  //TIM向上计数模式
-	TIM_TimeBaseInit(IR_TIM, &TIM_TimeBaseStructure); //根据指定的参数初始化TIMx
+	TIM_TimeBaseStructure.TIM_Period = 0xFFFF;
+	TIM_TimeBaseStructure.TIM_Prescaler = 719;
+	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInit(IR_TIM, &TIM_TimeBaseStructure);
 
     TIM_ICInitStructure.TIM_Channel = TIM_Channel_4;
-	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Falling;//TIM_ICPolarity_Falling;
+	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_BothEdge;//TIM_ICPolarity_Falling;
 	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
 	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
-	TIM_ICInitStructure.TIM_ICFilter = 0;//IC4F=0011 配置输入滤波器 8个定时器时钟周期滤波
+	TIM_ICInitStructure.TIM_ICFilter = 0;
 	TIM_ICInit(IR_TIM, &TIM_ICInitStructure);
 
-    //TIM_SelectInputTrigger(IR_TIM, TIM_TS_TI1FP1);  //选择输入触发源---TIM经滤波定时器输入2
-    //TIM_SelectSlaveMode(IR_TIM, TIM_SlaveMode_Reset);                       //复位模式为从模式
-    //TIM_SelectMasterSlaveMode(IR_TIM, TIM_MasterSlaveMode_Enable);          //
+    //TIM_SelectInputTrigger(IR_TIM, TIM_TS_TI1FP1);
+    //TIM_SelectSlaveMode(IR_TIM, TIM_SlaveMode_Reset);
+    //TIM_SelectMasterSlaveMode(IR_TIM, TIM_MasterSlaveMode_Enable);
 
 	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;

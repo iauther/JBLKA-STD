@@ -21,11 +21,10 @@ int fan_set(u8 temp)
         dac_set(DAC_CH1, 0);
     }
     else if(temp>=TEMP_MAX){
-        dac_set(DAC_CH1, 3300);
+        dac_set(DAC_CH1, 0xfff);
     }
     else {
-        u16 mv=3300*(temp-40)/(TEMP_MAX-TEMP_MIN);
-        dac_set(DAC_CH1, mv);
+        dac_set(DAC_CH1, ((temp-40)*4096)/(TEMP_MAX-TEMP_MIN));
     }
 
     return 0;
