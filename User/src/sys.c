@@ -110,7 +110,7 @@ int sys_init(void)
     lcd_init();
     usbd_init();
     do_config();
-    ir_init();
+    //ir_init();
 
     return 0;
 }

@@ -10,6 +10,10 @@ static int msg_put(msg_t *m, void *ptr, int len)
 #ifdef RTX
     osStatus_t st;
     
+    if(!m->mq) {
+        return -1;
+    }
+
     st = osMessageQueuePut(m->mq, ptr, 0, 0);
     if(st!=osOK) {
         return -1;
@@ -41,6 +45,10 @@ int msg_send(msg_t *m, void *ptr, int len)
 {
     int r;
     
+    if(!m) {
+        return -1;
+    }
+
 #ifdef RTX
     osStatus_t st;
     r = msg_put(m, ptr, len);
@@ -57,6 +65,10 @@ int msg_post(msg_t *m, void *ptr, int len)
 {
     int r=0;
 
+    if(!m) {
+        return -1;
+    }
+
 #ifdef RTX
     r = msg_put(m, ptr, len);
 #endif
@@ -68,6 +80,10 @@ int msg_post(msg_t *m, void *ptr, int len)
 int msg_recv(msg_t *m, void *ptr, int *len)
 {
     int r=0;
+
+    if(!m) {
+        return -1;
+    }
 
 #ifdef RTX
     osStatus_t st;
@@ -82,6 +98,10 @@ int msg_recv(msg_t *m, void *ptr, int *len)
 int msg_ack(msg_t *m)
 {
     int r=0;
+
+    if(!m) {
+        return -1;
+    }
 
 #ifdef RTX
     osStatus_t st;
@@ -99,6 +119,10 @@ int msg_reset(msg_t *m)
 {
     int r=0;
 
+    if(!m) {
+        return -1;
+    }
+
 #ifdef RTX
     osStatus_t st;
     st = osMessageQueueReset(m->mq);
@@ -112,6 +136,10 @@ int msg_reset(msg_t *m)
 int msg_free(msg_t **m)
 {
     int r=0;
+
+    if(!m) {
+        return -1;
+    }
 
 #ifdef RTX
     osStatus_t st;

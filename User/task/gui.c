@@ -113,6 +113,10 @@ void gui_task(void *arg)
 
     //menu_init();
     gui_msg = msg_init(MSG_MAX, sizeof(e));
+    if(!gui_msg) {
+        return;
+    }
+
     while(1) {
         r = msg_recv(gui_msg, &e, NULL);
         if(r==0) {
@@ -132,7 +136,7 @@ void gui_task(void *arg)
                         break;
                     
                         case SRC_KNOB:
-                        knob_proc(k->value, 1);
+                        knob_proc(k->value, k->times);
                         break;
                     }
                     //menu_handle(k);

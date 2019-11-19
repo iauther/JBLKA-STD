@@ -171,6 +171,10 @@ void com_task(void *arg)
 
     //menu_init();
     com_msg = msg_init(MSG_MAX, sizeof(e));
+    if(!com_msg) {
+        return;
+    }
+
     while(1) {
         r = msg_recv(com_msg, &e, NULL);
         if(r==0) {

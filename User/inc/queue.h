@@ -4,7 +4,7 @@
 #include "types.h"
 
 typedef struct {
-	node_t     **nodes;		// array to store queue elements
+	node_t     *nodes;		// array to store queue elements
 	int         max;	    // maximum capacity of the queue
 	int         size;		// element counter in the queue
 	int         head;		// head points to head element in the queue (if any)

@@ -37,6 +37,10 @@ void dev_task(void *arg)
     osStatus_t st;
     
     dev_msg = msg_init(MSG_MAX, sizeof(e));
+    if(!dev_msg) {
+        return;
+    }
+
     dev_tmr = osTimerNew(tmr1_fun, osTimerPeriodic, NULL, NULL);
     osTimerStart(dev_tmr, 1000);
 

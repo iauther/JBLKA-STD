@@ -113,7 +113,7 @@ static void knob_tmr_cb(void)
         e.evt = EVT_KEY;
         n.ptr = &e.key;
         n.len = sizeof(e.key);
-        r = queue_get(kq, &n);
+        r = queue_get(kq, &n, NULL);
         if(r==0) {
             gui_post_evt(&e);
         }
