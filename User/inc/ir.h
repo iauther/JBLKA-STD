@@ -10,6 +10,7 @@ typedef struct {
 	u8   bits;
 	u8   started;
     u8   repeat;
+    u16  counter;
     u16  polarity;
 }ircode_t;
  

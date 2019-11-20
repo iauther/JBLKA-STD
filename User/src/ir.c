@@ -23,8 +23,7 @@
 #define in_range(v,min,max) (v>min && v<max)
 #define IR_ADDR             0x88
 #define IR_TIM              TIM2
-#define IR_TIM_CCx          TIM_IT_CC4
-
+#define IR_IDLE_LEVEL       1
 
 ircode_t irCode;
 ircode_t *pIR=&irCode;
@@ -73,34 +72,48 @@ static void ir_reset(void)
     pIR->htime = 0;
     pIR->ltime = 0;
     pIR->started = 0;
-    pIR->polarity = TIM_ICPolarity_Falling;
+    pIR->counter = 0;
+    pIR->polarity = (IR_IDLE_LEVEL?TIM_ICPolarity_Falling:TIM_ICPolarity_Rising);
 }
 
-	 
+int ttt=0; 
 void TIM2_IRQHandler(void)
 {
     u16 polarity;
+    
+    if(TIM_GetITStatus(IR_TIM, TIM_IT_Update)==SET) {
+        ir_reset();
+        TIM_ClearITPendingBit(IR_TIM, TIM_IT_Update);
+    }
 
-    if(TIM_GetITStatus(IR_TIM, TIM_IT_Update)!=RESET) {
-		ir_reset();
-	}
+    if(TIM_GetITStatus(IR_TIM, TIM_IT_CC4)==SET) {
 
-    if(TIM_GetITStatus(IR_TIM, IR_TIM_CCx)!=RESET) {
-    //if(TIM_GetITStatus(IR_TIM, TIM_IT_CC1|TIM_IT_CC2|TIM_IT_CC3|TIM_IT_CC4) == SET) {
-
-		if(pIR->polarity==TIM_ICPolarity_Falling) {
-            polarity = TIM_ICPolarity_Rising;
+        if(pIR->polarity==(IR_IDLE_LEVEL?TIM_ICPolarity_Falling:TIM_ICPolarity_Rising)) {
+            polarity = (IR_IDLE_LEVEL?TIM_ICPolarity_Rising:TIM_ICPolarity_Falling);
             if(pIR->started==1) {
-                pIR->htime = TIM_GetCapture4(IR_TIM);
+                pIR->ltime = TIM_GetCapture4(IR_TIM);
+            }
+            else {
+                pIR->ltime = 0;
             }
         }
         else {
-            polarity = TIM_ICPolarity_Falling;
+            polarity = (IR_IDLE_LEVEL?TIM_ICPolarity_Falling:TIM_ICPolarity_Rising);
             if(pIR->started==0) pIR->started = 1;
-            pIR->ltime = TIM_GetCapture4(IR_TIM);
+            pIR->htime = TIM_GetCapture4(IR_TIM);
         }
         TIM_SetCounter(IR_TIM, 0);
-        //TIM_OC4PolarityConfig(IR_TIM, polarity);
+        TIM_OC4PolarityConfig(IR_TIM, polarity);
+        TIM_ClearITPendingBit(IR_TIM, TIM_IT_CC4);
+        pIR->polarity = polarity;
+
+        if(pIR->started) {
+            pIR->counter++;
+        }
+
+        if(pIR->counter==0 || pIR->counter%2) {
+            return;
+        }
 
         if(in_range(pIR->htime, 8500, 9500) && in_range(pIR->ltime, 4000, 5000) ) {         //判断是否为引导码(高9ms, 低4.5ms)
             pIR->key = 0;  //同步码
@@ -133,11 +146,8 @@ void TIM2_IRQHandler(void)
             e.evt = EVT_KEY;
             gui_post_evt(&e);
 #endif
-        }  
-    }
-
-    pIR->polarity = polarity;
-	TIM_ClearITPendingBit(IR_TIM, TIM_IT_Update|IR_TIM_CCx);	 	    
+        } 
+    }  
 }
 
 
@@ -146,54 +156,59 @@ void TIM2_IRQHandler(void)
 int ir_init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
-	NVIC_InitTypeDef NVIC_InitStructure;
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-	TIM_ICInitTypeDef  TIM_ICInitStructure;  
-
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+    NVIC_InitTypeDef NVIC_InitStructure;
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    TIM_ICInitTypeDef  TIM_ICInitStructure;  
 
     ir_reset();
-    //TIM_DeInit(IR_TIM);
-    //NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+    GPIO_PinRemapConfig(GPIO_PartialRemap2_TIM2, ENABLE);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; 
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-	//GPIO_SetBits(GPIOB, GPIO_Pin_11);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 
-	TIM_TimeBaseStructure.TIM_Period = 0xFFFF;
-	TIM_TimeBaseStructure.TIM_Prescaler = 719;
-	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
-	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInit(IR_TIM, &TIM_TimeBaseStructure);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; 
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
+    //GPIO_SetBits(GPIOB, GPIO_Pin_11);
+
+    TIM_TimeBaseStructure.TIM_Period = 0xFFFF;
+    TIM_TimeBaseStructure.TIM_Prescaler = 72-1;
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(IR_TIM, &TIM_TimeBaseStructure);
 
     TIM_ICInitStructure.TIM_Channel = TIM_Channel_4;
-	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_BothEdge;//TIM_ICPolarity_Falling;
-	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
-	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
-	TIM_ICInitStructure.TIM_ICFilter = 0;
-	TIM_ICInit(IR_TIM, &TIM_ICInitStructure);
+    TIM_ICInitStructure.TIM_ICPolarity = pIR->polarity;
+    TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
+    TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
+    TIM_ICInitStructure.TIM_ICFilter = 0;
+    TIM_ICInit(IR_TIM, &TIM_ICInitStructure);
 
     //TIM_SelectInputTrigger(IR_TIM, TIM_TS_TI1FP1);
     //TIM_SelectSlaveMode(IR_TIM, TIM_SlaveMode_Reset);
     //TIM_SelectMasterSlaveMode(IR_TIM, TIM_MasterSlaveMode_Enable);
 
-	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+    //NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 
     //TIM_ClearFlag(IR_TIM, TIM_FLAG_Update|TIM_IT_CC4);
     //TIM_ClearITPendingBit(IR_TIM, TIM_IT_Update|TIM_IT_CC4);
-	//TIM_ITConfig(IR_TIM, TIM_IT_Update|TIM_IT_CC1|TIM_IT_CC2|TIM_IT_CC3|TIM_IT_CC4, ENABLE);
+    //TIM_ITConfig(IR_TIM, TIM_IT_Update|TIM_IT_CC1|TIM_IT_CC2|TIM_IT_CC3|TIM_IT_CC4, ENABLE);
+
+    //TIM_ClearFlag(IR_TIM, TIM_IT_CC4);
+    //TIM_CCxCmd(IR_TIM, TIM_Channel_4, TIM_CCx_Enable);
     TIM_ITConfig(IR_TIM, TIM_IT_Update|TIM_IT_CC4, ENABLE);
-	TIM_Cmd(IR_TIM, ENABLE);
+    TIM_Cmd(IR_TIM, ENABLE);
     
     return 0;
 }
 
-
+//DMA0方式：
+//https://www.amobbs.com/thread-5696604-1-1.html?_dsign=2c6ac05f
 
