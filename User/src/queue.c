@@ -3,15 +3,15 @@
 #include <string.h>
 #include "queue.h"
 
-static int do_iterate(queue_t *q, node_t *n, qiterater iter)
+static int do_iterate(queue_t *q, void *p, qiterater iter)
 {
     int i,o,r=-1;
-    void *n2;
+    node_t *n;
 
     for(i=0; i<q->size; i++) {
         o = (q->head+i)%q->max;
-        n2 = &q->nodes[o];
-        r = iter(q, i, n, n2);
+        n = &q->nodes[o];
+        r = iter(q, i, p, n->ptr);
         if(q->quit || r>=0) {
             break;
         }
@@ -90,7 +90,7 @@ int queue_put(queue_t *q, node_t *n, qiterater iter)
     
     q->locked = 1;
     if(iter) {
-        i = do_iterate(q, n, iter);
+        i = do_iterate(q, n->ptr, iter);
     }
 
     if(i<0) {       //not find
@@ -117,7 +117,7 @@ int queue_get(queue_t *q, node_t *n, qiterater iter)
     
     q->locked = 1;
     if(iter) {
-        i = do_iterate(q, n, iter);
+        i = do_iterate(q, n->ptr, iter);
         if(i<0) {
             q->locked = 0;
             return -1;

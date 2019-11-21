@@ -17,7 +17,7 @@ typedef struct {
 }queue_t;
 
 
-typedef int (*qiterater)(queue_t *q, int index, node_t *n, node_t *n2);
+typedef int (*qiterater)(queue_t *q, int index, void *p1, void *p2);
 
 
 queue_t* queue_init(int max, int bsz);

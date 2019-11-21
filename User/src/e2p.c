@@ -53,9 +53,12 @@ int e2p_init(void)
 }
 
 
-static int ifind(queue_t *q, int index, node_t *n, node_t *n2)
+static int ifind(queue_t *q, int index, void *p1, void *p2)
 {
-    if(n->ptr==n2->ptr && n->len==n2->len) {
+    node_t *n1=(node_t*)p1;
+    node_t *n2=(node_t*)p2;
+
+    if(n1->ptr==n2->ptr && n1->len==n2->len) {
         return index;
     }
 
@@ -64,9 +67,12 @@ static int ifind(queue_t *q, int index, node_t *n, node_t *n2)
 int e2p_put(node_t *n)
 {
     int r;
+    node_t n2;
 
     lock_on(LOCK_E2P);
-    r = queue_put(eq, n, ifind);
+    n2.ptr = n;
+    n2.len = sizeof(node_t);
+    r = queue_put(eq, &n2, ifind);
     lock_off(LOCK_E2P);
 
     return r;
@@ -76,8 +82,11 @@ int e2p_put(node_t *n)
 int e2p_get(node_t *n)
 {
     int r;
+    node_t n2;
 
     lock_on(LOCK_E2P);
+    n2.ptr = n;
+    n2.len = sizeof(node_t);
     r = queue_get(eq, n, NULL);
     lock_off(LOCK_E2P);
 

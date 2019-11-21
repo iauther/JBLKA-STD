@@ -69,9 +69,10 @@ static void keyPool_init(void)
 }
 
 
-static int kfind(queue_t *q, int index, node_t *n, node_t *n2)
+static int kfind(queue_t *q, int index, void *p1, void *p2)
 {
-    key_t *k1=(key_t*)n->ptr, *k2=(key_t*)n2->ptr;
+    key_t *k1=(key_t*)p1;
+    key_t *k2=(key_t*)p2;
 
     if(k1->value==k2->value) {
         k1->times += k2->times;
