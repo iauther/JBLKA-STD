@@ -1,5 +1,6 @@
 #include "device.h"
 #include "sys.h"
+#include "task.h"
 #include "usb_desc.h"
 #include "usb_lib.h"
 
@@ -34,28 +35,13 @@ int is_multipkts(packet_t *pkt)
 
 static int usb_send(u8 *data, u16 len)
 {
-    //u32 tx_status = 0 ;
-	//u32 tx_count  = 0 ;
-	//u32 i = 0;
-	//SetEPTxCount(ENDP2,0);
-
     UserToPMABufferCopy(data, ENDP2_TXADDR, len);
-    SetEPTxCount(ENDP2, REPORT_COUNT);
-    SetEPTxValid(ENDP2);
 
-#if 0
-    while(1) {
-		tx_status = GetEPTxStatus(ENDP2);
-		tx_count  = GetEPTxCount(ENDP2) ;
-		
-		if( (tx_status == 0x00000020) && (tx_count == 0x00000040)	)
-			return 0 ;
-		else 
-			i++ ; 
-		if(i>2000)
-			return -1 ;
-	}
-#endif
+
+    SetEPTxCount(ENDP2, REPORT_COUNT);
+
+
+    SetEPTxValid(ENDP2);
 
     return 0;
 }
@@ -65,25 +51,24 @@ static int usb_send(u8 *data, u16 len)
 
 int usbd_recv(void)
 {
+#ifdef RTX
+    {
+        evt_com_t e;
+        e.evt = EVT_HID;
+        PMAToUserBufferCopy(e.param.hid, ENDP1_RXADDR, REPORT_COUNT);
+        com_post_evt(&e);
+    }
+#else
     if(!usbRxFlag) {
         PMAToUserBufferCopy(usbRxBuf, ENDP1_RXADDR, REPORT_COUNT);
         usbRxFlag = 1;
     }
+#endif
     SetEPRxStatus(ENDP1, EP_RX_VALID);
 
 #if 0//def APP
 {
-    evt_t e;
-
-    e.evt = EVT_HID;
-    e.ptr = pRx;
-
-    if(is_multipkts(pRx)) {
-        com_send_evt(&e);
-    }
-    else {
-        dev_send_evt(&e);
-    }
+    
 }
 #endif
     return 0;

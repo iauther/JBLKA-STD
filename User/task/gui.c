@@ -3,6 +3,7 @@
 #define MSG_MAX         6
 
 #ifdef RTX
+extern paras_data_t gParams;
 msg_t *gui_msg=NULL;
 static void key_proc(u8 key)
 {
@@ -40,33 +41,90 @@ static void ir_proc(u8 key)
     int r;
     s16 g;
     node_t n;
+    dsp_data_t dd={0};
+    Dsp_Paras *dsp=&gParams.dsp;
 
     switch(key) {
         case KEY_LOCK:
-        break;
-        case KEY_INPUT:
+        {
+            //
+        }
         break;
 
-        case KEY_MUTE:  
+        case KEY_INPUT:
+        {
+            dsp->Array_Input.input = (dsp->Array_Input.input+1)%INPUT_MAX;
+            sys_set_input(dsp->Array_Input.input);
+            dd.id = CMD_ID_Input;
+            dd.dlen = sizeof(TypeS_Input);
+            r = dsp_send(&dd);
+            n.ptr = &dsp->Array_Input;
+            n.len = sizeof(TypeS_Input);
+        }
         break;
-        
+
+        case KEY_MUTE:
+        {
+            u8 i;
+            dd.id = CMD_ID_Mute;
+            for(i=0; i<Mute_CH_NUM; i++) {
+                dd.ch = i;
+                dd.dlen = sizeof(TypeS_Mute);
+                r = dsp_send(&dd);
+            }
+            n.ptr = dsp->Array_Mute;
+            n.len = sizeof(dsp->Array_Mute);
+        } 
+        break;
+
+#if 0        
         //player key
         case KEY_PREV:
         case KEY_NEXT:
         case KEY_PLAYPAUSE:
         case KEY_ONELOOP:
-        //do nothing
+        {
+            //
+        }
         break;
+#endif
         
         case KEY_MODE:
         case KEY_M1:
         case KEY_M2:
         case KEY_M3:
+        {
+            if(key==KEY_MODE) {
+                gParams.pre = (gParams.pre+1)%PRESET_MAX;
+            }
+            else {
+                gParams.pre = key-KEY_M1;
+            }
+            
+            paras_read_preset(gParams.pre, dsp);
+            r = dsp_download();
+            n.ptr = &gParams.pre;
+            n.len = sizeof(gParams.pre);
+        }
         break;
         
         case KEY_SHARP:      //#
         case KEY_0:          //
         case KEY_b:
+        if(key==KEY_SHARP) {
+            dsp->Array_PitchShift.PitchShift = (dsp->Array_PitchShift.PitchShift+1)%5;
+        }
+        else if(key==KEY_0) {
+            dsp->Array_PitchShift.PitchShift = 0;
+        }
+        else {
+            dsp->Array_PitchShift.PitchShift = (dsp->Array_PitchShift.PitchShift-1)%5;
+        }
+        dd.id = CMD_ID_PitchShift;
+        dd.dlen = sizeof(TypeS_PitchShift);
+        r = dsp_send(&dd);
+        n.ptr = &dsp->Array_PitchShift;
+        n.len = sizeof(dsp->Array_PitchShift);
         break;
         
         case KEY_MUSIC_UP:

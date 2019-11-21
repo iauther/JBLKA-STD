@@ -148,7 +148,7 @@ static void dsp_wait_started(void)
 static int dsp_write(dsp_buf_t *db, u8 wait)
 {
     int r;
-    u16 i, crc;
+    u16 crc;
     u16 *ptr = (u16*)db->cmd.DataPtr;
     u16 u16Len = db->cmd.Len/2;
 
@@ -157,8 +157,6 @@ static int dsp_write(dsp_buf_t *db, u8 wait)
     db->buf[2] = db->cmd.ID;
     db->buf[3] = db->cmd.Ch;
     db->buf[4] = db->cmd.No;
-    //for(i=0; i<u16Len; i++)
-    //    db->buf[5 + i] = *(ptr+i);
     memcpy(&db->buf[5], ptr, db->cmd.Len);
 
     crc = crc_calc(&db->buf[1], u16Len+ComHeadLen);
@@ -326,7 +324,7 @@ int dsp_download(void)
     return 0;
 }
 
-int dsp_reset_peq(eq_reset_t *rst)
+int dsp_reset_peq(eq_reset_t *rst, node_t *n)
 {
     u8 i;
     int r;
@@ -344,6 +342,11 @@ int dsp_reset_peq(eq_reset_t *rst)
     for(i=0; i<MaxEQBand; i++) {
         dsp.n = i;
         dsp_send(&dsp);
+    }
+
+    if(n) {
+        n->ptr = &gParams.dsp.Array_EQ[rst->ch];
+        n->len = sizeof(TypeS_EQ);
     }
 
 quit:

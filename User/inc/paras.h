@@ -16,7 +16,9 @@ int paras_write(void *p, int len);
 
 int paras_reset(void);
 
-int paras_save_preset(u8 index);
+int paras_read_preset(u8 index, Dsp_Paras *dsp);
+
+int paras_write_preset(u8 index, Dsp_Paras *dsp);
 
 int paras_update(packet_t *pkt, node_t *node);
 

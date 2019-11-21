@@ -500,7 +500,7 @@ int dsp_init(void);
 
 int dsp_reinit(void);
 
-int dsp_reset_peq(eq_reset_t *rst);
+int dsp_reset_peq(eq_reset_t *rst, node_t *n);
 
 int dsp_set_started(void);
 

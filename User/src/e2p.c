@@ -64,12 +64,9 @@ static int ifind(queue_t *q, int index, node_t *n, node_t *n2)
 int e2p_put(node_t *n)
 {
     int r;
-    node_t n2;
 
     lock_on(LOCK_E2P);
-    n2.ptr = n;
-    n2.len = sizeof(node_t);
-    r = queue_put(eq, &n2, ifind);
+    r = queue_put(eq, n, ifind);
     lock_off(LOCK_E2P);
 
     return r;
@@ -79,13 +76,9 @@ int e2p_put(node_t *n)
 int e2p_get(node_t *n)
 {
     int r;
-    node_t n2;
 
     lock_on(LOCK_E2P);
-    r = queue_get(eq, &n2, NULL);
-    if(r==0) {
-        memcpy(n, n2.ptr, n2.len);
-    }
+    r = queue_get(eq, n, NULL);
     lock_off(LOCK_E2P);
 
     return r;

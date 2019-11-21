@@ -129,7 +129,7 @@ int knob_init(void)
 
 #ifdef RTX
     kq = queue_init(KQ_MAX, sizeof(key_t));
-    tim_init(TIMER4, 10, knob_tmr_cb);
+    tim_init(TIMER4, 50, knob_tmr_cb);
 #endif
 
     return usart_init(KNOB_UART, &para);

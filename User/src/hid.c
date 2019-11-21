@@ -2,9 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "hid.h"
-#include "e2p.h"
 #include "usbd.h"
-//#include "flash.h"
+#include "paras.h"
 #include "config.h"
 #include "packet.h"
 
@@ -18,19 +17,6 @@ u8 hidBuf[3000];
 //paras_data_t gParams;
 //Dsp_Paras    gPresets[PRESET_MAX];
 //packet_t     *pTx = (packet_t*)&hidTxBuf[1];
-
-#ifdef APP
-static void preset_read(u8 index, Dsp_Paras *dp)
-{
-    u32 offset=sizeof(paras_data_t)+index*sizeof(Dsp_Paras);
-    e2p_read(offset, (u8*)dp, sizeof(Dsp_Paras));
-}
-static void preset_write(u8 index, Dsp_Paras *dp)
-{
-    u32 offset=sizeof(paras_data_t)+index*sizeof(Dsp_Paras);
-    e2p_write(offset, (u8*)dp, sizeof(Dsp_Paras));
-}
-#endif
 
 
 
@@ -70,7 +56,7 @@ void hid_pkt_init(int mode, u8 nck, packet_t *pkt)
 
             hd->ptr = hidBuf;
             if (mode == TX) {
-                preset_read(pre->index, (Dsp_Paras*)hd->ptr);
+                paras_read_preset(pre->index, (Dsp_Paras*)hd->ptr);
                 int more = (hd->length%PAYLOAD_LEN)>0?1:0;
                 hd->pkts = hd->length /PAYLOAD_LEN+more;
                 hd->onceLen = 0;

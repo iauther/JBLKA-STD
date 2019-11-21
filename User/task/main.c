@@ -119,6 +119,7 @@ static int hid_multi_proc(packet_t *pkt)
 {
     int r=0;
     u8  last;
+    node_t n;
 
     switch(pkt->type) {
         case TYPE_ACK:
@@ -134,7 +135,10 @@ static int hid_multi_proc(packet_t *pkt)
         {
             if(pkt->type==TYPE_EQRESET) {
                 eq_reset_t *rst=(eq_reset_t*)pkt->data;
-                dsp_reset_peq(rst);
+                r = dsp_reset_peq(rst, &n);
+                if(r==0) {
+                    e2p_put(&n);
+                }
             }
 
             if(pkt->dlen>0 && pkt->pkts>1) {

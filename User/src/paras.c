@@ -274,9 +274,24 @@ int paras_reset(void)
 }
 
 
-int paras_save_preset(u8 index)
+int paras_read_preset(u8 index, Dsp_Paras *dsp)
 {
-    u32 offset=sizeof(paras_data_t)+sizeof(u8)+sizeof(Dsp_Paras)*(index+1);
-    return e2p_write(offset, (u8*)&gParams, sizeof(paras_data_t));
+    if(index>=PRESET_MAX || !dsp) {
+        return -1;
+    }
+
+    u32 offset=sizeof(paras_data_t)+index*sizeof(Dsp_Paras);
+    return e2p_read(offset, (u8*)dsp, sizeof(Dsp_Paras));
+}
+
+
+int paras_write_preset(u8 index, Dsp_Paras *dsp)
+{
+    if(index>=PRESET_MAX || !dsp) {
+        return -1;
+    }
+
+    u32 offset=sizeof(paras_data_t)+index*sizeof(Dsp_Paras);
+    return e2p_write(offset, (u8*)dsp, sizeof(Dsp_Paras));
 }
 
