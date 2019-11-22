@@ -2,11 +2,11 @@
 #define __LOCK_H__
 
 #include "types.h"
-#include "cmsis_os2.h"
 
 enum {
     LOCK_DSP=0,
     LOCK_E2P,
+    LOCK_LCD,
     
     LOCK_MAX
 };

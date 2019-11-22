@@ -2,14 +2,6 @@
 #include "sys.h"
 
 
-static void adda_reset(void)      //PB5, 低电平复位，时间至少1秒，(开机默认低电平)
-{
-    GPIO_ResetBits(GPIOB, GPIO_Pin_5);
-    delay_ms(10);
-    GPIO_SetBits(GPIOB, GPIO_Pin_5);
-}
-
-
 static void rcc_init(void)
 {
     ErrorStatus HSEStartUpStatus;
@@ -76,23 +68,6 @@ static void rcc_init(void)
 
 
 ////////////////////////////////////////////////
-static int do_config(void)
-{
-#if 0
-    dsp_reset();
-#else
-    dsp_init();
-#endif
-    adda_reset();
-    delay_ms(2000);
-    //hdmi_reset(200);
-    sys_mute(0);
-
-    sys_set_iodat(0);
-    sys_set_input(gParams.dsp.Array_Input.input);
-    
-    return 0;
-}
 
 int sys_init(void)
 {
@@ -109,7 +84,6 @@ int sys_init(void)
     fan_init();
     lcd_init();
     usbd_init();
-    do_config();
     ir_init();
 
     return 0;

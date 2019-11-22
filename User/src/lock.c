@@ -1,4 +1,5 @@
 #include "lock.h"
+#include "cmsis_os2.h"
 
 osMutexId_t mutex[LOCK_MAX];
 

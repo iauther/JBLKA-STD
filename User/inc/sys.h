@@ -16,6 +16,11 @@
 #include "packet.h"
 #include "config.h"
 
+enum {
+    STATE_PC_TUNING,
+    STATE_UPGRADING,
+};
+
 
 int sys_init(void);
 

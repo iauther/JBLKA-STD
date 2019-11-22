@@ -3,6 +3,7 @@
 #include "dac.h"
 #include "lcd.h"
 #include "font.h"
+#include "lock.h"
 #include "delay.h"
 #include "stm32f10x_spi.h"
 #include "stm32f10x_gpio.h"
@@ -159,7 +160,7 @@ static void lcd_display(int on)
 {
     if(on) {
         lcd_write_cmd(0x29);
-        lcd_set_bright(20);
+        lcd_set_bright(100);
     }
     else {
         lcd_set_bright(0);
@@ -331,7 +332,7 @@ void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
     u16  x = 0, y = 0;
     u16  x_temp = 0, y_temp = 0;
 
-    /* 画斜线（Bresenham算法） */
+    /* 画斜线（Bresenham算法�?*/
     delta_x = x2 - x1;
     delta_y = y2 - y1;
     if(delta_x > 0) {
@@ -353,7 +354,7 @@ void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
         incy = 1;
     }
     else if(delta_y == 0) {
-        //水平斜线(水平线)
+        //水平斜线(水平�?
         incy = 0;
     }
     else {
@@ -362,7 +363,7 @@ void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
         delta_y = -delta_y;
     }           
     
-    /* 计算画笔打点距离(取两个间距中的最大值) */
+    /* 计算画笔打点距离(取两个间距中的最大�? */
     if(delta_x > delta_y) {
         distance = delta_x;
     }
@@ -370,14 +371,14 @@ void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
         distance = delta_y;
     }
     
-    /* 开始打点 */
+    /* 开始打�?*/
     x = x1;
     y = y1;
     //第一个点无效，所以t的次数加一
     for(t = 0; t <= distance + 1;t++) {
         lcd_draw_point(x, y, color);
     
-        /* 判断离实际值最近的像素点 */
+        /* 判断离实际值最近的像素�?*/
         x_temp += delta_x;  
         if(x_temp > distance) {
             //x方向越界，减去距离值，为下一次检测做准备
@@ -403,7 +404,7 @@ void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor)
     u16 y0 = y;
     font_info_t inf = font_get(font);
     
-    c = c - ' ';    /* 得到偏移后的值（ASCII字库是从空格开始取模，所以-' '就是对应字符的字库） */
+    c = c - ' ';    /* 得到偏移后的值（ASCII字库是从空格开始取模，所�?' '就是对应字符的字库） */
     for(t = 0; t < inf.size; t++) { /*遍历打印所有像素点到LCD */
         if(FONT_16 == font) {
             temp = font_1608[c][t];   /* 调用1608字体 */
@@ -412,15 +413,15 @@ void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor)
             temp = font_2412[c][t];   /* 调用2412字体 */
         }
         else if(FONT_32 == font) {
-            temp = font_3216[c][t];   /* 调用3216数码管字体 */
+            temp = font_3216[c][t];   /* 调用3216数码管字�?*/
         }
         else if(FONT_48 == font){
-            temp = font_4824[c][t];   /* 调用4824数码管字体 */
+            temp = font_4824[c][t];   /* 调用4824数码管字�?*/
         }
         else {   
-            return;     /* 没有找到对应的字库 */
+            return;     /* 没有找到对应的字�?*/
         }
-        for(t1 = 0; t1 < 8; t1++) { /* 打印一个像素点到液晶 */
+        for(t1 = 0; t1 < 8; t1++) { /* 打印一个像素点到液�?*/
                        
             if(temp & 0x80) {
                 lcd_draw_point(x, y, color);
@@ -455,7 +456,7 @@ void lcd_draw_string(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u1
     
     w += x;
     h += y;
-    while((*str<='~') && (*str>=' ')) {       /* 判断是不是非法字符! */
+    while((*str<='~') && (*str>=' ')) {       /* 判断是不是非法字�? */
         if(x >= w) {
             x = x0; 
             y += inf.height;
@@ -537,12 +538,14 @@ void lcd_draw_string_center(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 co
     y2 = y+(h-inf.height)/2;
     h2 = inf.height;
 
-    //lcd_fill_rect(x, y, x2-x, h, LCD_BC);
-    //lcd_fill_rect(x2+w2, y, w-w2-(x2-x), h, LCD_BC);
+#if 0
+    lcd_fill_rect(x, y, x2-x, h, LCD_BC);
+    lcd_fill_rect(x2+w2, y, w-w2-(x2-x), h, LCD_BC);
 
-    //lcd_fill_rect(x2, y, w2, y2-y, LCD_BC);
-    //lcd_fill_rect(x2, y2+h2, w2, h-h2-(y2-y), LCD_BC);
-    
+    lcd_fill_rect(x2, y, w2, y2-y, LCD_BC);
+    lcd_fill_rect(x2, y2+h2, w2, h-h2-(y2-y), LCD_BC);
+#endif
+
     lcd_draw_string(x2, y2, w2, h2, str, font, color, bgcolor);
 }
 

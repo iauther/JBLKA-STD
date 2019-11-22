@@ -10,8 +10,6 @@ enum {
     TOPBAR_REFRESH_INPUT  = 1<<2,
     TOPBAR_REFRESH_PRESET = 1<<3,
 
-    TOPBAR_REFRESH_TITLE  = 1<<4,
-
     TOPBAR_REFRESH_ALL    = 0xff,
 };
 

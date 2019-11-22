@@ -1,3 +1,4 @@
+#include "menu.h"
 #include "listitem.h"
 
 
@@ -17,7 +18,8 @@ listitem_t *listitem_init(rect_t *rect, u8 max)
     }
     
     l->rect = *rect;
-    //l->list = list_init(max);
+    l->list = list_init(max, sizeof(element_t));
+    l->focusId = 0;
     
     return 0;
 }
@@ -32,8 +34,10 @@ int listitem_free(listitem_t *l)
 
 int listitem_add(listitem_t *l, element_t *e)
 {
-    //list_add(l->list, e);
-    return 0;
+    node_t n;
+    n.ptr = e;
+    n.len = sizeof(element_t);
+    return list_add(l->list, -1, &n);
 }
 
 

@@ -22,6 +22,8 @@ typedef enum {
     TYPE_VERSION,
     TYPE_UPGRADE_REQ,
     TYPE_REBOOT,
+
+    TYPE_APP_EXIT=0xE0,             //pc application exit
 }eTYPE;
 
 typedef enum {

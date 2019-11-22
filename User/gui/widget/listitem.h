@@ -8,13 +8,14 @@ typedef struct {
     s8          id;
     s8          *txt;
     void        *data;
-} element_t; 
+}element_t; 
 
 typedef struct {
     u8      type;
     rect_t  rect;
     
     list_t  *list;
+    u8      focusId;
     u32     refreshFlag;
 }listitem_t;
 

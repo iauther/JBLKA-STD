@@ -40,7 +40,7 @@ int menu_clear(void)
 int menu_init(void)
 {
     topbar_init(TOPBAR_HEIGHT);
-    fn_funcs[gMenu].init(NULL);
+    //fn_funcs[gMenu].init(NULL);
     
     return 0;
 }

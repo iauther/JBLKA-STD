@@ -20,7 +20,7 @@ topbar_t mTopbar;
 static void topbar_clear(void)
 {
     rect_t *r = &mTopbar.rect;
-    lcd_fill_rect(r->x, r->y, r->w, r->h, BLACK);
+    lcd_fill_rect(r->x, r->y, r->w, r->h, LCD_BC);
 }
 
 static void show_temp(void)
@@ -46,24 +46,28 @@ static void show_bt(void)
 
 static void show_input(void)
 {
-    //rect_t rect={0};
+    u8 tmp[10];
+    const char *str[INPUT_MAX]={"VOD", "DVD", "BGM", "BT/USB", "OPT", "HIN", "HARC"};
+    rect_t r = mTopbar.rect;
+    u16 input=uiParams.dsp.music.input->input;
+
+    r.x += mTopbar.rect.w/2;
+    sprintf((char*)tmp, "%s", str[input]);
+    
+    lcd_draw_string_center(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC);
 }
 
 static void show_preset(void)
 {
-    //rect_t rect={0};
+    u8 tmp[10];
+    rect_t r = mTopbar.rect;
+
+    r.x += mTopbar.rect.w*3/4;
+    sprintf((char*)tmp, "%d", gParams.pre);
+    
+    lcd_draw_string_center(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC);
 }
 
-
-static int show_title(void)
-{
-    //rect_t r=mTopbar.rect;
-
-    //topbar_clear();
-    //lcd_draw_string();
-
-    return 0;
-}
 
 //////////////////////////////////////////////
 int topbar_init(u16 h)
@@ -76,7 +80,7 @@ int topbar_init(u16 h)
     mTopbar.pio  = uiParams.pio;
     mTopbar.stat = &gStatus;
     mTopbar.title = NULL;
-    mTopbar.refreshFlag = 0;
+    mTopbar.refreshFlag = TOPBAR_REFRESH_ALL;
     
     return 0;
 }
@@ -112,10 +116,7 @@ int topbar_refresh(void)
     if(mTopbar.refreshFlag & TOPBAR_REFRESH_PRESET) {
         show_preset();
     }
-
-    if(mTopbar.refreshFlag & TOPBAR_REFRESH_TITLE) {
-        show_title();
-    }
+    
     mTopbar.refreshFlag = 0;
 
     return 0;

@@ -1,4 +1,5 @@
 #include "task.h"
+#include "menu.h"
 
 #define MSG_MAX         6
 
@@ -170,6 +171,9 @@ void gui_task(void *arg)
     osStatus_t st;
 
     //menu_init();
+    //e.evt = EVT_REFRESH;
+    //gui_post_evt(&e);
+
     gui_msg = msg_init(MSG_MAX, sizeof(e));
     if(!gui_msg) {
         return;

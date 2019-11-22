@@ -155,4 +155,10 @@ int usbd_init(void)
     return 0;
 }
 
+int usbd_is_plugin(void)
+{
+    extern __IO uint32_t bDeviceState;
+    return (bDeviceState==5);   //CONFIGURED
+}
+
 

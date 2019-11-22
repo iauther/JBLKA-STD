@@ -87,7 +87,7 @@ int e2p_get(node_t *n)
     lock_on(LOCK_E2P);
     n2.ptr = n;
     n2.len = sizeof(node_t);
-    r = queue_get(eq, n, NULL);
+    r = queue_get(eq, &n2, NULL);
     lock_off(LOCK_E2P);
 
     return r;
