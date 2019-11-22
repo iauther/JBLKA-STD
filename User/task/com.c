@@ -1,35 +1,11 @@
 #include "task.h"
 
+
 #define MSG_MAX         6
 
 #ifdef RTX
 u8 gAppExit=1;
 msg_t *com_msg=NULL;
-
-static void adda_reset(void)      //PB5, 低电平复位，时间至少1秒，(开机默认低电平)
-{
-    GPIO_ResetBits(GPIOB, GPIO_Pin_5);
-    delay_ms(10);
-    GPIO_SetBits(GPIOB, GPIO_Pin_5);
-}
-static int audio_init(void)
-{
-#if 0
-    dsp_reset();
-#else
-    dsp_init();
-#endif
-    adda_reset();
-    delay_ms(2000);
-    //hdmi_reset(200);
-    sys_mute(0);
-
-    sys_set_iodat(0);
-    sys_set_input(gParams.dsp.Array_Input.input);
-    
-    return 0;
-}
-
 static int set_default(void)
 {
     node_t n;
@@ -203,7 +179,7 @@ void com_task(void *arg)
     evt_com_t e;
     osStatus_t st;
     
-    audio_init();
+    sys_audio_init();
     //menu_init();
 
     com_msg = msg_init(MSG_MAX, sizeof(e));

@@ -336,7 +336,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>USE_STDPERIPH_DRIVER,STM32F10X_HD,APP,RTX</Define>
+              <Define>USE_STDPERIPH_DRIVER,STM32F10X_HD,APP</Define>
               <Undefine></Undefine>
               <IncludePath>../User/inc;../User/USB/inc;../User/task;../User/gui;../User/gui/widget;../Os/RTX5;../Driver/stm32f10x/sys;../Driver/stm32f10x/drv/inc</IncludePath>
             </VariousControls>
@@ -354,7 +354,7 @@
             <uClangAs>0</uClangAs>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>RTX</Define>
+              <Define></Define>
               <Undefine></Undefine>
               <IncludePath>./Os;./Usr/inc;./Usb/inc;./Driver/sys;./Driver/drv/inc</IncludePath>
             </VariousControls>

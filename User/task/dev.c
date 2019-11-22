@@ -3,10 +3,10 @@
 
 #define MSG_MAX         6
 
+status_data_t gStatus;
 #ifdef RTX
 osTimerId_t dev_tmr;
 msg_t *dev_msg=NULL;
-status_data_t gStatus;
 
 extern paras_data_t gParams;
 

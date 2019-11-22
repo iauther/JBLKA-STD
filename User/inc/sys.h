@@ -24,6 +24,8 @@ enum {
 
 int sys_init(void);
 
+int sys_audio_init(void);
+
 int sys_set_input(u16 input);
 
 int sys_set_iodat(io_data_t *io);

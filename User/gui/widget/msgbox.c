@@ -1,10 +1,11 @@
 #include "msgbox.h"
+#ifdef RTX
 #include "cmsis_os2.h"
-
+osTimerId_t msg_tmr=NULL;
+#endif
 
 msgbox_t mbox;
 u8 msgbox_flag=0;
-osTimerId_t msg_tmr=NULL;
 static void msg_tmr_fun(void *arg)
 {
     //msg_clear();
@@ -22,7 +23,8 @@ int msgbox_init(rect_t *rect, s8 *title, s8 *txt, s8 sec)
     mbox.rect  = *rect;
     mbox.txt   = txt;
     mbox.sec   = sec;
-    
+
+#ifdef RTX
     if(msg_tmr) {
         msg_tmr = osTimerNew(msg_tmr_fun, osTimerOnce, NULL, NULL);
     }
@@ -30,6 +32,7 @@ int msgbox_init(rect_t *rect, s8 *title, s8 *txt, s8 sec)
     if(mbox.sec>0 && msg_tmr) {
         osTimerStart(msg_tmr, mbox.sec*1000);
     }
+#endif
     msgbox_flag = 1;
     
     return 0;
