@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include "msg.h"
 
 #define FLAGS_MASK   0x00000001
@@ -9,8 +10,7 @@ static int msg_put(msg_t *m, void *ptr, int len)
 
 #ifdef RTX
     osStatus_t st;
-    
-    if(!m->mq) {
+    if(!m || !ptr || !len) {
         return -1;
     }
 
@@ -18,7 +18,7 @@ static int msg_put(msg_t *m, void *ptr, int len)
     if(st!=osOK) {
         return -1;
     }
- #endif
+#endif
    
     return 0;
 }
@@ -26,12 +26,13 @@ static int msg_put(msg_t *m, void *ptr, int len)
 msg_t* msg_init(int max, int msg_size)
 {
     msg_t *m=NULL;
-
-#ifdef RTX
-    m = (msg_t*)malloc(sizeof(msg_t));
+    
+    m = (msg_t*)calloc(1, sizeof(msg_t));
     if(!m) {
         return NULL;
     }
+
+#ifdef RTX
     m->mq = osMessageQueueNew(max, msg_size, NULL);
     m->ef = osEventFlagsNew(NULL);
     m->ack = 0;
@@ -45,7 +46,7 @@ int msg_send(msg_t *m, void *ptr, int len)
 {
     int r;
     
-    if(!m) {
+    if(!m || !ptr || !len) {
         return -1;
     }
 
@@ -65,7 +66,7 @@ int msg_post(msg_t *m, void *ptr, int len)
 {
     int r=0;
 
-    if(!m) {
+    if(!m || !ptr || !len) {
         return -1;
     }
 
@@ -77,18 +78,21 @@ int msg_post(msg_t *m, void *ptr, int len)
 }
 
 
-int msg_recv(msg_t *m, void *ptr, int *len)
+int msg_recv(msg_t *m, void *ptr, int len)
 {
     int r=0;
+    void *p=NULL;
 
-    if(!m) {
+    if(!m || !ptr || !len) {
         return -1;
     }
 
 #ifdef RTX
     osStatus_t st;
     st = osMessageQueueGet(m->mq, ptr, NULL, osWaitForever);
-    r = (st==osOK)?0:-1;
+    if(st!=osOK) {
+        return -1;
+    }
 #endif
 
     return r;
@@ -143,7 +147,6 @@ int msg_free(msg_t **m)
 
 #ifdef RTX
     osStatus_t st;
-    
     osMessageQueueDelete((*m)->mq);
     osEventFlagsDelete((*m)->ef);
     free(*m);

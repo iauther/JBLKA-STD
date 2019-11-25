@@ -1,7 +1,7 @@
 #include "task.h"
 
 
-#define MSG_MAX         6
+#define MSG_MAX         20
 
 #ifdef RTX
 u8 gAppExit=1;
@@ -188,7 +188,7 @@ void com_task(void *arg)
     }
 
     while(1) {
-        r = msg_recv(com_msg, &e, NULL);
+        r = msg_recv(com_msg, &e, sizeof(e));
         if(r==0) {
             switch(e.evt) {
                 

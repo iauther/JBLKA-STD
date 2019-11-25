@@ -28,7 +28,6 @@ static void tmr1_fun (void *arg)
 }
 //////////////////////////////////////////////////////////
 
-
 void dev_task(void *arg)
 {
     int r;
@@ -45,7 +44,7 @@ void dev_task(void *arg)
     osTimerStart(dev_tmr, 1000);
 
     while(1) {
-        r = msg_recv(dev_msg, &e, NULL);
+        r = msg_recv(dev_msg, &e, sizeof(e));
         if(r==0) {
             switch(e.evt) {
                 

@@ -2,6 +2,7 @@
 #define __MSG_H__
 
 #include "types.h"
+#include "queue.h"
 #include "cmsis_os2.h"
 
 typedef struct {
@@ -18,7 +19,7 @@ int msg_send(msg_t *m, void *ptr, int len);
 
 int msg_post(msg_t *m, void *ptr, int len);
 
-int msg_recv(msg_t *m, void *ptr, int *len);
+int msg_recv(msg_t *m, void *ptr, int len);
 
 int msg_reset(msg_t *m);
 

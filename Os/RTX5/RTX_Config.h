@@ -287,14 +287,14 @@
 //   <e>Object specific Memory allocation
 //   <i> Enables object specific memory allocation.
 #ifndef OS_MEMPOOL_OBJ_MEM
-#define OS_MEMPOOL_OBJ_MEM          0
+#define OS_MEMPOOL_OBJ_MEM          1
 #endif
  
 //     <o>Number of Memory Pool objects <1-1000>
 //     <i> Defines maximum number of objects that can be active at the same time.
 //     <i> Applies to objects with system provided memory for control blocks.
 #ifndef OS_MEMPOOL_NUM
-#define OS_MEMPOOL_NUM              1
+#define OS_MEMPOOL_NUM              10
 #endif
  
 //     <o>Data Storage Memory size [bytes] <0-1073741824:8>

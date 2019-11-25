@@ -18,6 +18,8 @@ int usbd_send_pkt(u8 type, void *data, u16 len, u16 pkts, u16 pid, u8 nck);
 
 int usbd_is_plugin(void);
 
+void usbd_tmr_cb(void);
+
 extern u8 usbRxFlag;
 
 #endif

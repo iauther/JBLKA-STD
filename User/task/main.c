@@ -348,8 +348,8 @@ int main(void)
     osKernelInitialize();
     
     osThreadNew(com_task, NULL, NULL);
-    osThreadNew(dev_task, NULL, NULL);
-    osThreadNew(gui_task, NULL, NULL);
+    //osThreadNew(dev_task, NULL, NULL);
+    //osThreadNew(gui_task, NULL, NULL);
     osKernelStart();
 #else
 	tim_init(TIMER3, 100, poll_cb);

@@ -4,12 +4,14 @@
 #include "usb_desc.h"
 #include "usb_lib.h"
 
-#define USBD_CUSTOMHID_OUTREPORT_BUF_SIZE   REPORT_COUNT
+#define UQ_MAX      10
 
-u8 usbRxBuf[USBD_CUSTOMHID_OUTREPORT_BUF_SIZE];
-u8 usbTxBuf[USBD_CUSTOMHID_OUTREPORT_BUF_SIZE];
+
+u8 usbRxBuf[REPORT_COUNT];
+u8 usbTxBuf[REPORT_COUNT];
 packet_t *pRx=(packet_t*)usbRxBuf;
 packet_t *pTx=(packet_t*)usbTxBuf;
+queue_t *uq=NULL;
 
 u8 usbRxFlag=0;
 int is_multipkts(packet_t *pkt)
@@ -36,27 +38,38 @@ int is_multipkts(packet_t *pkt)
 static int usb_send(u8 *data, u16 len)
 {
     UserToPMABufferCopy(data, ENDP2_TXADDR, len);
-
-
     SetEPTxCount(ENDP2, REPORT_COUNT);
-
-
     SetEPTxValid(ENDP2);
 
     return 0;
 }
 
 
+static int ufind(queue_t *q, int index, void *p1, void *p2)
+{
+    evt_com_t *e1=(evt_com_t*)p1;
+    evt_com_t *e2=(evt_com_t*)p2;
+    packet_t *pkt1=(packet_t*)e1->param.hid;
+    packet_t *pkt2=(packet_t*)e2->param.hid;
 
+    if(memcmp(pkt1, pkt2, sizeof(packet_t))==0) {
+        return index;
+    }
+
+    return -1;
+}
 
 int usbd_recv(void)
 {
 #ifdef RTX
     {
+        node_t n;
         evt_com_t e;
         e.evt = EVT_HID;
         PMAToUserBufferCopy(e.param.hid, ENDP1_RXADDR, REPORT_COUNT);
-        com_post_evt(&e);
+        n.ptr = &e;
+        n.len = sizeof(e);
+        queue_put(uq, &n, ufind);
     }
 #else
     if(!usbRxFlag) {
@@ -66,11 +79,6 @@ int usbd_recv(void)
 #endif
     SetEPRxStatus(ENDP1, EP_RX_VALID);
 
-#if 0//def APP
-{
-    
-}
-#endif
     return 0;
 }
 
@@ -86,7 +94,7 @@ int usbd_send_ack(packet_t *p, int r)
     ack->type = p->type;
     ack->err  = r;
 
-    usb_send(usbTxBuf, USBD_CUSTOMHID_OUTREPORT_BUF_SIZE);
+    usb_send(usbTxBuf, REPORT_COUNT);
 
     return 0;
 }
@@ -99,11 +107,11 @@ int usbd_send_pkt(u8 type, void *data, u16 len, u16 pkts, u16 pid, u8 nck)
     pTx->pkts  = pkts;
     pTx->pid  = pid;
     pTx->dlen = len;
-    if (data && len<=USBD_CUSTOMHID_OUTREPORT_BUF_SIZE-sizeof(packet_t)) {
+    if (data && len<=REPORT_COUNT-sizeof(packet_t)) {
 		memcpy(pTx->data, data, len);
 	}
 
-    return usb_send(usbTxBuf, USBD_CUSTOMHID_OUTREPORT_BUF_SIZE);
+    return usb_send(usbTxBuf, REPORT_COUNT);
 }
 
 
@@ -152,6 +160,10 @@ int usbd_init(void)
     usb_dp_reset();
 	USB_Init();
 
+#ifdef RTX
+    uq = queue_init(UQ_MAX, sizeof(evt_com_t));
+#endif
+
     return 0;
 }
 
@@ -161,4 +173,21 @@ int usbd_is_plugin(void)
     return (bDeviceState==5);   //CONFIGURED
 }
 
+void usbd_tmr_cb(void)
+{
+#ifdef RTX
+    {
+        int r;
+        node_t n;
+        evt_com_t e;
+
+        n.ptr = &e;
+        n.len = sizeof(e);
+        r = queue_get(uq, &n, NULL);
+        if(r==0) {
+            com_post_evt(&e);
+        }
+    }
+#endif
+}
 

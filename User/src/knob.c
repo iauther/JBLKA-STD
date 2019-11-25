@@ -103,13 +103,15 @@ static void knob_rx_cb(u8 *data, u16 data_len)
     }
 #endif
 }
-static void knob_tmr_cb(void)
+
+
+void knob_tmr_cb(void)
 {
 #ifdef RTX
     {
         int r;
         node_t n;
-        evt_gui_t e={0};
+        evt_gui_t e;
 
         e.evt = EVT_KEY;
         n.ptr = &e.key;
@@ -130,7 +132,6 @@ int knob_init(void)
 
 #ifdef RTX
     kq = queue_init(KQ_MAX, sizeof(key_t));
-    tim_init(TIMER4, 50, knob_tmr_cb);
 #endif
 
     return usart_init(KNOB_UART, &para);

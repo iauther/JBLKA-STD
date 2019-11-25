@@ -163,7 +163,6 @@ static void knob_proc(u8 key, u16 times)
 }
 
 
-
 void gui_task(void *arg)
 {
     int r;
@@ -180,7 +179,7 @@ void gui_task(void *arg)
     }
 
     while(1) {
-        r = msg_recv(gui_msg, &e, NULL);
+        r = msg_recv(gui_msg, &e, sizeof(e));
         if(r==0) {
             switch(e.evt) {
                 

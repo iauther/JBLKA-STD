@@ -71,7 +71,18 @@ static void adda_reset(void)      //PB5, µÕµÁ∆Ω∏¥Œª£¨ ±º‰÷¡…Ÿ1√Î£¨(ø™ª˙ƒ¨»œµÕµÁ∆
     delay_ms(10);
     GPIO_SetBits(GPIOB, GPIO_Pin_5);
 }
+
+
+static void timer_cb(void)
+{
+    //static u64 timer_cnt=0;
+    //timer_cnt++;
+
+    knob_tmr_cb();
+    usbd_tmr_cb();
+}
 ///////////////////////////////////////////////
+
 int sys_init(void)
 {
     //rcc_init();
@@ -91,6 +102,8 @@ int sys_init(void)
 
 #ifndef RTX
     sys_audio_init();
+#else
+    tim_init(TIMER4, 50, timer_cb);
 #endif
 
     return 0;

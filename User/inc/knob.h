@@ -5,6 +5,8 @@
 
 int knob_init(void);
 
+void knob_tmr_cb(void);
+
 u8 knob_get_key(u16 *times);
 
 #endif
