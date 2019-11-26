@@ -77,10 +77,10 @@ int msgbox_update()
 }
 
 
-int msgbox_handle(key_t *k)
+int msgbox_handle(u8 key)
 {
     if(mbox.sec>0 && msgbox_flag>0) {
-        switch(k->value) {
+        switch(key) {
             case KEY_UP:
             break;
             

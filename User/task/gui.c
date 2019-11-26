@@ -9,31 +9,36 @@ msg_t *gui_msg=NULL;
 static void key_proc(u8 key)
 {
     switch(key) {
-        case KEY_UP:
-        break;
-        
-        case KEY_DOWN:
-        break;
-
         case KEY_MUSIC:
+        if(gMenu!=MENU_MUSIC) {
+            gMenu = MENU_MUSIC;
+            menu_refresh();
+        }
         break;
 
         case KEY_MIC:
+        if(gMenu!=MENU_MIC) {
+            gMenu = MENU_MIC;
+            menu_refresh();
+        }
         break;
 
         case KEY_EFFECT:
-        break;
-
-        case KEY_ENTER:
-        break;
-
-        case KEY_EXIT:
-        break;
-
-        case KEY_SAVE:
+        if(gMenu!=MENU_EFFECT) {
+            gMenu = MENU_EFFECT;
+            menu_refresh();
+        }
         break;
 
         case KEY_PRESET:
+        if(gMenu!=MENU_PRESET) {
+            gMenu = MENU_PRESET;
+            menu_refresh();
+        }
+        break;
+
+        default:
+        menu_handle(key);
         break;
     }
 }
@@ -157,9 +162,15 @@ static void knob_proc(u8 key, u16 times)
         return;
     }
 
-    e2p_put(&n);
+    if(gMenu!=MENU_HOME) {
+        gMenu = MENU_HOME;
+        menu_refresh();
+    }
+    
     sprintf((char*)tmp, "%d", g);
     lcd_draw_string_center(0, 100, LCD_WIDTH, 60, tmp, FONT_32, LCD_FC, LCD_BC);
+
+    e2p_put(&n);
 }
 
 
@@ -170,8 +181,7 @@ void gui_task(void *arg)
     osStatus_t st;
 
     //menu_init();
-    //e.evt = EVT_REFRESH;
-    //gui_post_evt(&e);
+    //menu_refresh();
 
     gui_msg = msg_init(MSG_MAX, sizeof(e));
     if(!gui_msg) {
@@ -193,14 +203,14 @@ void gui_task(void *arg)
                         break;
 
                         case SRC_KEY:
-                        key_proc(k->value);
+                        //key_proc(k->value);
+                        menu_handle(k);
                         break;
                     
                         case SRC_KNOB:
                         knob_proc(k->value, k->times);
                         break;
                     }
-                    //menu_handle(k);
                 }
                 break;
 

@@ -67,7 +67,7 @@ int listitem_refresh(listitem_t *l)
     return 0;
 }
 
-int listitem_handle(listitem_t *l, key_t *k)
+int listitem_set_focus(listitem_t *l, int id)
 {
     
     return 0;

@@ -29,7 +29,7 @@ int texture_refresh(texture_t *t)
 }
 
 
-int texture_handle(texture_t *t, key_t *k)
+int texture_handle(texture_t *t, u8 key)
 {
     return 0;
 }

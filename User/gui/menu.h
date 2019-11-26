@@ -17,7 +17,7 @@ enum {
     MENU_MIC,
     MENU_MUSIC,
     MENU_EFFECT,
-    MENU_PRESETS,
+    MENU_PRESET,
     
     MENU_MAX
 };
@@ -104,8 +104,8 @@ typedef struct {
 
 
 typedef struct _item_{
-    const char      *txt;
     u8              type;       //menu type
+    const char      *txt;
     struct  _item_  *parent;
 }item_t;
 
@@ -113,7 +113,7 @@ typedef struct _item_{
 #define DEF_FUNC(XX) \
         int XX##_init(void *p); \
         int XX##_free(void *p); \
-        int XX##_handle(void *p, key_t *k); \
+        int XX##_handle(void *p, u8 key); \
         int XX##_refresh(void *p)
 DEF_FUNC(home);
 DEF_FUNC(mic);
@@ -128,7 +128,8 @@ int menu_clear(void);
 
 int menu_refresh(void);
 
-int menu_handle(key_t *k);
+int menu_handle(u8 key);
 
+extern u8 gMenu;
 
 #endif

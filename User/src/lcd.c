@@ -163,8 +163,8 @@ static void lcd_display(int on)
         lcd_set_bright(100);
     }
     else {
-        lcd_set_bright(0);
         lcd_write_cmd(0x28);
+        lcd_set_bright(0);
     }
 }
 
@@ -299,7 +299,7 @@ void lcd_set_bright(u8 percent)
     }
 
 #ifdef BACKLIGHT_USE_DAC
-    dac_set(DAC_CH2, (percent*4096)/100);
+    dac_set(DAC_CH2, (percent*4095)/100);
 #else
     LCD_PWR(percent);
 #endif

@@ -18,22 +18,6 @@ func_t fn_funcs[MENU_MAX]={
     INIT_FUNC(effect),
     INIT_FUNC(presets),
 };
-
-
-
-
-
-int menu_clear(void)
-{
-    rect_t r=MENU_RECT;
-    
-    lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
-    return 0;
-}
-
-
-
-
 /////////////////////////////////////////
 
 
@@ -48,8 +32,6 @@ int menu_init(void)
 
 int menu_refresh(void)
 {
-    topbar_refresh();
-
     if(gMenu!=gMenuPrev) {
         fn_funcs[gMenuPrev].free(NULL);
         fn_funcs[gMenu].init(NULL);
@@ -60,12 +42,23 @@ int menu_refresh(void)
 }
 
 
-int menu_handle(key_t *k)
+int menu_handle(u8 key)
 {
-    fn_funcs[gMenu].handle(NULL, k);
+    fn_funcs[gMenu].handle(NULL, key);
     
     return 0;
 }
+
+
+int menu_clear(void)
+{
+    rect_t r=MENU_RECT;
+    
+    lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
+    return 0;
+}
+
+
 //////////////////////////////////////////////
 
 

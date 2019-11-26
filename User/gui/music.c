@@ -20,7 +20,7 @@ int music_free(void *p)
 }
 
 
-int music_handle(void *p, key_t *k)
+int music_handle(void *p, u8 key)
 {
     return 0;
 }

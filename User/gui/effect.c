@@ -16,7 +16,7 @@ int effect_free(void *p)
 }
 
 
-int effect_handle(void *p, key_t *k)
+int effect_handle(void *p, u8 key)
 {
     return 0;
 }

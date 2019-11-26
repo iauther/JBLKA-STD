@@ -4,6 +4,7 @@
 #include "queue.h"
 #include "usart.h"
 #include "task.h"
+#include "menu.h"
 #include "config.h"
 
 #define KQ_MAX      10
@@ -67,7 +68,19 @@ static void keyPool_init(void)
         keyPool[knobTab[i].code] = knobTab[i].key;
     }
 }
+static u8 knob_key_remap(u8 value)
+{
+    if(gMenu!=MENU_HOME) {
+        if(value==KEY_EFFECT_DN) {
+            return KEY_DOWN;
+        }
+        else if(value==KEY_EFFECT_UP) {
+            return KEY_UP;
+        }
+    }
 
+    return value;
+}
 
 static int kfind(queue_t *q, int index, void *p1, void *p2)
 {
@@ -83,6 +96,7 @@ static int kfind(queue_t *q, int index, void *p1, void *p2)
 }
 static void knob_rx_cb(u8 *data, u16 data_len)
 {
+    u8 value;
     keyTimes[knobValue]++;
 
 #ifdef RTX
@@ -90,8 +104,9 @@ static void knob_rx_cb(u8 *data, u16 data_len)
         key_t k;
         node_t n;
 
-        k.src = SRC_KNOB;
-        k.value = keyPool[knobValue];
+        value = knob_key_remap(keyPool[knobValue]);
+        k.src = (value==keyPool[knobValue])?SRC_KNOB:SRC_KEY;
+        k.value = value;
         k.times = keyTimes[knobValue];
         k.updown = 0;
         k.longPress = 0;

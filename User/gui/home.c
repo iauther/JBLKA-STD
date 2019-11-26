@@ -45,9 +45,9 @@ int home_free(void *p)
 }
 
 
-int home_handle(void *p, key_t *k)
+int home_handle(void *p, u8 key)
 {
-    listitem_handle(mHome.pl, k);
+    //listitem_handle(mHome.pl, k);
     return 0;
 }
 

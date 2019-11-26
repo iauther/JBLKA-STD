@@ -16,7 +16,7 @@ int presets_free(void *p)
 }
 
 
-int presets_handle(void *p, key_t *k)
+int presets_handle(void *p, u8 key)
 {
     return 0;
 }

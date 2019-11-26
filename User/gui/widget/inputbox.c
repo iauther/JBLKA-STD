@@ -86,9 +86,9 @@ int inputbox_refresh(inputbox_t *i)
 }
 
 
-int inputbox_handle(inputbox_t *i, key_t *k)
+int inputbox_handle(inputbox_t *i, u8 key)
 {
-    switch(k->value) {
+    switch(key) {
         
         case KEY_ENTER:
         break;

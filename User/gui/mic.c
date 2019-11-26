@@ -17,7 +17,7 @@ int mic_free(void *p)
 
 
 
-int mic_handle(void *p, key_t *k)
+int mic_handle(void *p, u8 key)
 {
     return 0;
 }

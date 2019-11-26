@@ -29,6 +29,6 @@ int listitem_set_refresh(listitem_t *l, u32 flag);
 
 int listitem_refresh(listitem_t *l);
 
-int listitem_handle(listitem_t *l, key_t *k);
+int listitem_set_focus(listitem_t *l, int id);
 
 #endif

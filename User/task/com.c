@@ -1,7 +1,7 @@
 #include "task.h"
 
 
-#define MSG_MAX         20
+#define MSG_MAX         8
 
 #ifdef RTX
 u8 gAppExit=1;
