@@ -14,7 +14,7 @@ enum {
 };
 
 
-int topbar_init(u16 h);
+int topbar_init(void);
 
 int topbar_free(void);
 

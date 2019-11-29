@@ -127,23 +127,27 @@ typedef struct
     def_main_t          main;
 }def_dsp_t;
 
+#define VAR_MAX        8
 typedef struct {
-    const char          *name;
-    const char          *unit;
-    s32                 min;
-    s32                 max;
+    cchr                *name;
+    cchr                *unit;
+    s16                 min;
+    s16                 max;
     f32                 step;
     f32                 div;        //show number==value/div
+}para_item_t;
+
+
+typedef struct {
+    para_item_t         items[VAR_MAX];
 }para_info_t;
 //#pragma pack()
 
-extern const def_dsp_t dspDefault;
+
+extern const def_dsp_t DEF_DSP;
 extern const fw_info_t FW_INFO;
 extern const io_data_t IO_DATA;
-
-extern const u16 GEQ2_FREQ[];
-extern const u16 GEQ3_FREQ[];
-extern const u16 PEQ3_FREQ[];
-extern const u16 PEQ7_FREQ[];
+extern const para_info_t PARA_INFO[CMD_ID_NUM];
+extern cchr *HLPF_STR[HLPF_Type_NUM];
 
 #endif

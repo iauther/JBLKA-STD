@@ -330,8 +330,8 @@ static void knob_proc(void)
         }
 
         e2p_put(&n);
-        sprintf((char*)tmp, "%d", gain);
-        lcd_draw_string_center(0, 100, LCD_WIDTH, 60, tmp, FONT_32, LCD_FC, LCD_BC);
+        sprintf((char*)tmp, "%3d", gain);
+        lcd_draw_string_align(0, 100, LCD_WIDTH, 60, tmp, FONT_32, LCD_FC, LCD_BC, ALIGN_MIDDLE);
     }
 }
 
@@ -348,8 +348,8 @@ int main(void)
     osKernelInitialize();
     
     osThreadNew(com_task, NULL, NULL);
-    //osThreadNew(dev_task, NULL, NULL);
-    //osThreadNew(gui_task, NULL, NULL);
+    osThreadNew(dev_task, NULL, NULL);
+    osThreadNew(gui_task, NULL, NULL);
     osKernelStart();
 #else
 	tim_init(TIMER3, 100, poll_cb);

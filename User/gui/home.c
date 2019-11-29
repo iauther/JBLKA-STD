@@ -14,17 +14,10 @@ home_t mHome={
 
 
 
-
-
-
-
-
-
-
 int home_init(void *p)
 {
     element_t e;
-    mHome.pl = listitem_init(&mHome.rect, 6);
+    mHome.pl = listitem_init(NULL, &mHome.rect, 6);
 
     listitem_add(mHome.pl, &e);
     listitem_add(mHome.pl, &e);
@@ -39,7 +32,7 @@ int home_init(void *p)
 
 int home_free(void *p)
 {
-    listitem_free(mHome.pl);
+    listitem_free(&mHome.pl);
     free(mHome.pl);
     return 0;
 }
@@ -47,7 +40,7 @@ int home_free(void *p)
 
 int home_handle(void *p, u8 key)
 {
-    //listitem_handle(mHome.pl, k);
+    //listitem_handle(mHome.pl, key);
     return 0;
 }
 

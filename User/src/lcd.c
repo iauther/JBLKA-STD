@@ -279,8 +279,7 @@ void lcd_init(void)
     lcd_write_data(0x20);
     lcd_write_data(0x23);
 
-    lcd_clear(LCD_BC);
-    lcd_draw_string_center(0, 20, LCD_WIDTH, 60, (u8*)"DEMO", FONT_32, LCD_FC, LCD_BC);
+    //lcd_clear(LCD_BC);
 
     lcd_display(1);
 }
@@ -473,35 +472,92 @@ void lcd_draw_string(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u1
 
 
 
-void lcd_draw_rect(u16 x1, u16 y1, u16 w, u16 h, u16 color)
+void lcd_draw_rect(u16 x, u16 y, u16 w, u16 h, u16 color)
 {
     u16  x2,y2;
 
-    x2 = x1 + w;
-    y2 = y1 + h;
-    lcd_draw_line(x1,y1,x2,y1,color);
-    lcd_draw_line(x1,y1,x1,y2,color);
-    lcd_draw_line(x1,y2,x2,y2,color);
-    lcd_draw_line(x2,y1,x2,y2,color);
+    x2 = x + w;
+    y2 = y + h;
+    lcd_draw_line(x, y, x2, y, color);
+    lcd_draw_line(x, y, x, y2, color);
+    lcd_draw_line(x, y2, x2, y2, color);
+    lcd_draw_line(x2, y, x2, y2, color);
 }
 
 
-void lcd_fill_rect(u16 x1, u16 y1, u16 w, u16 h, u16 color)
+void lcd_draw_arc( u16 x, u16 y, u16 r, u8 s, u16 color)
+{
+    u16 x1,y1,xd,yd,e;
+
+    xd = 1 - (r << 1);
+    yd = 0;
+    e = 0;
+    x1 = r;
+    y1 = 0;
+
+    while (x1 >= y1) {
+        // Q1
+        if ( s & 0x01 ) lcd_draw_point(x + x1, y - y1, color);
+        if ( s & 0x02 ) lcd_draw_point(x + y1, y - x1, color);
+
+        // Q2
+        if ( s & 0x04 ) lcd_draw_point(x - y1, y - x1, color);
+        if ( s & 0x08 ) lcd_draw_point(x - x1, y - y1, color);
+
+        // Q3
+        if ( s & 0x10 ) lcd_draw_point(x - x1, y + y1, color);
+        if ( s & 0x20 ) lcd_draw_point(x - y1, y + x1, color);
+
+        // Q4
+        if ( s & 0x40 ) lcd_draw_point(x + y1, y + x1, color);
+        if ( s & 0x80 ) lcd_draw_point(x + x1, y + y1, color);
+
+        y1++;
+        e += yd;
+        yd += 2;
+        if (((e << 1) + xd) > 0) {
+            x1--;
+            e += xd;
+            xd += 2;
+        }
+    }
+}
+
+
+void lcd_draw_round_rect(u16 x, u16 y, u16 w, u16 h, u16 r, u16 color)
+{
+    u16  x2,y2;
+
+    x2 = x + w;
+    y2 = y + h;
+    lcd_draw_line(x, y, x2, y, color);
+    lcd_draw_line(x, y, x, y2, color);
+    lcd_draw_line(x, y2, x2, y2, color);
+    lcd_draw_line(x2, y, x2, y2, color);
+
+    lcd_draw_arc(x+r, y+r, r, 0x0c, color);
+    lcd_draw_arc(x+w-r, y+r, r, 0x03, color);
+    lcd_draw_arc(x+r, y+h-r, r, 0x30, color);
+    lcd_draw_arc(x+w-r, y+h-r, r, 0xc0, color);
+}
+
+
+void lcd_fill_rect(u16 x, u16 y, u16 w, u16 h, u16 color)
 {
     u16 i = 0;
     u16  x2,y2;
     u32 size = 0, size_remain = 0;
     
-    x2 = x1 + w;
-    y2 = y1 + h;
-    size = (x2 - x1 + 1) * (y2 - y1 + 1) * 2;
+    x2 = x + w;
+    y2 = y + h;
+    size = (x2 - x + 1) * (y2 - y + 1) * 2;
 
     if(size > LCD_BUF_SIZE) {
         size_remain = size - LCD_BUF_SIZE;
         size = LCD_BUF_SIZE;
     }
 
-    lcd_set_address(x1, y1, x2, y2);
+    lcd_set_address(x, y, x2, y2);
     while(1) {
         for(i = 0; i < size / 2; i++) {
             lcd_buf[2 * i] = color >> 8;
@@ -526,24 +582,35 @@ void lcd_fill_rect(u16 x1, u16 y1, u16 w, u16 h, u16 color)
 }
 
 
-void lcd_draw_string_center(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u16 bgcolor)
+void lcd_draw_string_align(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u16 bgcolor, u8 align)
 {
-    font_info_t inf;
+    font_info_t info;
     u16 x2,y2,w2,h2;
     
-    inf = font_get(font);
-    w2 = strlen((char*)str)*inf.width;
-    
-    x2 = x+(w-w2)/2;
-    y2 = y+(h-inf.height)/2;
-    h2 = inf.height;
+    info = font_get(font);
+    w2 = strlen((char*)str)*info.width;
+    y2 = y+(h-info.height)/2;
+    h2 = info.height;
+
+    if(align==ALIGN_LEFT) {
+        x2 = x;
+    }
+    else if(align==ALIGN_MIDDLE) {
+        x2 = x+(w-w2)/2;
+    }
+    else if(align==ALIGN_RIGHT){
+        x2 = x+w-w2;
+    }
+    else {
+        return;
+    }
 
 #if 0
-    lcd_fill_rect(x, y, x2-x, h, LCD_BC);
-    lcd_fill_rect(x2+w2, y, w-w2-(x2-x), h, LCD_BC);
+    lcd_fill_rect(x, y, x2-x, h, bgcolor);
+    lcd_fill_rect(x2+w2, y, w-w2-(x2-x), h, bgcolor);
 
-    lcd_fill_rect(x2, y, w2, y2-y, LCD_BC);
-    lcd_fill_rect(x2, y2+h2, w2, h-h2-(y2-y), LCD_BC);
+    lcd_fill_rect(x2, y, w2, y2-y, bgcolor);
+    lcd_fill_rect(x2, y2+h2, w2, h-h2-(y2-y), bgcolor);
 #endif
 
     lcd_draw_string(x2, y2, w2, h2, str, font, color, bgcolor);

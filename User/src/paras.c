@@ -121,7 +121,7 @@ int paras_init(void)
 
     paras_remap();
     if(!check_version()) {
-        set_to_default(&uiParams, &dspDefault);
+        set_to_default(&uiParams, &DEF_DSP);
         r = e2p_write(0, (u8*)&gParams, sizeof(gParams));
 
         //the following used for test
@@ -144,43 +144,43 @@ static int reset_peq(u8 ch)
     switch(ch) {
         case EQ_CH_Music:
         for(i=0; i<PEQ_BANDS; i++) {
-            *ui->dsp.music.peq[i] = dspDefault.music.eq.BandCoef[2+i];
+            *ui->dsp.music.peq[i] = DEF_DSP.music.eq.BandCoef[2+i];
         }
         break;
 
         case EQ_CH_Mic:
         for(i=0; i<PEQ_BANDS; i++) {
-            *ui->dsp.mic.peq[i] = dspDefault.mic.eq.BandCoef[3+i];
+            *ui->dsp.mic.peq[i] = DEF_DSP.mic.eq.BandCoef[3+i];
         }
         break;
 
         case EQ_CH_Echo:
         for(i=0; i<3; i++) {
-            *ui->dsp.echo.peq[i] = dspDefault.echo.eq.BandCoef[i];
+            *ui->dsp.echo.peq[i] = DEF_DSP.echo.eq.BandCoef[i];
         }
         break;
 
         case EQ_CH_Rev:
         for(i=0; i<3; i++) {
-            *ui->dsp.reverb.peq[i] = dspDefault.reverb.eq.BandCoef[i];
+            *ui->dsp.reverb.peq[i] = DEF_DSP.reverb.eq.BandCoef[i];
         }
         break;
 
         case EQ_CH_Main:
         for(i=0; i<PEQ_BANDS; i++) {
-            *ui->dsp.main.peq[i] = dspDefault.main.eq.BandCoef[i];
+            *ui->dsp.main.peq[i] = DEF_DSP.main.eq.BandCoef[i];
         }
         break;
 
         case EQ_CH_Sub:
         for(i=0; i<PEQ_BANDS; i++) {
-            *ui->dsp.sub.peq[i] = dspDefault.sub.eq.BandCoef[i];
+            *ui->dsp.sub.peq[i] = DEF_DSP.sub.eq.BandCoef[i];
         }
         break;
 
         case EQ_CH_Rec:
         for(i=0; i<PEQ_BANDS; i++) {
-            *ui->dsp.rec.peq[i] = dspDefault.rec.eq.BandCoef[i];
+            *ui->dsp.rec.peq[i] = DEF_DSP.rec.eq.BandCoef[i];
         }
         break;
 
@@ -204,7 +204,7 @@ int paras_reset_peq(eq_reset_t *rst)
 int paras_default(void)
 {
     int r;
-    set_to_default(&uiParams, &dspDefault);
+    set_to_default(&uiParams, &DEF_DSP);
     return r;
 }
 
@@ -269,7 +269,7 @@ int paras_write(void *p, int len)
 
 int paras_reset(void)
 {
-    set_to_default(&uiParams, &dspDefault);
+    set_to_default(&uiParams, &DEF_DSP);
     return e2p_write(0, (u8*)&gParams, sizeof(paras_data_t));
 }
 

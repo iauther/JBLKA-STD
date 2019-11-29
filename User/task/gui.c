@@ -39,6 +39,7 @@ static void key_proc(u8 key)
 
         default:
         menu_handle(key);
+        //menu_refresh();
         break;
     }
 }
@@ -168,7 +169,7 @@ static void knob_proc(u8 key, u16 times)
     }
     
     sprintf((char*)tmp, "%d", g);
-    lcd_draw_string_center(0, 100, LCD_WIDTH, 60, tmp, FONT_32, LCD_FC, LCD_BC);
+    lcd_draw_string_align(0, 100, LCD_WIDTH, 60, tmp, FONT_32, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 
     e2p_put(&n);
 }
@@ -180,8 +181,8 @@ void gui_task(void *arg)
     evt_gui_t e;
     osStatus_t st;
 
-    //menu_init();
-    //menu_refresh();
+    topbar_init();
+    menu_init();
 
     gui_msg = msg_init(MSG_MAX, sizeof(e));
     if(!gui_msg) {
@@ -203,8 +204,7 @@ void gui_task(void *arg)
                         break;
 
                         case SRC_KEY:
-                        //key_proc(k->value);
-                        menu_handle(k);
+                        key_proc(k->value);
                         break;
                     
                         case SRC_KNOB:

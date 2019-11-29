@@ -3,17 +3,17 @@
 
 #include "evt.h"
 #include "key.h"
-#include "inputbox.h"
-#include "listitem.h"
+#include "default.h"
 #include "msgbox.h"
 #include "topbar.h"
 #include "texture.h"
+#include "inputbox.h"
+#include "listitem.h"
 #include "packet.h"
 #include "task.h"
 
 enum {
     MENU_HOME=0,
-    MENU_GAIN,
     MENU_MIC,
     MENU_MUSIC,
     MENU_EFFECT,
@@ -23,91 +23,31 @@ enum {
 };
 
 enum {
-    HOME_MUSIC,
-    HOME_EFFECT,
-    HOME_MIC,
-    
-    HOME_MAX
-};
-
-enum {
-    MIC_GAIN,
-    MIC_GEQ,
-    MIC_PEQ,
-    MIC_HPF,
-    MIC_LPF,
-    MIC_LIMITER,
-    MIC_FEEDBACK,
-    MIC_NOISEGATE,
-    
-    MIC_MAX
-};
-
-enum {
-    EFFECT_GAIN,
-    EFFECT_ECHO,
-    EFFECT_REVERB,
-    
-    EFFECT_MAX
-};
-
-enum {
-    ECHO_HPF,
-    ECHO_LPF,
-    ECHO_PEQ,
-    ECHO_DELAY,
-    ECHO_REPEAT,
-    ECHO_EFFECT_VOL,
-    ECHO_DIRECT_VOL, 
-    
-    ECHO_MAX
-};
-
-enum {
-    REVERB_HPF,
-    REVERB_LPF,
-    REVERB_PEQ,
-    REVERB_DELAY,
-    REVERB_EFFECT_VOL,
-    REVERB_DIRECT_VOL,
-    
-    REVERB_MAX
-};
-
-enum {
-    MUSIC_HPF,
-    MUSIC_LPF,
-    MUSIC_GEQ,
-    MUSIC_PEQ,
-    MUSIC_INPUT,
-    MUSIC_PITCH,
-    MUSIC_NOISEGATE,
-    
-    MUSIC_MAX
-};
-
-enum {
-    TYPE_SLIDER,
-    TYPE_INPUTBOX,
-    TYPE_LISTITEM,
+    TYPE_NONE=0,
+    TYPE_LIST,
+    TYPE_DATA,
 
     TYPE_MAX
 };
 
-
 typedef struct {
     int (*init)(void *p);
     int (*free)(void *p);
-    int (*handle)(void *p, key_t *k);
+    int (*handle)(void *p, u8 key);
     int (*refresh)(void *p);
 }func_t;
 
-
 typedef struct _item_{
-    u8              type;       //menu type
-    const char      *txt;
-    struct  _item_  *parent;
-}item_t;
+    u8              type;
+    cchr            *txt;
+    u8              cmd;       //dsp cmd id
+    void            *data;
+    listitem_t      *sub;
+}item_data_t;
+
+typedef struct {
+    item_data_t items[VAR_MAX];
+}dsp_item_t;
 
 
 #define DEF_FUNC(XX) \
@@ -129,6 +69,8 @@ int menu_clear(void);
 int menu_refresh(void);
 
 int menu_handle(u8 key);
+
+
 
 extern u8 gMenu;
 

@@ -101,6 +101,12 @@ int list_set(list_t *l, int index, node_t *n)
 }
 
 
+int list_size(list_t *l)
+{
+    return l->size;
+}
+
+
 int list_quit(list_t *l)
 {
     l->quit = 1;

@@ -24,6 +24,7 @@
 #include "lock.h"
 #include "delay.h"
 #include "config.h"
+#include "gbl.h"
 #include "stm32f10x.h"
 
 

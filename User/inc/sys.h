@@ -14,6 +14,7 @@
 #include "delay.h"
 #include "paras.h"
 #include "packet.h"
+#include "gbl.h"
 #include "config.h"
 
 enum {

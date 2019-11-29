@@ -1,5 +1,8 @@
 #include "inputbox.h"
 
+#define LABEL_RECT  {1,1,1,1}
+#define BOX_RECT    {2,1,1,1}
+
 
 static int show_label(inputbox_t *i)
 {
@@ -39,7 +42,7 @@ static int input_show_all(inputbox_t *i)
 }
 /////////////////////////////////////////////
 
-inputbox_t *inputbox_init(rect_t *rect, s8 *label, s8 *unit, data_t *dat)
+inputbox_t *inputbox_init(para_item_t *para)
 {
     inputbox_t *i=(inputbox_t*)malloc(sizeof(inputbox_t));
     if(!i) {
@@ -47,8 +50,6 @@ inputbox_t *inputbox_init(rect_t *rect, s8 *label, s8 *unit, data_t *dat)
     }
 
     i->type  = 0;//TYPE_INPUT;
-    i->rect  = *rect;
-    i->data  = *dat;
     
     return i;
 }

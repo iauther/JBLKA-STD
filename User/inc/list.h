@@ -30,6 +30,8 @@ int list_get(list_t *l, int index, node_t *n);
 
 int list_set(list_t *l, int index, node_t *n);
 
+int list_size(list_t *l);
+
 int list_quit(list_t *l);
 
 int list_clear(list_t *l);

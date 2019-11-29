@@ -28,9 +28,10 @@ static void show_temp(void)
     u8 tmp[10];
     rect_t r = mTopbar.rect;
 
+    r.w = mTopbar.rect.w/4;
     sprintf((char*)tmp, "%02d", mTopbar.stat->pwr_temp);
     
-    lcd_draw_string_center(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
 
 static void show_bt(void)
@@ -39,9 +40,10 @@ static void show_bt(void)
     rect_t r = mTopbar.rect;
 
     r.x += mTopbar.rect.w/4;
-    sprintf((char*)tmp, "BT");
+    r.w = mTopbar.rect.w/4;
+    sprintf((char*)tmp, "BT/USB");
     
-    lcd_draw_string_center(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
 
 static void show_input(void)
@@ -52,9 +54,10 @@ static void show_input(void)
     u16 input=uiParams.dsp.music.input->input;
 
     r.x += mTopbar.rect.w/2;
+    r.w = mTopbar.rect.w/4;
     sprintf((char*)tmp, "%s", str[input]);
     
-    lcd_draw_string_center(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
 
 static void show_preset(void)
@@ -63,24 +66,27 @@ static void show_preset(void)
     rect_t r = mTopbar.rect;
 
     r.x += mTopbar.rect.w*3/4;
+    r.w = mTopbar.rect.w/4;
     sprintf((char*)tmp, "%d", gParams.pre);
     
-    lcd_draw_string_center(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
 
 
 //////////////////////////////////////////////
-int topbar_init(u16 h)
+int topbar_init(void)
 {
     mTopbar.rect.x = 0;
     mTopbar.rect.y = 0;
     mTopbar.rect.w = LCD_WIDTH;
-    mTopbar.rect.h = h;
+    mTopbar.rect.h = TOPBAR_HEIGHT;
 
     mTopbar.pio  = uiParams.pio;
     mTopbar.stat = &gStatus;
     mTopbar.title = NULL;
     mTopbar.refreshFlag = TOPBAR_REFRESH_ALL;
+
+    topbar_refresh();
     
     return 0;
 }

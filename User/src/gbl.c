@@ -1,6 +1,6 @@
 #include "gbl.h"
 
-volatile gbl_t gb;
+gbl_t gb;
 
 
 
