@@ -618,6 +618,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\src\list.c</FilePath>
             </File>
+            <File>
+              <FileName>gbl.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\gbl.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

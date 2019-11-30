@@ -169,8 +169,7 @@ static void knob_proc(u8 key, u16 times)
     }
     
     sprintf((char*)tmp, "%d", g);
-    lcd_draw_string_align(0, 100, LCD_WIDTH, 60, tmp, FONT_32, LCD_FC, LCD_BC, ALIGN_MIDDLE);
-
+    lcd_draw_string_align(0, 100, LCD_WIDTH, 60, tmp, FONT_32, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
     e2p_put(&n);
 }
 

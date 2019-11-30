@@ -2,14 +2,14 @@
 
 
 u8 micMenu=0;
-int mic_init(void *p)
+int mic_init(void)
 {
     micMenu = 0;
     return 0;
 }
 
 
-int mic_free(void *p)
+int mic_free(void)
 {
     micMenu = 0;
     return 0;
@@ -17,13 +17,13 @@ int mic_free(void *p)
 
 
 
-int mic_handle(void *p, u8 key)
+int mic_handle(u8 key)
 {
     return 0;
 }
 
 
-int mic_refresh(void *p)
+int mic_refresh(void)
 {
     return 0;
 }

@@ -22,13 +22,12 @@
 #define LCD_WIDTH        320
 #define LCD_HEIGHT       240
 
-
 enum {
-    ALIGN_LEFT=0,
+    ALIGN_NONE=0,
+    ALIGN_LEFT,
     ALIGN_MIDDLE,
     ALIGN_RIGHT,
 };
-
 
 typedef struct {
     u16 x;
@@ -38,19 +37,18 @@ typedef struct {
 }rect_t;
 
 
-
 void lcd_init(void);
 void lcd_clear(u16 color);
 void lcd_set_bright(u8 percent);
 void lcd_draw_point(u16 x, u16 y, u16 color);
 void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color);
-void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor);
-void lcd_draw_string(u16 x, u16 y, u16 width, u16 height, u8 *str, u8 font, u16 color, u16 bgcolor);
+void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor, u8 pure);
+void lcd_draw_string(u16 x, u16 y, u16 width, u16 height, u8 *str, u8 font, u16 color, u16 bgcolor, u8 pure);
 void lcd_draw_rect(u16 x, u16 y, u16 w, u16 h, uint16_t color);
 void lcd_draw_arc( u16 x, u16 y, u16 r, u8 s, u16 color);
 void lcd_draw_round_rect(u16 x, u16 y, u16 w, u16 h, u16 r, u16 color);
 void lcd_fill_rect(u16 x, u16 y, u16 w, u16 h, u16 color);
-void lcd_draw_string_align(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u16 bgcolor, u8 align);
+void lcd_draw_string_align(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u16 bgcolor, u8 align, u8 pure);
 
 #endif
 

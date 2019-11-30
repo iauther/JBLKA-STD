@@ -55,6 +55,16 @@ int listitem_reset(listitem_t *l)
 }
 
 
+listitem_t* listitem_get_parent(listitem_t *l)
+{
+    if(!l) {
+        return NULL;
+    }
+
+    return l->parent;
+}
+
+
 int listitem_set_parent(listitem_t *l, listitem_t *parent)
 {
     if(!l) {
@@ -66,13 +76,24 @@ int listitem_set_parent(listitem_t *l, listitem_t *parent)
 }
 
 
-listitem_t* listitem_get_parent(listitem_t *l)
+listitem_t* listitem_get_child(listitem_t *l)
 {
     if(!l) {
         return NULL;
     }
 
-    return l->parent;
+    return l->child;
+}
+
+
+int listitem_set_child(listitem_t *l, listitem_t *child)
+{
+    if(!l) {
+        return -1;
+    }
+    l->child = child;
+
+    return 0;
 }
 
 
@@ -114,7 +135,7 @@ static void lcd_draw_item(listitem_t *l, u8 index, u16 font_color, u16 bgcolor)
     list_get(l->list, index, &n);
     i = (item_data_t*)n.ptr;
     lcd_draw_round_rect(l->rect.x, l->rect.y+index*ITEM_HEIGHT, l->rect.w, ITEM_HEIGHT, 6, bgcolor);
-    lcd_draw_string_align(l->rect.x, l->rect.h, l->rect.w, l->rect.h, (u8*)i->txt, FONT_32, font_color, bgcolor, ALIGN_MIDDLE);
+    lcd_draw_string_align(l->rect.x, l->rect.h, l->rect.w, l->rect.h, (u8*)i->txt, FONT_32, font_color, bgcolor, ALIGN_MIDDLE, 0);
 }
 int listitem_refresh(listitem_t *l)
 {
@@ -128,7 +149,7 @@ int listitem_refresh(listitem_t *l)
     if(l->refreshFlag & REFRESH_TITLE) {
         rect_t r=TITLE_RECT;
         lcd_fill_rect(r.x, r.h, r.w, r.h, LCD_BC);
-        lcd_draw_string_align(r.x, r.h, r.w, r.h, (u8*)l->title, FONT_32, LCD_FC, LCD_BC, ALIGN_MIDDLE);
+        lcd_draw_string_align(r.x, r.h, r.w, r.h, (u8*)l->title, FONT_32, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
         lcd_draw_line(r.x, r.y, r.w, r.h+4, LCD_FC);
     }
 
@@ -223,6 +244,7 @@ int listitem_move(listitem_t *l, int dir)
 int listitem_handle(listitem_t *l, u8 key)
 {
     int r;
+    listitem_t *child,*parent;
 
     if(!l) {
         return -1;
@@ -240,11 +262,12 @@ int listitem_handle(listitem_t *l, u8 key)
         case KEY_ENTER:
         {
             node_t n;
+            
             r = listitem_get_focus(l, &n);
             if(r==0) {
-                item_data_t *pi=(item_data_t*)n.ptr;
-                if(pi->sub) {
-                    gb.pl = pi->sub;
+                child = listitem_get_child(l);
+                if(child) {
+                    gb.pl = child;
                     listitem_set_refresh(l, REFRESH_ALL);
                 }
             }
@@ -252,8 +275,9 @@ int listitem_handle(listitem_t *l, u8 key)
         break;
         
         case KEY_EXIT:
-        if(listitem_get_parent(l)){
-            gb.pl = listitem_get_parent(gb.pl);
+        parent = listitem_get_parent(l);
+        if(parent){
+            gb.pl = parent;
             listitem_set_refresh(l, REFRESH_ALL);
         }
         else {

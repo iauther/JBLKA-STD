@@ -42,7 +42,7 @@ static int input_show_all(inputbox_t *i)
 }
 /////////////////////////////////////////////
 
-inputbox_t *inputbox_init(para_item_t *para)
+inputbox_t *inputbox_init(rect_t *rect, para_item_t *para)
 {
     inputbox_t *i=(inputbox_t*)malloc(sizeof(inputbox_t));
     if(!i) {
@@ -91,16 +91,16 @@ int inputbox_handle(inputbox_t *i, u8 key)
 {
     switch(key) {
         
-        case KEY_ENTER:
-        break;
-        
-        case KEY_EXIT:
-        break;
-        
         case KEY_UP:
         break;
         
         case KEY_DOWN:
+        break;
+
+        case KEY_ENTER:
+        break;
+        
+        case KEY_EXIT:
         break;
     }
     

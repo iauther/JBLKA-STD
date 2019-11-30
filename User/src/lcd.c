@@ -384,7 +384,6 @@ void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
             x_temp -= distance;     
             //在x方向递增打点
             x += incx;
-                
         }
         y_temp += delta_y;
         if(y_temp > distance) {
@@ -397,7 +396,7 @@ void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
 }
 
 
-void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor)
+void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor, u8 pure)
 {                             
     u16 temp, t1, t;
     u16 y0 = y;
@@ -426,7 +425,9 @@ void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor)
                 lcd_draw_point(x, y, color);
             }
             else {
-                lcd_draw_point(x, y, bgcolor);
+                if(!pure) {
+                    lcd_draw_point(x, y, bgcolor);
+                }
             }
 
             temp <<= 1;
@@ -445,10 +446,10 @@ void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor)
             }
         }    
     }                     
-} 
+}
 
 
-void lcd_draw_string(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u16 bgcolor)
+void lcd_draw_string(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u16 bgcolor, u8 pure)
 {
     u16 x0 = x;
     font_info_t inf = font_get(font);
@@ -464,12 +465,11 @@ void lcd_draw_string(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u1
         if(y >= h) {   
             break;
         }
-        lcd_draw_char(x, y, *str, font, color, bgcolor);
+        lcd_draw_char(x, y, *str, font, color, bgcolor, pure);
         x += inf.height/2;
         str++;
     }  
 }
-
 
 
 void lcd_draw_rect(u16 x, u16 y, u16 w, u16 h, u16 color)
@@ -582,7 +582,7 @@ void lcd_fill_rect(u16 x, u16 y, u16 w, u16 h, u16 color)
 }
 
 
-void lcd_draw_string_align(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u16 bgcolor, u8 align)
+void lcd_draw_string_align(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u16 bgcolor, u8 align, u8 pure)
 {
     font_info_t info;
     u16 x2,y2,w2,h2;
@@ -591,7 +591,7 @@ void lcd_draw_string_align(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 col
     w2 = strlen((char*)str)*info.width;
     y2 = y+(h-info.height)/2;
     h2 = info.height;
-
+    
     if(align==ALIGN_LEFT) {
         x2 = x;
     }
@@ -613,7 +613,7 @@ void lcd_draw_string_align(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 col
     lcd_fill_rect(x2, y2+h2, w2, h-h2-(y2-y), bgcolor);
 #endif
 
-    lcd_draw_string(x2, y2, w2, h2, str, font, color, bgcolor);
+    lcd_draw_string(x2, y2, w2, h2, str, font, color, bgcolor, pure);
 }
 
 

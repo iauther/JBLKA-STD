@@ -4,7 +4,6 @@
 typedef struct {
     rect_t      rect;
     listitem_t  *pl;
-    //slider_t    *sl[];
 }home_t;
 
 home_t mHome={
@@ -14,38 +13,27 @@ home_t mHome={
 
 
 
-int home_init(void *p)
+int home_init(void)
 {
-    element_t e;
-    mHome.pl = listitem_init(NULL, &mHome.rect, 6);
-
-    listitem_add(mHome.pl, &e);
-    listitem_add(mHome.pl, &e);
-    listitem_add(mHome.pl, &e);
-    listitem_add(mHome.pl, &e);
-    listitem_add(mHome.pl, &e);
-    listitem_add(mHome.pl, &e);
     
     return 0;
 }
 
 
-int home_free(void *p)
+int home_free(void)
 {
-    listitem_free(&mHome.pl);
-    free(mHome.pl);
     return 0;
 }
 
 
-int home_handle(void *p, u8 key)
+int home_handle(u8 key)
 {
     //listitem_handle(mHome.pl, key);
     return 0;
 }
 
 
-int home_refresh(void *p)
+int home_refresh(void)
 {
     
     return 0;

@@ -27,6 +27,7 @@ typedef struct _listitem {
     u32     refreshFlag;
 
     struct _listitem *parent;
+    struct _listitem *child;
 }listitem_t;
 
 listitem_t *listitem_init(cchr *title, rect_t *rect, u8 max, int node_size);
@@ -35,9 +36,13 @@ int listitem_free(listitem_t **l);
 
 int listitem_reset(listitem_t *l);
 
+listitem_t * listitem_get_parent(listitem_t *l);
+
 int listitem_set_parent(listitem_t *l, listitem_t *parent);
 
-listitem_t* listitem_get_parent(listitem_t *l);
+listitem_t * listitem_get_child(listitem_t *l);
+
+int listitem_set_child(listitem_t *l, listitem_t *child);
 
 int listitem_add(listitem_t *l, node_t *n);
 

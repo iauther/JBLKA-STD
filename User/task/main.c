@@ -331,7 +331,7 @@ static void knob_proc(void)
 
         e2p_put(&n);
         sprintf((char*)tmp, "%3d", gain);
-        lcd_draw_string_align(0, 100, LCD_WIDTH, 60, tmp, FONT_32, LCD_FC, LCD_BC, ALIGN_MIDDLE);
+        lcd_draw_string_align(0, 100, LCD_WIDTH, 60, tmp, FONT_32, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
     }
 }
 
