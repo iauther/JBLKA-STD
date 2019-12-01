@@ -32,6 +32,10 @@ int queue_get(queue_t *q, node_t *n, qiterater iter);
 
 int queue_put(queue_t *q, node_t *n, qiterater iter);
 
+int queue_pop(queue_t *q);
+
+int queue_peer(queue_t *q, node_t *n);
+
 int queue_iterate(queue_t *q, node_t *n, qiterater iter);
 
 int queue_clear(queue_t *q);

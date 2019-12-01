@@ -14,7 +14,7 @@ enum {
 };
 
 typedef struct _listitem {
-    u8      type;
+    u8      control;
     rect_t  rect;
     u8      imax;
     cchr    *title;

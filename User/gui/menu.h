@@ -4,6 +4,7 @@
 #include "evt.h"
 #include "key.h"
 #include "gbl.h"
+#include "queue.h"
 #include "default.h"
 #include "msgbox.h"
 #include "topbar.h"
@@ -87,8 +88,20 @@ DEF_MENU_FUNC(presets);
         XX##_refresh, \
     }
 
+typedef struct _item_t{
+    u8              control;
+    void            *handle;
+}item_t;
+
+typedef struct {
+    listitem_t  *l;
+    queue_t     *q;
+}menu_t;
+
 
 int menu_init(void);
+
+int menu_free(void);
 
 int menu_clear(void);
 
@@ -98,6 +111,6 @@ int menu_handle(u8 key);
 
 int menu_add_item(listitem_t *l, u8 menu);
 
-extern u8 gMenu;
+extern u8 gM;
 
 #endif

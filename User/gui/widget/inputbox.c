@@ -1,4 +1,5 @@
 #include "inputbox.h"
+#include "lcd.h"
 
 #define LABEL_RECT  {1,1,1,1}
 #define BOX_RECT    {2,1,1,1}

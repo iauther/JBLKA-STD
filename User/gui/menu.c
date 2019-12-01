@@ -1,27 +1,14 @@
 #include "menu.h"
+#include "dsp.h"
 
-u8 gMenu=MENU_HOME;
-u8 gMenuPrev=MENU_HOME;
-
-
-menu_func_t fn_funcs[MENU_MAX]={
+u8 gM=MENU_HOME;
+menu_func_t gFuncs[MENU_MAX]={
     MAKE_FUNC(home),
     MAKE_FUNC(mic),
     MAKE_FUNC(music),
     MAKE_FUNC(effect),
     MAKE_FUNC(presets),
 };
-
-
-
-#include "dsp.h"
-int menu_clear(void)
-{
-    rect_t r=MENU_RECT;
-    
-    lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
-    return 0;
-}
 
 
 const dsp_item_t dspItems[CMD_ID_NUM]={
@@ -232,23 +219,36 @@ item_data_t effItems[]={
 
 int menu_init(void)
 {
-    fn_funcs[gMenu].init();
-    
+    gFuncs[gM].init();
+    return 0;
+}
+
+
+int menu_free(void)
+{
+    gFuncs[gM].free();
     return 0;
 }
 
 
 int menu_refresh(void)
 {
-    fn_funcs[gMenu].refresh();
+    gFuncs[gM].refresh();
+    return 0;
+}
+
+
+int menu_clear(void)
+{
+    rect_t r=MENU_RECT;
+    lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
     return 0;
 }
 
 
 int menu_handle(u8 key)
 {
-    fn_funcs[gMenu].handle(key);
-    
+    gFuncs[gM].handle(key);
     return 0;
 }
 

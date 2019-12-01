@@ -10,29 +10,29 @@ static void key_proc(u8 key)
 {
     switch(key) {
         case KEY_MUSIC:
-        if(gMenu!=MENU_MUSIC) {
-            gMenu = MENU_MUSIC;
+        if(gM!=MENU_MUSIC) {
+            gM = MENU_MUSIC;
             menu_refresh();
         }
         break;
 
         case KEY_MIC:
-        if(gMenu!=MENU_MIC) {
-            gMenu = MENU_MIC;
+        if(gM!=MENU_MIC) {
+            gM = MENU_MIC;
             menu_refresh();
         }
         break;
 
         case KEY_EFFECT:
-        if(gMenu!=MENU_EFFECT) {
-            gMenu = MENU_EFFECT;
+        if(gM!=MENU_EFFECT) {
+            gM = MENU_EFFECT;
             menu_refresh();
         }
         break;
 
         case KEY_PRESET:
-        if(gMenu!=MENU_PRESET) {
-            gMenu = MENU_PRESET;
+        if(gM!=MENU_PRESET) {
+            gM = MENU_PRESET;
             menu_refresh();
         }
         break;
@@ -163,8 +163,8 @@ static void knob_proc(u8 key, u16 times)
         return;
     }
 
-    if(gMenu!=MENU_HOME) {
-        gMenu = MENU_HOME;
+    if(gM!=MENU_HOME) {
+        gM = MENU_HOME;
         menu_refresh();
     }
     

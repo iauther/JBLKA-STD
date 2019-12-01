@@ -70,7 +70,7 @@ static void keyPool_init(void)
 }
 static u8 knob_key_remap(u8 value)
 {
-    if(gMenu!=MENU_HOME) {
+    if(gM!=MENU_HOME) {
         if(value==KEY_EFFECT_DN) {
             return KEY_DOWN;
         }

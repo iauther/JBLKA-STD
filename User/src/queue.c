@@ -139,6 +139,45 @@ int queue_get(queue_t *q, node_t *n, qiterater iter)
 }
 
 
+int queue_pop(queue_t *q)
+{
+    int i=-1;
+
+	if (!q || q->size==0 || q->locked) {
+		return -1;
+	}
+    
+    q->locked = 1;
+    if(i<0) {
+        i = q->head;
+        q->head = (q->head + 1) % q->max;	// circular queue
+    }
+	
+	q->size--;
+    q->locked = 0;
+	
+	return 0;
+}
+
+
+int queue_peer(queue_t *q, node_t *n)
+{
+    int i=-1;
+
+	if (!q || !n || q->size==0 || q->locked) {
+		return -1;
+	}
+    
+    q->locked = 1;
+    i = q->head;
+    memcpy(n->ptr, q->nodes[i].ptr, q->nodes[i].len);
+    n->len = q->nodes[i].len;
+    q->locked = 0;
+	
+	return 0;
+}
+
+
 int queue_iterate(queue_t *q, node_t *n, qiterater iter)
 {
     int r;
