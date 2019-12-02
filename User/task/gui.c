@@ -10,36 +10,23 @@ static void key_proc(u8 key)
 {
     switch(key) {
         case KEY_MUSIC:
-        if(gM!=MENU_MUSIC) {
-            gM = MENU_MUSIC;
-            menu_refresh();
-        }
+        menu_switch(MENU_MUSIC);
         break;
 
         case KEY_MIC:
-        if(gM!=MENU_MIC) {
-            gM = MENU_MIC;
-            menu_refresh();
-        }
+        menu_switch(MENU_MIC);
         break;
 
         case KEY_EFFECT:
-        if(gM!=MENU_EFFECT) {
-            gM = MENU_EFFECT;
-            menu_refresh();
-        }
+        menu_switch(MENU_EFFECT);
         break;
 
         case KEY_PRESET:
-        if(gM!=MENU_PRESET) {
-            gM = MENU_PRESET;
-            menu_refresh();
-        }
+        menu_switch(MENU_PRESET);
         break;
 
         default:
         menu_handle(key);
-        //menu_refresh();
         break;
     }
 }
@@ -215,7 +202,7 @@ void gui_task(void *arg)
 
                 case EVT_REFRESH:
                 {
-                    //menu_refresh();
+                    menu_refresh();
                 }
                 break;
             }
@@ -229,6 +216,13 @@ void gui_task(void *arg)
 void gui_post_evt(evt_gui_t *e)
 {
     msg_post(gui_msg, e, sizeof(*e));
+}
+
+void gui_post_refresh(void)
+{
+    evt_gui_t e;
+    e.evt = EVT_REFRESH;
+    msg_post(gui_msg, &e, sizeof(e));
 }
 
 #endif

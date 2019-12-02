@@ -78,6 +78,7 @@ static void timer_cb(void)
     //static u64 timer_cnt=0;
     //timer_cnt++;
 
+    adc_tmr_cb();
     knob_tmr_cb();
     usbd_tmr_cb();
 }

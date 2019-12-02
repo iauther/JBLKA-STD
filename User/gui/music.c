@@ -3,7 +3,6 @@
 
 #define ITEM_MAX    6
 menu_t *mscMenu=NULL;
-listitem_t *mscList=NULL;
 int music_init(void)
 {
     u8 i;
@@ -14,6 +13,7 @@ int music_init(void)
     queue_t *q;
 
     if(mscMenu) {
+        listitem_set_refresh(mscMenu->l, REFRESH_ALL);
         return 0;
     }
     
@@ -36,8 +36,7 @@ int music_init(void)
     mscMenu->l = l;
     mscMenu->q = q;
 
-    menu_add_item(mscList, MENU_MUSIC);
-    gb.pl = mscList;
+    menu_add_item(l, MENU_MUSIC);
 
     return 0;
 }
@@ -101,6 +100,10 @@ int music_handle(u8 key)
 
 int music_refresh(void)
 {
-    listitem_refresh(mscList);
-    return 0;
+    return listitem_refresh(mscMenu->l);
+}
+
+int music_set_refresh(u32 flag)
+{
+    return listitem_set_refresh(mscMenu->l, flag);
 }

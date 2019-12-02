@@ -1,5 +1,7 @@
 #include "adc.h"
 #include "key.h"
+#include "evt.h"
+#include "task.h"
 #include "stm32f10x.h"
 
 
@@ -18,7 +20,8 @@ const adc_info_t adcTab0[5] = {
 };
 
 const adc_info_t adcTab1[2] = {
-    {0x0a68,    KEY_MUSIC},
+    //{0x0a68,    KEY_MUSIC},
+    {0x0ab2,    KEY_MUSIC},
     {0x04c4,    KEY_PRESET},
 };
 
@@ -32,7 +35,7 @@ u8 adcTrigKey=KEY_NONE;
 u16 adcValue[ADC_CH_MAX];
 u8 adcChannel[ADC_CH_MAX]={ADC_Channel_6, ADC_Channel_7, ADC_Channel_10, ADC_Channel_11, ADC_Channel_12, ADC_Channel_13};
 
-static u8 get_key(u16 v0, u16 v1)
+static u8 calc_key(u16 v0, u16 v1)
 {
     u8 i,key,key0,key1;
 
@@ -68,6 +71,10 @@ static u8 get_key(u16 v0, u16 v1)
     adcKey = key;
 
     return key;
+}
+static u8 get_key(void)
+{
+    return calc_key(adcValue[ADC_CH_KEY1], adcValue[ADC_CH_KEY2]);
 }
 
 
@@ -149,10 +156,28 @@ u16 adc_read(u8 ch)
 
 u8 adc_get_key(void)
 {
-    return get_key(adcValue[ADC_CH_KEY1], adcValue[ADC_CH_KEY2]);
+    return get_key();
 }
 
 
+void adc_tmr_cb(void)
+{
+#ifdef RTX
+    {
+        u8 key;
+
+        key = get_key();
+        if(key!=KEY_NONE) {
+            evt_gui_t e={0};
+            
+            e.evt = EVT_KEY;
+            e.key.src = SRC_KEY;
+            e.key.value=key;
+            gui_post_evt(&e);
+        }
+    }
+#endif
+}
 
 
 

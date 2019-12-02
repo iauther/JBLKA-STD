@@ -9,6 +9,7 @@
 
 void gui_task(void *arg);
 void gui_post_evt(evt_gui_t *e);
+void gui_post_refresh(void);
 
 void dev_task(void *arg);
 void dev_post_evt(evt_dev_t *e);

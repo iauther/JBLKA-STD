@@ -1,7 +1,7 @@
 #include "menu.h"
 
 
-u8 preMenu=0;
+menu_t *preMenu=NULL;
 int presets_init(void)
 {
     preMenu = 0;
@@ -26,4 +26,11 @@ int presets_refresh(void)
 {
     return 0;
 }
+
+
+int presets_set_refresh(u32 flag)
+{
+    return listitem_set_refresh(preMenu->l, flag);
+}
+
 

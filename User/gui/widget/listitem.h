@@ -10,7 +10,7 @@ enum {
     REFRESH_LIST        = 1<<2,
     REFRESH_TXT_SCROLL  = 1<<3,
 
-    REFRESH_ALL         = 0xff,
+    REFRESH_ALL         = 0xffff,
 };
 
 typedef struct _listitem {

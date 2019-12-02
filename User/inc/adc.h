@@ -23,4 +23,6 @@ int adc_deinit(void);
 
 u8 adc_get_key(void);
 
+void adc_tmr_cb(void);
+
 #endif

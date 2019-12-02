@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "default.h"
 #include "config.h"
 
@@ -183,104 +184,175 @@ const def_dsp_t DEF_DSP={
         .mute       = {.Mute = 0},
     },
 };
+/////////////////////////////////////////////////////////////////////////
 
-const para_info_t PARA_INFO[CMD_ID_NUM]={
+
+const para_txt_t HLPF_TXT={
+    {
+        "BYPASS",
+        "12dB BUTTERWORTH",
+        "12dB BESSEL",
+        "12dB LINKRILEY",
+        "18dB BUTTERWORTH",
+        "18dB BESSEL",
+        "24dB BUTTERWORTH",
+        "24dB BESSEL",
+        "24dB LINKRILEY",
+    }
+};
+para_txt_t PITCH_TXT={
+    {
+        "b5",
+        "b4",
+        "b3",
+        "b2",
+        "b1",
+        "0",
+        "#1",
+        "#2",
+        "#3",
+        "#4",
+        "#5",
+    }
+};
+para_txt_t FEEDBACK_TXT={
+    {
+        "OFF",
+        "4HZ",
+        "6HZ",
+        "8HZ",
+    }
+};
+para_txt_t INPUT_TXT={
+    {
+        "VOD",
+        "DVD",
+        "BGM",
+        "BTUSB",
+        "OPT",
+        "HIN",
+        "HARC",
+    }
+};
+para_txt_t EQTYPE_TXT={
+    {
+        "PEQ",
+        "LS",
+        "HS",
+    }
+};
+para_txt_t ONOFF_TXT={
+    {
+        "OFF",
+        "ON",
+    }
+};
+para_txt_t PHASE_TXT={
+    {
+        "+",
+        "-",
+    }
+};
+
+
+u32 parainfo_length=sizeof(PARA_INFO);
+paras_info_t PARA_INFO[CMD_ID_NUM]={
     {//0
         {
-            {"",                    "",                1,                   1,                 1,                  1},
+            {"",                    "",                1,                   1,                  1,                  1,              0,              NULL},
         }
     },
 
     {//CMD_ID_Gain
         {
-            {"GAIN",                "",                 1,                  1000,               1,                  1},
-            {"MUTE",                "",                 0,                  1,                  1,                  1},
-            {"",                    "",                 1,                  1,                  1,                  1},
+            {"GAIN",                "",                 1,                  1000,               1,                  1,              0,              NULL},
+            {"MUTE",                "",                 0,                  1,                  1,                  1,              0,              &ONOFF_TXT},
+            {"",                    "",                 1,                  1,                  1,                  1,              0,              NULL},
         }
     },
 
     {//CMD_ID_Vol
         {
-            {"VOL",                 "",                 0,                  200,                1,                  1},
-            {"PHASE",               "",                 0,                  1,                  1,                  1},
-            {"",                    "",                 1,                  1,                  1,                  1},
+            {"VOL",                 "",                 0,                  200,                1,                  1,              0,              NULL},
+            {"PHASE",               "",                 0,                  1,                  1,                  1,              0,              &PHASE_TXT},
+            {"",                    "",                 1,                  1,                  1,                  1,              0,              NULL},
         }
     },
 
     {//CMD_ID_EQ
         {
-            {"FREQ",                "Hz",               20,                 20000,              1,                  1},
-            {"GAIN",                "dB",               -24,                12,                 0.1,                1},
-            {"Q",                   "",                 1,                  1280,               1,                  10},
-            {"TYPE",                "",                 0,                  2,                  1,                  1},
-            {"BYPASS",              "",                 0,                  1,                  1,                  1},
-            {"",                    "",                 1,                  1,                  1,                  1},
+            {"FREQ",                "Hz",               20,                 20000,              1,                  1,              0,              NULL},
+            {"GAIN",                "dB",               -24,                12,                 0.1,                1,              0,              NULL},
+            {"Q",                   "",                 1,                  1280,               1,                  10,             1,              &EQTYPE_TXT},
+            {"TYPE",                "",                 0,                  2,                  1,                  1,              0,              NULL},
+            {"BYPASS",              "",                 0,                  1,                  1,                  1,              0,              NULL},
+            {"",                    "",                 1,                  1,                  1,                  1,              0,              NULL},
         }
     },
 
     {//CMD_ID_HLPF
         {
-            {"FREQ",                "",                 20,                 21000,              1,                  1},
-            {"TYPE",                "",                 HLPF_Type_Bypass,   HLPF_Type_24dBLinkRiley, 1,             1},
-            {"",                    "",                 1,                  1,                  1,                  1},
+            {"FREQ",                "",                 20,                 21000,              1,                  1,              0,              NULL},
+            {"TYPE",                "",                 HLPF_Type_Bypass,   HLPF_Type_24dBLinkRiley, 1,             1,              0,              &HLPF_TXT},
+            {"",                    "",                 1,                  1,                  1,                  1,              0,              NULL},
         }
     },
 
     {//CMD_ID_Delay
         {
-            {"ECHO PREDELAY",       "ms",               0,                  4800,               48,                 48},
-            {"ECHO DELAY",          "ms",               0,                  14400,              48,                 48},
-            {"REVERB PREDELAY",     "ms",               0,                  4800,               48,                 48},
-            {"REVERB DELAY",        "ms",               0,                  8000,               1,                  1},
-            {"MAINL DELAY",         "ms",               0,                  1920,               48,                 48},
-            {"MAINR DELAY",         "ms",               0,                  1920,               48,                 48},
-            {"SUB DELAY",           "ms",               0,                  1920,               48,                 48},
-            {"",                    "",                 1,                  1,                  1,                  1},
+            {"ECHO PREDELAY",       "ms",               0,                  4800,               48,                 48,              0,             NULL},
+            {"ECHO DELAY",          "ms",               0,                  14400,              48,                 48,              0,             NULL},
+            {"REVERB PREDELAY",     "ms",               0,                  4800,               48,                 48,              0,             NULL},
+            {"REVERB DELAY",        "ms",               0,                  8000,               1,                  1,               0,             NULL},
+            {"MAINL DELAY",         "ms",               0,                  1920,               48,                 48,              0,             NULL},
+            {"MAINR DELAY",         "ms",               0,                  1920,               48,                 48,              0,             NULL},
+            {"SUB DELAY",           "ms",               0,                  1920,               48,                 48,              0,             NULL},
+            {"",                    "",                 1,                  1,                  1,                  1,               0,             NULL},
         }
     },
 
     {//CMD_ID_FeedBack
         {
-            {"FEEDBACK",            "",                 0,                  3,                  1,                  1},
-            {"",                    "",                 1,                  1,                  1,                  1},
+            {"FEEDBACK",            "",                 0,                  3,                  1,                  1,               0,             &FEEDBACK_TXT},
+            {"",                    "",                 1,                  1,                  1,                  1,               0,             NULL},
         }
     },
 
     {//CMD_ID_Limiter
         {
-            {"THRESHOLD",           "dB",               -34,                0,                  1,                  1},
-            {"ATTACKTIME",          "ms",               0,                  900,                1,                  1},
-            {"RELEASETIME",         "ms",               0,                  9000,               1,                  1},
-            {"RATIO",               "ms",               0,                  1000,               1,                  10},
-            {"",                    "",                 1,                  1,                  1,                  1},
+            {"THRESHOLD",           "dB",               -34,                0,                  1,                  1,               0,             NULL},
+            {"ATTACKTIME",          "ms",               0,                  900,                1,                  1,               0,             NULL},
+            {"RELEASETIME",         "ms",               0,                  9000,               1,                  1,               0,             NULL},
+            {"RATIO",               "ms",               0,                  1000,               1,                  10,              1,             NULL},
+            {"",                    "",                 1,                  1,                  1,                  1,               0,             NULL},
         }
     },
 
     {//CMD_ID_PitchShift
         {
-            {"PITCH",               "",                 -5,                 5,                  1,                  1},
-            {"",                    "",                 1,                  1,                  1,                  1},
+            {"PITCH",               "",                 -5,                 5,                  1,                  1,               0,             &PITCH_TXT},
+            {"",                    "",                 1,                  1,                  1,                  1,               0,             NULL},
         }
     },
 
     {//CMD_ID_Mute
         {
-            {"MUTE",                "",                 0,                  1,                  1,                  1},
-            {"",                    "",                 1,                  1,                  1,                  1},
+            {"MUTE",                "",                 0,                  1,                  1,                  1,               0,             &ONOFF_TXT},
+            {"",                    "",                 1,                  1,                  1,                  1,               0,             NULL},
         }
     },
 
     {//CMD_ID_NoiseGate
         {
-            {"THRESHOLD",           "dB",               -60,                0,                  1,                  1},
-            {"",                    "",                 1,                  1,                  1,                  1},
+            {"THRESHOLD",           "dB",               -60,                0,                  1,                  1,               0,             NULL},
+            {"",                    "",                 1,                  1,                  1,                  1,               0,             NULL},
         }
     },
 
     {//CMD_ID_Input
         {
-            {"INPUT",               "",                 INPUT_VOD,          INPUT_HDMI_ARC,     1,                  1},
-            {"",                    "",                 1,                  1,                  1,                  1},
+            {"INPUT",               "",                 INPUT_VOD,          INPUT_HDMI_ARC,     1,                  1,               0,             &INPUT_TXT},
+            {"",                    "",                 1,                  1,                  1,                  1,               0,             NULL},
         }
     },
 };
@@ -307,16 +379,5 @@ const io_data_t IO_DATA = {
     .tx485_en = 0,
 };
 
-cchr *HLPF_STR[HLPF_Type_NUM] = {
-    "BYPASS",
-    "12dB BUTTERWORTH",
-    "12dB BESSEL",
-    "12dB LINKRILEY",
-    "18dB BUTTERWORTH",
-    "18dB BESSEL",
-    "24dB BUTTERWORTH",
-    "24dB BESSEL",
-    "24dB LINKRILEY",
-};
 
 

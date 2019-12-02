@@ -127,7 +127,11 @@ typedef struct
     def_main_t          main;
 }def_dsp_t;
 
-#define VAR_MAX        8
+#define VAR_MAX         8
+#define TXT_MAX         12
+typedef struct {
+    cchr                *txt[TXT_MAX];
+}para_txt_t;
 typedef struct {
     cchr                *name;
     cchr                *unit;
@@ -135,19 +139,33 @@ typedef struct {
     s16                 max;
     f32                 step;
     f32                 div;        //show number==value/div
-}para_item_t;
+    u8                  flt;        //is float or not
+    const para_txt_t    *ptxt;
+}para_info_t;
 
+typedef struct _item{
+    u8              control;
+    cchr            *txt;
+    u8              cmd;       //dsp cmd id
+    void            *data;
+    para_info_t     *info;
+
+    void            *handle;    //the control handle
+}item_data_t;
 
 typedef struct {
-    para_item_t         items[VAR_MAX];
-}para_info_t;
+    item_data_t items[VAR_MAX];
+}dsp_item_t;
+
+typedef struct {
+    para_info_t         info[VAR_MAX];
+}paras_info_t;
 //#pragma pack()
 
 
 extern const def_dsp_t DEF_DSP;
 extern const fw_info_t FW_INFO;
 extern const io_data_t IO_DATA;
-extern const para_info_t PARA_INFO[CMD_ID_NUM];
-extern cchr *HLPF_STR[HLPF_Type_NUM];
+extern paras_info_t PARA_INFO[CMD_ID_NUM];
 
 #endif

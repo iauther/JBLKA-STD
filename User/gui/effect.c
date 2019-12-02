@@ -1,7 +1,7 @@
 #include "menu.h"
 
 
-u8 effMenu=0;
+menu_t *effMenu=NULL;
 int effect_init(void)
 {
     effMenu = 0;
@@ -26,3 +26,11 @@ int effect_refresh(void)
 {
     return 0;
 }
+
+
+int effect_set_refresh(u32 flag)
+{
+    return listitem_set_refresh(effMenu->l, flag);
+}
+
+

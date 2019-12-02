@@ -1,5 +1,6 @@
 #include "gbl.h"
 #include "menu.h"
+#include "inputbox.h"
 #include "listitem.h"
 
 
@@ -9,7 +10,7 @@ static void li_reset(listitem_t *l)
     l->firstId = 0;
     l->prev_firstId = 0;
     l->prev_focusId = 0;
-    l->refreshFlag  = 0xffff;
+    l->refreshFlag  = REFRESH_ALL;
 }
 
 
@@ -154,8 +155,24 @@ int listitem_refresh(listitem_t *l)
     }
 
     if(l->refreshFlag & REFRESH_FOCUS) {
-        lcd_draw_item(l, l->prev_focusId, LCD_FC, ITEM_FOCUS_BGCOLOR);
-        lcd_draw_item(l, l->focusId, LCD_FC, ITEM_FOCUS_COLOR);
+        node_t n;
+        item_data_t it1, it2;
+        
+        n.ptr = &it1;
+        n.len = sizeof(item_data_t);
+        listitem_get(l, l->prev_focusId, &n);
+        n.ptr = &it2;
+        listitem_get(l, l->focusId, &n);
+        if(it1.control==CONTROL_LIST) {
+            lcd_draw_item(l, l->prev_focusId, LCD_FC, LCD_BC);
+            lcd_draw_item(l, l->focusId, ITEM_FOCUS_COLOR, ITEM_FOCUS_BGCOLOR);
+        }
+        else if(it1.control==CONTROL_INPUTBOX){
+            inputbox_t *box1=(inputbox_t*)it1.handle;
+            inputbox_t *box2=(inputbox_t*)it2.handle;
+            inputbox_show(box1, LCD_FC, LCD_BC);
+            inputbox_show(box2, ITEM_FOCUS_COLOR, ITEM_FOCUS_BGCOLOR);
+        }
     }
 
     if(l->refreshFlag & REFRESH_LIST) {
@@ -243,9 +260,6 @@ int listitem_move(listitem_t *l, int dir)
 
 int listitem_handle(listitem_t *l, u8 key)
 {
-    int r;
-    listitem_t *child,*parent;
-
     if(!l) {
         return -1;
     }
@@ -257,32 +271,6 @@ int listitem_handle(listitem_t *l, u8 key)
 
         case KEY_DOWN:
         listitem_move(l, DOWN);
-        break;
-
-        case KEY_ENTER:
-        {
-            node_t n;
-            
-            r = listitem_get_focus(l, &n);
-            if(r==0) {
-                child = listitem_get_child(l);
-                if(child) {
-                    gb.pl = child;
-                    listitem_set_refresh(l, REFRESH_ALL);
-                }
-            }
-        }
-        break;
-        
-        case KEY_EXIT:
-        parent = listitem_get_parent(l);
-        if(parent){
-            gb.pl = parent;
-            listitem_set_refresh(l, REFRESH_ALL);
-        }
-        else {
-            listitem_clear(l);
-        }
         break;
     }
 

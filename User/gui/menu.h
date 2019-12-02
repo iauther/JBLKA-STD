@@ -46,27 +46,15 @@ typedef struct{
     int (*free)(void);
     int (*handle)(u8 key);
     int (*refresh)(void);
+    int (*set_refresh)(u32 flag);
 }menu_func_t;
-
-typedef struct _item{
-    u8              control;
-    cchr            *txt;
-    u8              cmd;       //dsp cmd id
-    void            *data;
-    void            *item;
-
-    void            *handle;    //the control handle
-}item_data_t;
-
-typedef struct {
-    item_data_t items[VAR_MAX];
-}dsp_item_t;
 
 #define DEF_MENU_FUNC(XX) \
     int XX##_init(void); \
     int XX##_free(void); \
     int XX##_handle(u8 key); \
-    int XX##_refresh(void);
+    int XX##_refresh(void); \
+    int XX##_set_refresh(u32 flag);
 
 #define DEF_CONTROL_FUNC(XX) \
     int XX##_init(rect_t *r, void *data); \
@@ -86,6 +74,7 @@ DEF_MENU_FUNC(presets);
         XX##_free, \
         XX##_handle, \
         XX##_refresh, \
+        XX##_set_refresh, \
     }
 
 typedef struct _item_t{
@@ -104,6 +93,8 @@ int menu_init(void);
 int menu_free(void);
 
 int menu_clear(void);
+
+int menu_switch(u8 menu);
 
 int menu_refresh(void);
 

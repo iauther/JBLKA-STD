@@ -2,7 +2,6 @@
 #include <string.h>
 #include "dac.h"
 #include "lcd.h"
-#include "font.h"
 #include "lock.h"
 #include "delay.h"
 #include "stm32f10x_spi.h"
@@ -279,8 +278,7 @@ void lcd_init(void)
     lcd_write_data(0x20);
     lcd_write_data(0x23);
 
-    //lcd_clear(LCD_BC);
-
+    lcd_clear(LCD_BC);
     lcd_display(1);
 }
 

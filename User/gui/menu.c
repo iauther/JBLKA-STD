@@ -215,11 +215,11 @@ item_data_t effItems[]={
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-
 int menu_init(void)
 {
     gFuncs[gM].init();
+    gui_post_refresh();
+
     return 0;
 }
 
@@ -230,6 +230,16 @@ int menu_free(void)
     return 0;
 }
 
+
+int menu_switch(u8 menu)
+{
+    if(gM!=menu) {
+        gM = menu;
+        menu_init();
+    }
+
+    return 0;
+}
 
 int menu_refresh(void)
 {
@@ -249,36 +259,58 @@ int menu_clear(void)
 int menu_handle(u8 key)
 {
     gFuncs[gM].handle(key);
+    gui_post_refresh();
+
     return 0;
 }
 
-static u8 get_item_num(item_data_t *item)
+static u8 get_num(item_data_t *dat)
 {
     u8 i=0;
-    while(item[i].control!=CONTROL_NONE) i++;
+    while(dat[i].control!=CONTROL_NONE) i++;
     return i;
 }
 int menu_add_item(listitem_t *l, u8 menu)
 {
     u8 i,j,num;
     node_t n;
-    item_data_t e;
+    item_data_t e,*pit=NULL;
     rect_t rect=MENU_RECT;
 
     if(!l) {
         return -1;
     }
+    
+    switch(menu) {
+    
+        case MENU_MUSIC:
+        pit = (item_data_t*)mscItems;
+        break;
+
+        case MENU_MIC:
+        pit = (item_data_t*)micItems;
+        break;
+
+        case MENU_EFFECT:
+        pit = (item_data_t*)effItems;
+        break;
+        
+        case MENU_PRESET:
+        //pit = (item_data_t*)preItems;
+        break;
+
+        default:
+        return -1;
+    }
 
     for(i=0;;i++) {
-        e = mscItems[i];
+        e = pit[i];
         if(e.control==CONTROL_LIST) {
-            num = get_item_num(e.item);
-            listitem_t *pl=listitem_init(e.txt, &rect, num, sizeof(e));
+            num = get_num(&e);
+            e.handle = listitem_init(e.txt, &rect, num, sizeof(e));
         }
         else if(e.control==CONTROL_INPUTBOX){
-            inputbox_t *b;
-            //num = get_item_num();
-            //b = inputbox_init(e.txt, &rect, 6, sizeof(e));
+            //e.handle = inputbox_init(e.txt, &rect, sizeof(e));
         }
         else {
             break;

@@ -2,6 +2,7 @@
 #define __LCD_H__
 
 #include "types.h"
+#include "font.h"
 
 /* 颜色 */
 #define WHITE         	 0xFFFF
