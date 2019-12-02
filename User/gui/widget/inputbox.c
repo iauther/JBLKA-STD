@@ -1,4 +1,4 @@
-#include <string.h>
+#include <stdio.h>
 #include "lcd.h"
 #include "inputbox.h"
 

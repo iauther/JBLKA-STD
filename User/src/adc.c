@@ -13,7 +13,7 @@ typedef struct {
 
 const adc_info_t adcTab0[5] = {
     {0x004e,    KEY_ENTER},
-    {0x07d8,    KEY_MIC},
+    {0x081c,    KEY_MIC},
     {0x0a67,    KEY_EFFECT},
     {0x0297,    KEY_SAVE},
     {0x04c5,    KEY_EXIT},
@@ -26,7 +26,7 @@ const adc_info_t adcTab1[2] = {
 };
 
 
-#define GAP             10
+#define GAP             200
 #define in_range(x,v)   ((v-GAP)<=x && x<=(v+GAP))
 
 u8 adcMode=0;
