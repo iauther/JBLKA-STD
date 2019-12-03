@@ -16,7 +16,7 @@ int effect_free(void)
 }
 
 
-int effect_handle(u8 key)
+int effect_handle(key_t key)
 {
     return 0;
 }

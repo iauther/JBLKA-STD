@@ -36,7 +36,7 @@ enum {
 typedef struct{
     void *(*init)(rect_t *r, void *data);
     int (*free)(void **p);
-    int (*handle)(void *p, u8 key);
+    int (*handle)(void *p, key_t key);
     int (*refresh)(void *p);
     int (*clear)(void *p);
 }control_func_t;
@@ -44,7 +44,7 @@ typedef struct{
 typedef struct{
     int (*init)(void);
     int (*free)(void);
-    int (*handle)(u8 key);
+    int (*handle)(key_t key);
     int (*refresh)(void);
     int (*set_refresh)(u32 flag);
 }menu_func_t;
@@ -52,14 +52,14 @@ typedef struct{
 #define DEF_MENU_FUNC(XX) \
     int XX##_init(void); \
     int XX##_free(void); \
-    int XX##_handle(u8 key); \
+    int XX##_handle(key_t key); \
     int XX##_refresh(void); \
     int XX##_set_refresh(u32 flag);
 
 #define DEF_CONTROL_FUNC(XX) \
     int XX##_init(rect_t *r, void *data); \
     int XX##_free(void **p); \
-    int XX##_handle(void *p, u8 key); \
+    int XX##_handle(void *p, key_t key); \
     int XX##_refresh(void *p);
 
 DEF_MENU_FUNC(home);
@@ -98,7 +98,7 @@ int menu_switch(u8 menu);
 
 int menu_refresh(void);
 
-int menu_handle(u8 key);
+int menu_handle(key_t key);
 
 int menu_add_item(listitem_t *l, u8 menu);
 

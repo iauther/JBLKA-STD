@@ -27,7 +27,7 @@ const adc_info_t adcTab1[2] = {
 
 
 #define GAP             200
-#define in_range(x,v)   ((v-GAP)<=x && x<=(v+GAP))
+#define in_range(x,v)   (v>GAP)?((v-GAP)<=x && x<=(v+GAP)):(0<=x && x<=(v+GAP))
 
 u8 adcMode=0;
 u8 adcKey=KEY_NONE;

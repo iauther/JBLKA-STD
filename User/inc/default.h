@@ -143,29 +143,32 @@ typedef struct {
     const para_txt_t    *ptxt;
 }para_info_t;
 
-typedef struct _item{
+typedef struct {
+    para_info_t         info[VAR_MAX];
+}paras_info_t;
+//////////////////////////////////////////
+
+typedef struct _item {
     u8              control;
     cchr            *txt;
     u8              cmd;       //dsp cmd id
     void            *data;
-    para_info_t     *info;
+    const struct _item *info;
 
     void            *handle;    //the control handle
-}item_data_t;
+}item_info_t;
 
 typedef struct {
-    item_data_t items[VAR_MAX];
-}dsp_item_t;
+    item_info_t     var[VAR_MAX];
+}dsp_var_t;
 
-typedef struct {
-    para_info_t         info[VAR_MAX];
-}paras_info_t;
+
 //#pragma pack()
 
 
 extern const def_dsp_t DEF_DSP;
 extern const fw_info_t FW_INFO;
 extern const io_data_t IO_DATA;
-extern paras_info_t PARA_INFO[CMD_ID_NUM];
+extern const paras_info_t PARA_INFO[CMD_ID_NUM];
 
 #endif

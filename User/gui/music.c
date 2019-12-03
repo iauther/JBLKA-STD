@@ -8,7 +8,7 @@ int music_init(void)
     u8 i;
     node_t n;
     rect_t rect=MENU_RECT;
-    item_data_t e;
+    item_info_t info;
     listitem_t *l;
     queue_t *q;
 
@@ -28,7 +28,7 @@ int music_init(void)
         return -1;
     }
 
-    l = listitem_init("MUSIC", &rect, ITEM_MAX, sizeof(e));
+    l = listitem_init("MUSIC", &rect, ITEM_MAX, sizeof(info));
     if(!l) {
         free(mscMenu);
         return -1;
@@ -48,7 +48,7 @@ int music_free(void)
 }
 
 
-int music_handle(u8 key)
+int music_handle(key_t key)
 {
     int r;
     node_t n;
@@ -65,13 +65,13 @@ int music_handle(u8 key)
         case CONTROL_LIST:
         {
             listitem_t *l=(listitem_t*)it.handle;
-            if(key==KEY_ENTER) {
+            if(key.value==KEY_ENTER) {
                 n.ptr = &it1;
                 n.len = sizeof(it1);
                 listitem_get_focus(l, &n);
                 queue_put(mscMenu->q, &n, NULL);
             }
-            else if(key==KEY_EXIT) {
+            else if(key.value==KEY_EXIT) {
                 queue_pop(mscMenu->q);
             }
             else {
@@ -83,7 +83,7 @@ int music_handle(u8 key)
         case CONTROL_INPUTBOX:
         {
             inputbox_t *box=(inputbox_t*)it.handle;
-            if(key==KEY_ENTER || key==KEY_EXIT) {
+            if(key.value==KEY_ENTER || key.value==KEY_EXIT) {
                 queue_pop(mscMenu->q);
             }
             else {

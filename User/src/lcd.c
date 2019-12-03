@@ -524,14 +524,10 @@ void lcd_draw_arc( u16 x, u16 y, u16 r, u8 s, u16 color)
 
 void lcd_draw_round_rect(u16 x, u16 y, u16 w, u16 h, u16 r, u16 color)
 {
-    u16  x2,y2;
-
-    x2 = x + w;
-    y2 = y + h;
-    lcd_draw_line(x, y, x2, y, color);
-    lcd_draw_line(x, y, x, y2, color);
-    lcd_draw_line(x, y2, x2, y2, color);
-    lcd_draw_line(x2, y, x2, y2, color);
+    lcd_draw_line(x+r, y,   x+w-r, y,   color);
+    lcd_draw_line(x+r, y+h, x+w-r, y+h, color);
+    lcd_draw_line(x,   y+r, x,   y+h-r, color);
+    lcd_draw_line(x+w, y+r, x+w, y+h-r, color);
 
     lcd_draw_arc(x+r, y+r, r, 0x0c, color);
     lcd_draw_arc(x+w-r, y+r, r, 0x03, color);

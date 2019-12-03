@@ -256,7 +256,7 @@ para_txt_t PHASE_TXT={
 
 
 u32 parainfo_length=sizeof(PARA_INFO);
-paras_info_t PARA_INFO[CMD_ID_NUM]={
+const paras_info_t PARA_INFO[CMD_ID_NUM]={
     {//0
         {
             {"",                    "",                1,                   1,                  1,                  1,              0,              NULL},

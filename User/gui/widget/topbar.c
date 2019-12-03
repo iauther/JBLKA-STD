@@ -76,10 +76,9 @@ static void show_preset(void)
 //////////////////////////////////////////////
 int topbar_init(void)
 {
-    mTopbar.rect.x = 0;
-    mTopbar.rect.y = 0;
-    mTopbar.rect.w = LCD_WIDTH;
-    mTopbar.rect.h = TOPBAR_HEIGHT;
+    rect_t r=TOPBAR_RECT;
+
+    mTopbar.rect = r;
 
     mTopbar.pio  = uiParams.pio;
     mTopbar.stat = &gStatus;

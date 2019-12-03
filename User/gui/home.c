@@ -15,7 +15,7 @@ int home_free(void)
 }
 
 
-int home_handle(u8 key)
+int home_handle(key_t key)
 {
     //listitem_handle(mHome.pl, key);
     return 0;

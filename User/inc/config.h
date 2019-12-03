@@ -29,13 +29,15 @@
 //LCD UI Setting
 #define LCD_WIDTH               320
 #define LCD_HEIGHT              240
-#define TOPBAR_HEIGHT           28
-#define ITEM_HEIGHT             40
+#define ITEM_HEIGHT             32
 #define ITEM_FOCUS_COLOR        YELLOW
 #define ITEM_FOCUS_BGCOLOR      CYAN
 
-#define TITLE_RECT              {40, 60, 240, 160}
-#define MENU_RECT               {40, 80, 240, 160}
+#define TOPBAR_RECT             {0,     0,      LCD_WIDTH,      16}
+#define TITLE_RECT              {0,     24,     LCD_WIDTH,      24}
+#define MENU_RECT               {80,    60,     LCD_WIDTH-160,  LCD_HEIGHT-80}
+#define INPUTBOX_RECT           {30,    60,     LCD_WIDTH-60,   LCD_HEIGHT-80}
+
 #define LCD_FC                  WHITE   //0x0000
 #define LCD_BC                  BLACK   //0xFFFF
 

@@ -6,9 +6,9 @@
 #ifdef RTX
 extern paras_data_t gParams;
 msg_t *gui_msg=NULL;
-static void key_proc(u8 key)
+static void key_proc(key_t key)
 {
-    switch(key) {
+    switch(key.value) {
         case KEY_MUSIC:
         menu_switch(MENU_MUSIC);
         break;
@@ -30,7 +30,7 @@ static void key_proc(u8 key)
         break;
     }
 }
-static void ir_proc(u8 key)
+static void ir_proc(key_t key)
 {
     int r;
     s16 g;
@@ -38,7 +38,7 @@ static void ir_proc(u8 key)
     dsp_data_t dd={0};
     Dsp_Paras *dsp=&gParams.dsp;
 
-    switch(key) {
+    switch(key.value) {
         case KEY_LOCK:
         {
             //
@@ -88,11 +88,11 @@ static void ir_proc(u8 key)
         case KEY_M2:
         case KEY_M3:
         {
-            if(key==KEY_MODE) {
+            if(key.value==KEY_MODE) {
                 gParams.pre = (gParams.pre+1)%PRESET_MAX;
             }
             else {
-                gParams.pre = key-KEY_M1;
+                gParams.pre = key.value-KEY_M1;
             }
             
             paras_read_preset(gParams.pre, dsp);
@@ -105,10 +105,10 @@ static void ir_proc(u8 key)
         case KEY_SHARP:      //#
         case KEY_0:          //
         case KEY_b:
-        if(key==KEY_SHARP) {
+        if(key.value==KEY_SHARP) {
             dsp->Array_PitchShift.PitchShift = (dsp->Array_PitchShift.PitchShift+1)%5;
         }
-        else if(key==KEY_0) {
+        else if(key.value==KEY_0) {
             dsp->Array_PitchShift.PitchShift = 0;
         }
         else {
@@ -127,7 +127,7 @@ static void ir_proc(u8 key)
         case KEY_EFFECT_DN:
         case KEY_MIC_UP:
         case KEY_MIC_DN:
-        r = dsp_gain_step(key, 1, &g, &n);
+        r = dsp_gain_step(key.value, 1, &g, &n);
         break;
 
         default:
@@ -138,14 +138,14 @@ static void ir_proc(u8 key)
         e2p_put(&n);
     }
 }
-static void knob_proc(u8 key, u16 times)
+static void knob_proc(key_t key)
 {
     int r;
     s16 g;
     u8 tmp[20];
     node_t n;
 
-    r = dsp_gain_step(key, 1, &g, &n);
+    r = dsp_gain_step(key.value, key.times, &g, &n);
     if(r) {
         return;
     }
@@ -182,19 +182,19 @@ void gui_task(void *arg)
                 
                 case EVT_KEY:
                 {
-                    key_t *k = &e.key;
+                    key_t *k=&e.key;
                     switch(k->src) {
                         
                         case SRC_IR:
-                        ir_proc(k->value);
+                        ir_proc(e.key);
                         break;
 
                         case SRC_KEY:
-                        key_proc(k->value);
+                        key_proc(e.key);
                         break;
                     
                         case SRC_KNOB:
-                        knob_proc(k->value, k->times);
+                        knob_proc(e.key);
                         break;
                     }
                 }

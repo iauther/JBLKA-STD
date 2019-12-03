@@ -16,7 +16,7 @@ int presets_free(void)
 }
 
 
-int presets_handle(u8 key)
+int presets_handle(key_t key)
 {
     return 0;
 }

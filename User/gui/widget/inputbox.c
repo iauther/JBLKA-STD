@@ -8,68 +8,68 @@
 #define BOX_RECT    {2,1,1,1}
 
 
-static void show_label(inputbox_t *i, u16 color, u16 bgcolor)
+static void show_label(inputbox_t *i, rect_t *rect, u16 color, u16 bgcolor)
 {
-    rect_t r=i->rect;
-    r.w = i->rect.w/2;
-    lcd_draw_string_align(r.x, r.h, r.w, r.h, (u8*)i->dat->txt, FONT_32, color, bgcolor, ALIGN_RIGHT, 0);
+    rect_t r=*rect;
+    r.w = rect->w/2;
+    lcd_draw_string_align(r.x, r.h, r.w, r.h, (u8*)i->info->name, FONT_32, color, bgcolor, ALIGN_RIGHT, 0);
 }
-static void show_value(inputbox_t *i, u16 color, u16 bgcolor)
+static void show_value(inputbox_t *i, rect_t *rect, u16 color, u16 bgcolor)
 {
-    rect_t r=i->rect;
-    para_info_t *inf=i->dat->info;
+    rect_t r=*rect;
 
-    r.x = i->rect.w/2;
-    r.w = i->rect.w/4;
+    r.x = rect->w/2;
+    r.w = rect->w/4;
 
     lcd_draw_rect(r.x, r.y, r.w, r.h, color);
-    lcd_draw_string_align(r.x, r.h, r.w, r.h, (u8*)inf->unit, FONT_16, color, bgcolor, ALIGN_MIDDLE, 0);
+    lcd_draw_string_align(r.x, r.h, r.w, r.h, (u8*)i->info->unit, FONT_16, color, bgcolor, ALIGN_MIDDLE, 0);
 }
-static void show_unit(inputbox_t *i, u16 color, u16 bgcolor)
+static void show_unit(inputbox_t *i, rect_t *rect, u16 color, u16 bgcolor)
 {
     char *ptxt;
     char tmp[20];
-    rect_t r=i->rect;
-    para_info_t *inf=i->dat->info;
-    s16 v=*(s16*)i->dat->data;
+    rect_t r=*rect;
+    s16 v=*i->data;
 
-    r.x = i->rect.w*3/4;
-    r.w = i->rect.w/4;
-    if(inf->ptxt) {
-        if(i->dat->cmd==CMD_ID_PitchShift) {
-            ptxt = (char*)inf->ptxt->txt[v+5];
+    r.x = rect->w*3/4;
+    r.w = rect->w/4;
+    if(i->info->ptxt) {
+        if(i->cmd==CMD_ID_PitchShift) {
+            ptxt = (char*)i->info->ptxt->txt[v+5];
         }
         else {
-            ptxt = (char*)inf->ptxt->txt[v];
+            ptxt = (char*)i->info->ptxt->txt[v];
         }
     }
     else{
-        if(inf->flt) {
-            sprintf(tmp, "%.1f", (f32)v/inf->step);
+        if(i->info->flt) {
+            sprintf(tmp, "%.1f", (f32)v/i->info->step);
         }
         else {
-            sprintf(tmp, "%d", v/(int)inf->step);
+            sprintf(tmp, "%d", v/(int)i->info->step);
         }
         ptxt = tmp;
     }
 
     lcd_draw_string_align(r.x, r.h, r.w, r.h, (u8*)ptxt, FONT_16, color, bgcolor, ALIGN_MIDDLE, 0);
 }
-static void input_show_all(inputbox_t *i, u16 color, u16 bgcolor)
+static void show_all(inputbox_t *i, rect_t *rect, u16 color, u16 bgcolor)
 {
-    show_label(i, color, bgcolor);
-    show_value(i, color, bgcolor);
-    show_unit(i, color, bgcolor);
+    show_label(i, rect, color, bgcolor);
+    show_value(i, rect, color, bgcolor);
+    show_unit(i,  rect, color, bgcolor);
 }
 /////////////////////////////////////////////
 
-inputbox_t *inputbox_init(rect_t *rect, item_data_t *dat)
+inputbox_t *inputbox_init(const item_info_t *info, u8 index)
 {
     inputbox_t *i=(inputbox_t*)malloc(sizeof(inputbox_t));
     if(!i) {
         return NULL;
     }
-
+    i->cmd = info->cmd;
+    i->info = &PARA_INFO[info->cmd].info[index];
+    i->data = (s16*)info->data;
     
     return i;
 }
@@ -96,20 +96,24 @@ int inputbox_refresh(inputbox_t *i)
 }
 
 
-int inputbox_handle(inputbox_t *i, u8 key)
+int inputbox_handle(inputbox_t *i, key_t key)
 {
-    switch(key) {
+    switch(key.value) {
         
         case KEY_UP:
+        {
+            //*i->data += 
+        }
         break;
         
         case KEY_DOWN:
+        {
+            
+        }
         break;
 
-        case KEY_ENTER:
-        break;
-        
-        case KEY_EXIT:
+        default:
+        return -1;
         break;
     }
     
@@ -124,7 +128,10 @@ int inputbox_clear(inputbox_t *i)
 }
 
 
-int inputbox_show(inputbox_t *i, u16 color, u16 bgcolor)
+int inputbox_show(inputbox_t *i, rect_t *rect, u16 color, u16 bgcolor)
 {
+    show_all(i, rect, color, bgcolor);
+    i->rect = *rect;
+
     return 0;
 }

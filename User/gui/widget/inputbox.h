@@ -6,12 +6,15 @@
 
 typedef struct {
     rect_t          rect;
-    item_data_t     *dat;
+    u8              index;
+    u8              cmd;
+    const para_info_t *info;
+    s16             *data;
 }inputbox_t;
 
-inputbox_t *inputbox_init(rect_t *rect, item_data_t *dat);
+inputbox_t *inputbox_init(const item_info_t *info, u8 index);
 int inputbox_free(inputbox_t **i);
-int inputbox_handle(inputbox_t *i, u8 key);
-int inputbox_show(inputbox_t *i, u16 color, u16 bgcolor);
+int inputbox_handle(inputbox_t *i, key_t key);
+int inputbox_show(inputbox_t *i, rect_t *rect, u16 color, u16 bgcolor);
 
 #endif

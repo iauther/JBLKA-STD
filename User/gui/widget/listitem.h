@@ -16,7 +16,8 @@ enum {
 typedef struct _listitem {
     u8      control;
     rect_t  rect;
-    u8      imax;
+    u8      pageItems;
+    u8      dispItems;
     cchr    *title;
     
     list_t  *list;
@@ -58,6 +59,6 @@ int listitem_clear(listitem_t *l);
 
 int listitem_move(listitem_t *l, int dir);
 
-int listitem_handle(listitem_t *l, u8 key);
+int listitem_handle(listitem_t *l, key_t key);
 
 #endif
