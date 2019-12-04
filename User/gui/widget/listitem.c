@@ -22,7 +22,7 @@ listitem_t *listitem_init(cchr *title, rect_t *rect, u8 max, int node_size)
     }
     
     l->rect = *rect;
-    l->list = list_init(max, sizeof(node_size));
+    l->list = slist_init(max, sizeof(node_size));
 
     l->pageItems = l->rect.h/ITEM_HEIGHT;
     l->dispItems = 0;
@@ -39,7 +39,7 @@ int listitem_free(listitem_t **l)
     if(!l) {
         return -1;
     }
-    list_free(&(*l)->list);
+    slist_free(&(*l)->list);
     free(*l);
 
     return 0;
@@ -99,26 +99,27 @@ int listitem_set_child(listitem_t *l, listitem_t *child)
 }
 
 
-int listitem_add(listitem_t *l, node_t *n)
+int listitem_append(listitem_t *l, node_t *n)
 {
     int r;
     int sz;
 
-    r = list_add(l->list, -1, n);
-    sz = list_size(l->list);
+    r = slist_append(l->list, n);
+    sz = slist_size(l->list);
     l->dispItems = MIN(l->dispItems, sz);
+    return r;
 }
 
 
 int listitem_get(listitem_t *l, u8 index, node_t *n)
 {
-    return list_get(l->list, index, n);
+    return slist_get(l->list, index, n);
 }
 
 
 int listitem_get_focus(listitem_t *l, node_t *n)
 {
-    return list_get(l->list, l->focusId, n);
+    return slist_get(l->list, l->focusId, n);
 }
 
 
@@ -140,7 +141,7 @@ static void lcd_draw_item(listitem_t *l, u8 index, u16 font_color, u16 bgcolor)
     node_t n;
     item_info_t *info;
 
-    list_get(l->list, index, &n);
+    slist_get(l->list, index, &n);
     info = (item_info_t*)n.ptr;
     lcd_draw_round_rect(l->rect.x, l->rect.y+index*ITEM_HEIGHT, l->rect.w, ITEM_HEIGHT, 6, bgcolor);
     lcd_draw_string_align(l->rect.x, l->rect.y, l->rect.w, l->rect.h, (u8*)info->txt, FONT_24, font_color, bgcolor, ALIGN_MIDDLE, 0);
@@ -244,13 +245,13 @@ int listitem_move(listitem_t *l, int dir)
     }
     else if(dir==DOWN) {
         if(l->firstId>0) {
-            if(l->focusId<list_size(l->list)-1) {
+            if(l->focusId<slist_size(l->list)-1) {
                 l->focusId++;
                 l->firstId++;
             }
         }
         else {
-            if(l->focusId<list_size(l->list)-1) {
+            if(l->focusId<slist_size(l->list)-1) {
                 l->focusId++;
                 if(l->focusId>=l->dispItems) {
                     l->firstId++;

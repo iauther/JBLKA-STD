@@ -37,6 +37,12 @@ typedef struct {
     u32             len;
 }node_t;
 
+typedef struct _lnode {
+    node_t          data;
+    struct _lnode   *prev;
+    struct _lnode   *next;
+}lnode_t;
+
 
 #ifdef __cplusplus
 }

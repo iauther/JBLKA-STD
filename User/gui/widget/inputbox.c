@@ -61,14 +61,14 @@ static void show_all(inputbox_t *i, rect_t *rect, u16 color, u16 bgcolor)
 }
 /////////////////////////////////////////////
 
-inputbox_t *inputbox_init(const item_info_t *info, u8 index)
+inputbox_t *inputbox_init(item_info_t *info, u8 index)
 {
     inputbox_t *i=(inputbox_t*)malloc(sizeof(inputbox_t));
     if(!i) {
         return NULL;
     }
     i->cmd = info->cmd;
-    i->info = &PARA_INFO[info->cmd].info[index];
+    i->info = (para_info_t*)&PARA_INFO[info->cmd].info[index];
     i->data = (s16*)info->data;
     
     return i;

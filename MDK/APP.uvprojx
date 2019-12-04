@@ -614,14 +614,19 @@
               <FilePath>..\User\src\ir.c</FilePath>
             </File>
             <File>
-              <FileName>list.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\src\list.c</FilePath>
-            </File>
-            <File>
               <FileName>gbl.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\src\gbl.c</FilePath>
+            </File>
+            <File>
+              <FileName>dlist.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\dlist.c</FilePath>
+            </File>
+            <File>
+              <FileName>slist.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\slist.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -11,7 +11,7 @@ menu_func_t gFuncs[MENU_MAX]={
 };
 
 
-const dsp_var_t dspItems[CMD_ID_NUM]={
+dsp_var_t dspItems[CMD_ID_NUM]={
     {//0
         {
             {CONTROL_NONE,              "",                  0,                         NULL,           NULL},
@@ -116,6 +116,8 @@ const dsp_var_t dspItems[CMD_ID_NUM]={
 #define DSP     uiParams.dsp
 #define MSC     DSP.music
 #define MIC     DSP.mic
+#define MIC     DSP.mic
+
 #define ECHO    DSP.echo
 #define REV     DSP.reverb
 const item_info_t mscPeqItems[]={
@@ -270,47 +272,44 @@ static u8 get_num(item_info_t *info)
     while(info[i].control!=CONTROL_NONE) i++;
     return i;
 }
-static void add_item(listitem_t *l, const item_info_t *info)
+static void add_item(listitem_t *l, item_info_t *info, void *data)
 {
     node_t n;
-    u8 i,j,num;
-    item_info_t inf;
+    u8 i,num;
+    listitem_t *pl;
+    rect_t r=MENU_RECT;
+    item_info_t *inf;
 
     if(!l || !info) {
         return;
     }
 
     for(i=0;;i++) {
-        inf = info[i];
-        if(inf.control==CONTROL_LIST) {
-            listitem_t *pl;
-            rect_t r=MENU_RECT;
-            
-            num = get_num(&inf);
-            pl = listitem_init(inf.txt, &r, num, sizeof(inf));
-            if(inf.info) {
-                add_item(pl, inf.info);
+        inf = info+i;
+        if(inf->control==CONTROL_LIST) {
+            num = get_num(inf);
+            pl = listitem_init(inf->txt, &r, num, sizeof(inf));
+            if(inf->info) {
+                add_item(pl, (item_info_t*)inf->info, inf->data);
             }
-            inf.handle = pl;
+            inf->handle = pl;
         }
-        else if(inf.control==CONTROL_INPUTBOX){
-            if(strlen(PARA_INFO[inf.cmd].info->name)==0) {
-                break;
-            }
-            inf.handle = inputbox_init(info, j);
+        else if(inf->control==CONTROL_INPUTBOX){
+            inf->data = (s16*)data+i;
+            inf->handle = inputbox_init(inf, i);
         }
         else {
-            break;
+            return;
         }
 
-        n.ptr = &inf;
+        n.ptr = inf;
         n.len = sizeof(inf);
-        listitem_add(l, &n);
+        listitem_append(l, &n);
     }
 }
 int menu_add_item(listitem_t *l, u8 menu)
 {
-    const item_info_t *info;
+    item_info_t *info;
 
     if(!l) {
         return -1;
@@ -319,26 +318,26 @@ int menu_add_item(listitem_t *l, u8 menu)
     switch(menu) {
     
         case MENU_MUSIC:
-        info = mscItems;
+        info = (item_info_t*)mscItems;
         break;
 
         case MENU_MIC:
-        info = micItems;
+        info = (item_info_t*)micItems;
         break;
 
         case MENU_EFFECT:
-        info = effItems;
+        info = (item_info_t*)effItems;
         break;
         
         case MENU_PRESET:
-        //p = (item_info_t*)preItems;
+        //info = (item_info_t **)preItems;
         break;
 
         default:
         return -1;
     }
 
-    add_item(l, info);
+    add_item(l, info, NULL);
 
     return 0;
 }

@@ -2,7 +2,7 @@
 #define __LISTITEM_H__
 
 #include "base.h"
-#include "list.h"
+#include "slist.h"
 
 enum {
     REFRESH_TITLE       = 1<<0,
@@ -20,7 +20,7 @@ typedef struct _listitem {
     u8      dispItems;
     cchr    *title;
     
-    list_t  *list;
+    slist_t *list;
     u8      firstId;
     u8      focusId;
     u8      prev_firstId;
@@ -45,7 +45,7 @@ listitem_t * listitem_get_child(listitem_t *l);
 
 int listitem_set_child(listitem_t *l, listitem_t *child);
 
-int listitem_add(listitem_t *l, node_t *n);
+int listitem_append(listitem_t *l, node_t *n);
 
 int listitem_get(listitem_t *l, u8 index, node_t *n);
 
