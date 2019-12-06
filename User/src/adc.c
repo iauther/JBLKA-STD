@@ -170,7 +170,7 @@ u8 adc_get_key(void)
     return get_key();
 }
 
-
+u8 adc_key_using=0;
 void adc_tmr_cb(void)
 {
 #ifdef RTX
@@ -178,14 +178,14 @@ void adc_tmr_cb(void)
         u8 key;
 
         key = get_key();
-        if(key!=KEY_NONE) {
+        if(key!=KEY_NONE && !adc_key_using) {
             evt_gui_t e={0};
             
             e.evt = EVT_KEY;
             e.key.src = (key==KEY_b || key==KEY_SHARP)?SRC_IR:SRC_KEY;
             e.key.value=key;
             gui_post_evt(&e);
-                
+            adc_key_using = 1;
         }
     }
 #endif

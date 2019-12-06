@@ -130,19 +130,15 @@ int listitem_set_refresh(listitem_t *l, u32 flag)
 }
 
 
-#define LABEL_RECT  {1,1,1,1}
-#define BOX_RECT    {2,1,1,1}
-
-
-static void draw_box_label(listitem_t *l, u8 index, item_info_t *info, rect_t *rect, u16 color, u16 bgcolor)
+static void draw_paras_label(listitem_t *l, u8 index, item_info_t *info, rect_t *rect, u16 color, u16 bgcolor)
 {
     rect_t r=*rect;
     const para_info_t *pi=&PARA_INFO[info->cmd].info[index];
 
     r.w = rect->w/2;
-    lcd_draw_string_align(r.x, r.h, r.w, r.h, (u8*)pi->name, FONT_24, color, bgcolor, ALIGN_RIGHT, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pi->name, FONT_24, color, bgcolor, ALIGN_RIGHT, 0);
 }
-static void draw_box_value(listitem_t *l, u8 index, item_info_t *info, rect_t *rect, u16 color, u16 bgcolor)
+static void draw_paras_value(listitem_t *l, u8 index, item_info_t *info, rect_t *rect, u16 color, u16 bgcolor)
 {
     char *ptxt;
     char tmp[20];
@@ -150,7 +146,7 @@ static void draw_box_value(listitem_t *l, u8 index, item_info_t *info, rect_t *r
     const para_info_t *pi=&PARA_INFO[info->cmd].info[index];
     s16 v=*((s16*)info->data+index);
 
-    r.x = rect->w*3/4;
+    r.x = rect->w/2;
     r.w = rect->w/4;
     if(pi->ptxt) {
         if(info->cmd==CMD_ID_PitchShift) {
@@ -170,25 +166,28 @@ static void draw_box_value(listitem_t *l, u8 index, item_info_t *info, rect_t *r
         ptxt = tmp;
     }
 
-    lcd_draw_string_align(r.x, r.h, r.w, r.h, (u8*)ptxt, FONT_16, color, bgcolor, ALIGN_MIDDLE, 0);
+    lcd_draw_rect(r.x, r.y, r.w, r.h, color);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)ptxt, FONT_16, color, bgcolor, ALIGN_MIDDLE, 0);
 }
-static void draw_box_unit(listitem_t *l, u8 index, item_info_t *info, rect_t *rect, u16 color, u16 bgcolor)
+static void draw_paras_unit(listitem_t *l, u8 index, item_info_t *info, rect_t *rect, u16 color, u16 bgcolor)
 {
     rect_t r=*rect;
     const para_info_t *pi=&PARA_INFO[info->cmd].info[index];
 
-    r.x = rect->w/2;
+    r.x = rect->w*3/4;
     r.w = rect->w/4;
 
-    lcd_draw_rect(r.x, r.y, r.w, r.h, color);
-    lcd_draw_string_align(r.x, r.h, r.w, r.h, (u8*)pi->unit, FONT_16, color, bgcolor, ALIGN_MIDDLE, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pi->unit, FONT_16, color, bgcolor, ALIGN_MIDDLE, 0);
 }
 static void draw_paras(listitem_t *l, u8 index, item_info_t *info, u16 color, u16 bgcolor)
 {
-    rect_t r=MENU_RECT;
-    draw_box_label(l, index, info, &r, color, bgcolor);
-    draw_box_value(l, index, info, &r, color, bgcolor);
-    draw_box_unit (l, index, info, &r, color, bgcolor);
+    rect_t r=INPUTBOX_RECT;
+    
+    r.h = ITEM_HEIGHT;
+    r.y = r.y+index*ITEM_HEIGHT;
+    draw_paras_label(l, index, info, &r, color, bgcolor);
+    draw_paras_value(l, index, info, &r, color, bgcolor);
+    draw_paras_unit (l, index, info, &r, color, bgcolor);
 }
 
 
@@ -236,7 +235,7 @@ static void draw_arrow(listitem_t *l, u16 color, u16 bgcolor)
 
 int listitem_refresh(listitem_t *l)
 {
-    u8  i;
+    u8  i,maxId;
     u16 color,bgcolor;
 
     if(!l) {
@@ -248,13 +247,13 @@ int listitem_refresh(listitem_t *l)
     }
 
     if(l->refreshFlag & REFRESH_LIST) {
-        u8 maxId = MIN((slist_size(l->list)-1),(l->firstId+l->dispItems-1));
+        maxId = MIN((slist_size(l->list)-1),(l->firstId+l->dispItems-1));
         lcd_fill_rect(l->rect.x, l->rect.y, l->rect.w, l->rect.h, LCD_BC);
-        
         for(i=l->firstId; i<=maxId; i++) {
-            color = (i==l->focusId)?ITEM_FOCUS_COLOR:LCD_FC;
-            //bgcolor = (i==l->focusId)?ITEM_FOCUS_BGCOLOR:LCD_BC;
-            draw_item(l, i, color, LCD_BC, 0);
+            if(i!=l->focusId) {
+                draw_item(l, i, LCD_FC, LCD_BC, 0);
+            }
+            draw_item(l, l->focusId, ITEM_FOCUS_COLOR, LCD_BC, 0);
         }
 
         draw_arrow(l, LCD_FC, LCD_BC);

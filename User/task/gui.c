@@ -4,6 +4,7 @@
 #define MSG_MAX         6
 
 #ifdef RTX
+extern u8 adc_key_using;
 extern paras_data_t gParams;
 msg_t *gui_msg=NULL;
 static void key_proc(key_t key)
@@ -29,6 +30,8 @@ static void key_proc(key_t key)
         menu_handle(key);
         break;
     }
+
+    adc_key_using = 0;
 }
 static void ir_proc(key_t key)
 {
