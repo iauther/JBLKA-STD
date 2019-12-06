@@ -3,6 +3,7 @@
 
 #include "base.h"
 #include "slist.h"
+#include "default.h"
 
 enum {
     REFRESH_TITLE       = 1<<0,
@@ -26,12 +27,13 @@ typedef struct _listitem {
     u8      prev_firstId;
     u8      prev_focusId;
     u32     refreshFlag;
+    u8      inEdit;
 
     struct _listitem *parent;
     struct _listitem *child;
 }listitem_t;
 
-listitem_t *listitem_init(cchr *title, rect_t *rect, u8 max, int node_size);
+listitem_t *listitem_init(cchr *title, u8 max, int node_size);
 
 int listitem_free(listitem_t **l);
 
@@ -45,9 +47,9 @@ listitem_t * listitem_get_child(listitem_t *l);
 
 int listitem_set_child(listitem_t *l, listitem_t *child);
 
-int listitem_append(listitem_t *l, node_t *n);
+int listitem_append(listitem_t *l, item_info_t *inf);
 
-int listitem_get(listitem_t *l, u8 index, node_t *n);
+item_info_t* listitem_get(listitem_t *l, u8 index);
 
 int listitem_get_focus(listitem_t *l, node_t *n);
 
@@ -59,6 +61,10 @@ int listitem_clear(listitem_t *l);
 
 int listitem_move(listitem_t *l, int dir);
 
-int listitem_handle(listitem_t *l, key_t key);
+int listitem_size(listitem_t *l);
+
+listitem_t* listitem_create(cchr *title, item_info_t *info);
+
+int listitem_handle(listitem_t **l, key_t key);
 
 #endif

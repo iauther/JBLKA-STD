@@ -6,6 +6,7 @@
 typedef struct _list {
     int             max;
     int             size;
+    int             node_size;
     lnode_t         *pool;
     u8              quit;
 }slist_t;

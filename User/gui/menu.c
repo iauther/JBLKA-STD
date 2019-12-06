@@ -1,17 +1,7 @@
 #include "menu.h"
 #include "dsp.h"
 
-u8 gM=MENU_HOME;
-menu_func_t gFuncs[MENU_MAX]={
-    MAKE_FUNC(home),
-    MAKE_FUNC(mic),
-    MAKE_FUNC(music),
-    MAKE_FUNC(effect),
-    MAKE_FUNC(presets),
-};
-
-
-dsp_var_t dspItems[CMD_ID_NUM]={
+CONST dsp_var_t dspItems[CMD_ID_NUM]={
     {//0
         {
             {CONTROL_NONE,              "",                  0,                         NULL,           NULL},
@@ -111,8 +101,6 @@ dsp_var_t dspItems[CMD_ID_NUM]={
         }
     },
 };
-
-
 #define DSP     uiParams.dsp
 #define MSC     DSP.music
 #define MIC     DSP.mic
@@ -120,7 +108,7 @@ dsp_var_t dspItems[CMD_ID_NUM]={
 
 #define ECHO    DSP.echo
 #define REV     DSP.reverb
-const item_info_t mscPeqItems[]={
+CONST item_info_t mscPeqItems[]={
     {CONTROL_LIST,     "PEQ1",        CMD_ID_EQ,        &MSC.peq[0],        &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_LIST,     "PEQ2",        CMD_ID_EQ,        &MSC.peq[1],        &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_LIST,     "PEQ3",        CMD_ID_EQ,        &MSC.peq[2],        &dspItems[CMD_ID_EQ].var[0]},
@@ -130,12 +118,12 @@ const item_info_t mscPeqItems[]={
     {CONTROL_LIST,     "PEQ7",        CMD_ID_EQ,        &MSC.peq[6],        &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_NONE,     "",            0,                NULL,               NULL},
 };
-const item_info_t mscGeqItems[]={
+CONST item_info_t mscGeqItems[]={
     {CONTROL_LIST,     "GEQ1",        CMD_ID_EQ,        &MSC.geq[0],        &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_LIST,     "GEQ2",        CMD_ID_EQ,        &MSC.geq[1],        &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_NONE,     "",            0,                NULL,               NULL},
 };
-const item_info_t mscItems[]={
+CONST item_info_t mscItems[]={
     {CONTROL_LIST,     "GAIN",        CMD_ID_Gain,      &MSC.gain,          &dspItems[CMD_ID_Gain].var[0]},
     {CONTROL_LIST,     "GEQ",         0,                &MSC.geq,           mscGeqItems},
     {CONTROL_LIST,     "PEQ",         0,                &MSC.peq,           mscPeqItems},
@@ -147,7 +135,7 @@ const item_info_t mscItems[]={
     {CONTROL_NONE,     "",            0,                NULL,               NULL},
 };
 ////////////////////////////////////////////////////////////////////////////////
-const item_info_t micPeqItems[]={
+CONST item_info_t micPeqItems[]={
     {CONTROL_LIST,     "PEQ1",        CMD_ID_EQ,        &MIC.peq[0],        &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_LIST,     "PEQ2",        CMD_ID_EQ,        &MIC.peq[1],        &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_LIST,     "PEQ3",        CMD_ID_EQ,        &MIC.peq[2],        &dspItems[CMD_ID_EQ].var[0]},
@@ -157,13 +145,13 @@ const item_info_t micPeqItems[]={
     {CONTROL_LIST,     "PEQ7",        CMD_ID_EQ,        &MIC.peq[6],        &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_NONE,     "",            0,                NULL,               NULL},
 };
-const item_info_t micGeqItems[]={
+CONST item_info_t micGeqItems[]={
     {CONTROL_LIST,     "GEQ1",        CMD_ID_EQ,        &MIC.geq[0],        &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_LIST,     "GEQ2",        CMD_ID_EQ,        &MIC.geq[1],        &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_LIST,     "GEQ3",        CMD_ID_EQ,        &MIC.geq[2],        &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_NONE,     "",            0,                NULL,               NULL},
 };
-const item_info_t micItems[]={
+CONST item_info_t micItems[]={
     {CONTROL_LIST,     "GAIN",        CMD_ID_Gain,      &MIC.gain,          &dspItems[CMD_ID_Gain].var[0]},
     {CONTROL_LIST,     "GEQ",         0,                &MIC.geq,           micGeqItems},
     {CONTROL_LIST,     "PEQ",         0,                &MIC.peq,           micPeqItems},
@@ -175,13 +163,13 @@ const item_info_t micItems[]={
     {CONTROL_NONE,     "",            0,                NULL,               NULL},
 };
 ////////////////////////////////////////////////////////////////////////////
-const item_info_t echoPeqItems[]={
+CONST item_info_t echoPeqItems[]={
     {CONTROL_LIST,     "PEQ1",        CMD_ID_EQ,        &ECHO.peq[0],       &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_LIST,     "PEQ2",        CMD_ID_EQ,        &ECHO.peq[1],       &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_LIST,     "PEQ3",        CMD_ID_EQ,        &ECHO.peq[2],       &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_NONE,     "",            0,                NULL,               NULL},
 };
-const item_info_t echoItems[]={
+CONST item_info_t echoItems[]={
     {CONTROL_LIST,     "PEQ",         0,                &ECHO.peq,          echoPeqItems},
     {CONTROL_LIST,     "REPEAT",      CMD_ID_Delay,     &ECHO.repeat,       &dspItems[CMD_ID_Delay].var[0]},
     {CONTROL_LIST,     "EFFECT VOL",  CMD_ID_Delay,     &ECHO.effVol,       &dspItems[CMD_ID_Delay].var[0]},
@@ -193,13 +181,13 @@ const item_info_t echoItems[]={
     {CONTROL_NONE,     "",            0,                NULL,               NULL},
 };
 
-const item_info_t revPeqItems[]={
+CONST item_info_t revPeqItems[]={
     {CONTROL_LIST,     "PEQ1",        CMD_ID_EQ,        &REV.peq[0],        &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_LIST,     "PEQ2",        CMD_ID_EQ,        &REV.peq[1],        &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_LIST,     "PEQ3",        CMD_ID_EQ,        &REV.peq[2],        &dspItems[CMD_ID_EQ].var[0]},
     {CONTROL_NONE,     "",            0,                NULL,               NULL},
 };
-const item_info_t reverbItems[]={
+CONST item_info_t reverbItems[]={
     {CONTROL_LIST,     "PEQ",         0,                &REV.peq,           echoPeqItems},
     {CONTROL_LIST,     "EFFECT VOL",  CMD_ID_Delay,     &REV.effVol,        &dspItems[CMD_ID_Delay].var[0]},
     {CONTROL_LIST,     "DIRECT VOL",  CMD_ID_Delay,     &REV.dirVol,        &dspItems[CMD_ID_Delay].var[0]},
@@ -209,18 +197,67 @@ const item_info_t reverbItems[]={
     {CONTROL_LIST,     "TIME",        CMD_ID_Delay,     &REV.time,          &dspItems[CMD_ID_Delay].var[0]},
     {CONTROL_NONE,     "",            0,                NULL,               NULL},
 };
-const item_info_t effItems[]={
+CONST item_info_t effItems[]={
     {CONTROL_LIST,     "GAIN",        CMD_ID_Gain,      &DSP.effGain,       &dspItems[CMD_ID_Gain].var[0]},
     {CONTROL_LIST,     "ECHO",        0,                &ECHO,              echoItems},
     {CONTROL_LIST,     "REVERB",      0,                &REV,               reverbItems},
     {CONTROL_NONE,     "",            0,                NULL,               NULL},
 };
-
+/////////////////////////////////////////////////////////////////////////////////
+CONST item_info_t preItems[]={
+    {CONTROL_TEXT,     "PRESET1",     0,                NULL,               NULL},
+    {CONTROL_TEXT,     "PRESET2",     0,                NULL,               NULL},
+    {CONTROL_TEXT,     "PRESET3",     0,                NULL,               NULL},
+    {CONTROL_TEXT,     "PRESET4",     0,                NULL,               NULL},
+    {CONTROL_TEXT,     "PRESET5",     0,                NULL,               NULL},
+    {CONTROL_TEXT,     "PRESET6",     0,                NULL,               NULL},
+    {CONTROL_TEXT,     "PRESET7",     0,                NULL,               NULL},
+    {CONTROL_TEXT,     "PRESET8",     0,                NULL,               NULL},
+    {CONTROL_NONE,     "",            0,                NULL,               NULL},
+};
 ///////////////////////////////////////////////////////////////////////////////
+
+u8 gM=MENU_HOME;
+listitem_t *gLists[MENU_MAX]={NULL};
+cchr *gTitles[MENU_MAX]={"HOME", "MIC", "MUSIC", "EFFECT", "PRESET"};
+CONST item_info_t *gInfos[MENU_MAX]={NULL, micItems, mscItems, effItems, preItems};
+
+
+static void trigger_refresh(void)
+{
+    gui_post_refresh();
+}
+static u8 get_num(item_info_t *info)
+{
+    u8 i=0;
+    while(info[i].control!=CONTROL_NONE) i++;
+    return i;
+}
+static void add_items(u8 menu)
+{
+    item_info_t *info;
+
+    if(menu>=MENU_MAX) {
+        return;
+    }
+
+    info = (item_info_t*)gInfos[menu];
+    gLists[menu] = listitem_create(gTitles[menu], info);
+}
+
+
+
+
 int menu_init(void)
 {
-    gFuncs[gM].init();
-    gui_post_refresh();
+    u8 m;
+
+    add_items(MENU_MUSIC);
+#if 0
+    for(m=0; m<MENU_MAX; m++) {
+        add_items(m);
+    }
+#endif
 
     return 0;
 }
@@ -228,7 +265,6 @@ int menu_init(void)
 
 int menu_free(void)
 {
-    gFuncs[gM].free();
     return 0;
 }
 
@@ -237,7 +273,8 @@ int menu_switch(u8 menu)
 {
     if(gM!=menu) {
         gM = menu;
-        menu_init();
+        listitem_set_refresh(gLists[gM], REFRESH_ALL);
+        trigger_refresh();
     }
 
     return 0;
@@ -245,102 +282,31 @@ int menu_switch(u8 menu)
 
 int menu_refresh(void)
 {
-    gFuncs[gM].refresh();
+    listitem_refresh(gLists[gM]);
     return 0;
 }
 
 
 int menu_clear(void)
 {
-    rect_t r=MENU_RECT;
-    lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
+    rect_t r1=TITLE_RECT;
+    rect_t r2=MENU_RECT;
+
+    lcd_fill_rect(r1.x, r1.y, r1.w, r1.h, LCD_BC);
+    lcd_fill_rect(r2.x, r2.y, r2.w, r2.h, LCD_BC);
+
     return 0;
 }
 
 
 int menu_handle(key_t key)
 {
-    gFuncs[gM].handle(key);
+    listitem_handle(&gLists[gM], key);
     gui_post_refresh();
 
     return 0;
 }
 
-static u8 get_num(item_info_t *info)
-{
-    u8 i=0;
-    while(info[i].control!=CONTROL_NONE) i++;
-    return i;
-}
-static void add_item(listitem_t *l, item_info_t *info, void *data)
-{
-    node_t n;
-    u8 i,num;
-    listitem_t *pl;
-    rect_t r=MENU_RECT;
-    item_info_t *inf;
-
-    if(!l || !info) {
-        return;
-    }
-
-    for(i=0;;i++) {
-        inf = info+i;
-        if(inf->control==CONTROL_LIST) {
-            num = get_num(inf);
-            pl = listitem_init(inf->txt, &r, num, sizeof(inf));
-            if(inf->info) {
-                add_item(pl, (item_info_t*)inf->info, inf->data);
-            }
-            inf->handle = pl;
-        }
-        else if(inf->control==CONTROL_INPUTBOX){
-            inf->data = (s16*)data+i;
-            inf->handle = inputbox_init(inf, i);
-        }
-        else {
-            return;
-        }
-
-        n.ptr = inf;
-        n.len = sizeof(inf);
-        listitem_append(l, &n);
-    }
-}
-int menu_add_item(listitem_t *l, u8 menu)
-{
-    item_info_t *info;
-
-    if(!l) {
-        return -1;
-    }
-    
-    switch(menu) {
-    
-        case MENU_MUSIC:
-        info = (item_info_t*)mscItems;
-        break;
-
-        case MENU_MIC:
-        info = (item_info_t*)micItems;
-        break;
-
-        case MENU_EFFECT:
-        info = (item_info_t*)effItems;
-        break;
-        
-        case MENU_PRESET:
-        //info = (item_info_t **)preItems;
-        break;
-
-        default:
-        return -1;
-    }
-
-    add_item(l, info, NULL);
-
-    return 0;
-}
 
 
 

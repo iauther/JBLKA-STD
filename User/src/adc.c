@@ -11,23 +11,26 @@ typedef struct {
 }adc_info_t;
 
 
-const adc_info_t adcTab0[5] = {
-    {0x004e,    KEY_ENTER},
-    {0x081c,    KEY_MIC},
-    {0x0a67,    KEY_EFFECT},
-    {0x0297,    KEY_SAVE},
-    {0x04c5,    KEY_EXIT},
+const adc_info_t adcTab0[] = {
+    {0x004f,    KEY_ENTER},
+    {0x0800,    KEY_MIC},
+    {0x0a98,    KEY_EFFECT},
+    {0x029f,    KEY_SAVE},
+    {0x04d2,    KEY_EXIT},
+    {0,         KEY_NONE},
 };
 
-const adc_info_t adcTab1[2] = {
-    //{0x0a68,    KEY_MUSIC},
-    {0x0ab2,    KEY_MUSIC},
-    {0x04c4,    KEY_PRESET},
+const adc_info_t adcTab1[] = {
+    {0x0a98,    KEY_MUSIC},
+    {0x04d2,    KEY_PRESET},
+    {0x0800,    KEY_SHARP},
+    {0x029f,    KEY_b},
+    {0,         KEY_NONE},
 };
 
 
 #define GAP             200
-#define in_range(x,v)   (v>GAP)?((v-GAP)<=x && x<=(v+GAP)):(0<=x && x<=(v+GAP))
+#define IS_VALUE(x,value,gap)   (value>gap)?((value-gap)<=x && x<=(value+gap)):(x<=(value+gap))
 
 u8 adcMode=0;
 u8 adcKey=KEY_NONE;
@@ -41,8 +44,12 @@ static u8 calc_key(u16 v0, u16 v1)
 
     key=key0=key1=KEY_NONE;
     if(v0 < 0x0f00) {
-        for(i=0; i<5; i++) {
-            if(in_range(v0, adcTab0[i].code)) {
+        for(i=0;;i++) {
+            if(adcTab0[i].key==KEY_NONE) {
+                break;
+            }
+
+            if(IS_VALUE(v0, adcTab0[i].code, GAP)) {
                 key0 = adcTab0[i].key;
                 break;
             }
@@ -50,8 +57,12 @@ static u8 calc_key(u16 v0, u16 v1)
     }
 
     if(v1 < 0x0f00) {
-        for(i=0; i<2; i++) {
-            if(in_range(v1, adcTab1[i].code)) {
+        for(i=0;;i++) {
+            if(adcTab1[i].key==KEY_NONE) {
+                break;
+            }
+
+            if(IS_VALUE(v1, adcTab1[i].code, GAP)) {
                 key1 = adcTab1[i].key;
                 break;
             }
@@ -171,7 +182,13 @@ void adc_tmr_cb(void)
             evt_gui_t e={0};
             
             e.evt = EVT_KEY;
-            e.key.src = SRC_KEY;
+            
+            if(key==KEY_b || key==KEY_SHARP) {
+                e.key.src = SRC_IR;
+            }
+            else {
+                e.key.src = SRC_KEY;
+            }
             e.key.value=key;
             gui_post_evt(&e);
         }

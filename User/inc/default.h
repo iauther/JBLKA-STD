@@ -153,9 +153,7 @@ typedef struct _item {
     cchr            *txt;
     u8              cmd;       //dsp cmd id
     void            *data;
-    const struct _item *info;
-
-    void            *handle;    //the control handle
+    CONST struct _item *info;
 }item_info_t;
 
 typedef struct {

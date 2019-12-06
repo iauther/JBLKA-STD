@@ -18,11 +18,13 @@ extern "C" {
 #define f32     float
 #define f64     double
 
+#define CONST   const
+
 typedef const char cchr;
 
-#define MAX(a,b)    (a>b)?a:b
-#define MIN(a,b)    (a<b)?b:a
-#define ABS(a,b)    (a>b)?(a-b):(b-a)
+#define MAX(a,b)    ((a>b)?a:b)
+#define MIN(a,b)    ((a<b)?a:b)
+#define ABS(a,b)    ((a>b)?(a-b):(b-a))
 
 
 

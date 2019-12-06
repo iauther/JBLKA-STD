@@ -914,39 +914,9 @@
           <GroupName>Gui</GroupName>
           <Files>
             <File>
-              <FileName>effect.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\gui\effect.c</FilePath>
-            </File>
-            <File>
-              <FileName>home.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\gui\home.c</FilePath>
-            </File>
-            <File>
               <FileName>menu.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\gui\menu.c</FilePath>
-            </File>
-            <File>
-              <FileName>mic.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\gui\mic.c</FilePath>
-            </File>
-            <File>
-              <FileName>music.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\gui\music.c</FilePath>
-            </File>
-            <File>
-              <FileName>presets.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\gui\presets.c</FilePath>
-            </File>
-            <File>
-              <FileName>inputbox.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\gui\widget\inputbox.c</FilePath>
             </File>
             <File>
               <FileName>msgbox.c</FileName>
