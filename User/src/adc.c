@@ -182,15 +182,10 @@ void adc_tmr_cb(void)
             evt_gui_t e={0};
             
             e.evt = EVT_KEY;
-            
-            if(key==KEY_b || key==KEY_SHARP) {
-                e.key.src = SRC_IR;
-            }
-            else {
-                e.key.src = SRC_KEY;
-            }
+            e.key.src = (key==KEY_b || key==KEY_SHARP)?SRC_IR:SRC_KEY;
             e.key.value=key;
             gui_post_evt(&e);
+                
         }
     }
 #endif

@@ -72,15 +72,15 @@ static void adda_reset(void)      //PB5, µÕµÁ∆Ω∏¥Œª£¨ ±º‰÷¡…Ÿ1√Î£¨(ø™ª˙ƒ¨»œµÕµÁ∆
     GPIO_SetBits(GPIOB, GPIO_Pin_5);
 }
 
-
+u32 tmr_cnt=0;
 static void timer_cb(void)
 {
-    //static u64 timer_cnt=0;
-    //timer_cnt++;
-
-    adc_tmr_cb();
+    if(tmr_cnt%4==0) {
+        adc_tmr_cb();
+    }
     knob_tmr_cb();
     usbd_tmr_cb();
+    tmr_cnt++;
 }
 ///////////////////////////////////////////////
 

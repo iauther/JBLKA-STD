@@ -251,12 +251,13 @@ static void add_items(u8 menu)
 int menu_init(void)
 {
     u8 m;
-
-    add_items(MENU_MUSIC);
-#if 0
+    
+#if 1
     for(m=0; m<MENU_MAX; m++) {
         add_items(m);
     }
+#else
+    add_items(MENU_MUSIC);
 #endif
 
     return 0;
@@ -275,6 +276,15 @@ int menu_switch(u8 menu)
         gM = menu;
         listitem_set_refresh(gLists[gM], REFRESH_ALL);
         trigger_refresh();
+    }
+    else {
+        #if 0
+        if(gM!=MENU_HOME) {
+            listitem_reset(gLists[gM]);
+            listitem_clear();
+            gM = MENU_HOME;
+        }
+        #endif
     }
 
     return 0;
@@ -301,8 +311,10 @@ int menu_clear(void)
 
 int menu_handle(key_t key)
 {
-    listitem_handle(&gLists[gM], key);
-    gui_post_refresh();
+    int r = listitem_handle(&gLists[gM], key);
+    if(r==0) {
+        trigger_refresh();
+    }
 
     return 0;
 }

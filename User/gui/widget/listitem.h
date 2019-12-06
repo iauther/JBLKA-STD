@@ -15,11 +15,10 @@ enum {
 };
 
 typedef struct _listitem {
-    u8      control;
+    cchr    *title;
     rect_t  rect;
     u8      pageItems;
     u8      dispItems;
-    cchr    *title;
     
     slist_t *list;
     u8      firstId;
@@ -57,7 +56,7 @@ int listitem_set_refresh(listitem_t *l, u32 flag);
 
 int listitem_refresh(listitem_t *l);
 
-int listitem_clear(listitem_t *l);
+int listitem_clear(void);
 
 int listitem_move(listitem_t *l, int dir);
 

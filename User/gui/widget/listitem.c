@@ -242,7 +242,7 @@ int listitem_refresh(listitem_t *l)
     if(!l) {
         return -1;
     }
-
+    
     if(l->refreshFlag & REFRESH_TITLE) {
         draw_title(l, LCD_FC, LCD_BC);
     }
@@ -278,15 +278,13 @@ int listitem_refresh(listitem_t *l)
 }
 
 
-int listitem_clear(listitem_t *l)
+int listitem_clear(void)
 {
-    if(!l) {
-        return -1;
-    }
-    
-    rect_t r=TITLE_RECT;
-    lcd_fill_rect(r.x, r.h, r.w, r.h, LCD_BC);
-    lcd_fill_rect(l->rect.x, l->rect.h, l->rect.w, l->rect.h, LCD_BC);
+    rect_t r1=TITLE_RECT;
+    rect_t r2=INPUTBOX_RECT;
+
+    lcd_fill_rect(r1.x, r1.y, r1.w, r1.h, LCD_BC);
+    lcd_fill_rect(r2.x, r2.y, r2.w, r2.h, LCD_BC);
 
     return 0;
 }
@@ -332,10 +330,10 @@ int listitem_move(listitem_t *l, int dir)
     }
 
     if(l->firstId != l->prev_firstId) {
-        listitem_set_refresh(l, REFRESH_LIST);
+        l->refreshFlag |= REFRESH_LIST;
     }
     else if(l->focusId != l->prev_focusId){
-        listitem_set_refresh(l, REFRESH_FOCUS);
+        l->refreshFlag |= REFRESH_FOCUS;
     }
 
     return 0;
@@ -381,7 +379,7 @@ listitem_t* listitem_create(cchr *title, item_info_t *info)
 
 int listitem_handle(listitem_t **l, key_t key)
 {
-    if(!l || !*l) {
+    if(!l || !(*l)) {
         return -1;
     }
 
@@ -399,11 +397,11 @@ int listitem_handle(listitem_t **l, key_t key)
             listitem_t *child;
             item_info_t *info=listitem_get((*l), (*l)->focusId);
             if(info->control==CONTROL_LIST) {
-                child = listitem_create(info->txt, info);
+                child = listitem_create(info->txt, (item_info_t*)info->info);
                 if(child) {
                     listitem_set_child(*l, child);
                     *l = child;     //进到子列表
-                    listitem_set_refresh(*l, REFRESH_ALL);
+                    (*l)->refreshFlag |= REFRESH_ALL;
                 }
             }
             else {
@@ -414,17 +412,19 @@ int listitem_handle(listitem_t **l, key_t key)
 
         case KEY_EXIT:
         {
+            listitem_t *pl=*l;
             listitem_t *parent=(*l)->parent;
             if(parent) {
-                listitem_free(l);
+                listitem_free(&pl);
                 *l = parent;        //退到父列表
-                listitem_set_refresh(*l, REFRESH_ALL);
+                (*l)->refreshFlag |= REFRESH_ALL;
             }
             else {
                 //listitem_free(l);     //退出菜单，是否释放？
-                listitem_clear((*l));
                 listitem_reset((*l));
-                //listitem_set_refresh(*l, REFRESH_ALL);
+                listitem_clear();
+                //(*l)->refreshFlag |= REFRESH_ALL;
+                gM = MENU_HOME;
             }
         }
         break;
@@ -434,6 +434,9 @@ int listitem_handle(listitem_t **l, key_t key)
             //do something ...
         }
         break;
+
+        default:
+        return -1;
     }
 
     return 0;
