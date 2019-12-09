@@ -16,7 +16,7 @@
 #define LCD_CS(n)   (n?GPIO_WriteBit(LCD_CS_GRP, LCD_CS_PIN, Bit_SET):GPIO_WriteBit(LCD_CS_GRP, LCD_CS_PIN, Bit_RESET))
 
 
-#define LCD_BUF_SIZE 1000
+#define LCD_BUF_SIZE 2000
 u8 lcd_buf[LCD_BUF_SIZE];
 
 static void gpio_output_set(GPIO_TypeDef  *grp, u32 pin)

@@ -147,7 +147,7 @@ static void dsp_wait_started(void)
 
 static int dsp_write(dsp_buf_t *db, u8 wait)
 {
-    int r;
+    int r,wlen;
     u16 crc;
     u16 *ptr = (u16*)db->cmd.DataPtr;
     u16 u16Len = db->cmd.Len/2;
@@ -162,12 +162,13 @@ static int dsp_write(dsp_buf_t *db, u8 wait)
     crc = crc_calc(&db->buf[1], u16Len+ComHeadLen);
     db->buf[5+u16Len] = crc;
 
-    r = usart_write(DSP_UART, (u8*)db->buf, sizeof(u16)*(6+u16Len));
+    wlen = sizeof(u16)*(6+u16Len);
+    r = usart_write(DSP_UART, (u8*)db->buf, wlen);
     if(wait) {
         dsp_ack_flag = 0;while(dsp_ack_flag==0);
     }
     
-    return r;
+    return (r==wlen)?0:-1;
 }
 
 
