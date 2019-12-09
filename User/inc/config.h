@@ -32,6 +32,7 @@
 #define ITEM_HEIGHT             32
 #define ITEM_FOCUS_COLOR        YELLOW
 #define ITEM_FOCUS_BGCOLOR      CYAN
+#define ITEM_EDIT_COLOR         RED
 
 #define TOPBAR_RECT             {0,     0,      LCD_WIDTH,      16}
 #define TITLE_RECT              {0,     24,     LCD_WIDTH,      24}

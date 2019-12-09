@@ -7,10 +7,11 @@
 
 enum {
     REFRESH_TITLE       = 1<<0,
-    REFRESH_FOCUS       = 1<<1,
-    REFRESH_VALUE       = 1<<2,
-    REFRESH_LIST        = 1<<3,
-    REFRESH_TXT_SCROLL  = 1<<4,
+    REFRESH_MOVE        = 1<<1,
+    REFRESH_FOCUS       = 1<<2,
+    REFRESH_VALUE       = 1<<3,
+    REFRESH_LIST        = 1<<4,
+    REFRESH_TXT_SCROLL  = 1<<5,
 
     REFRESH_ALL         = 0xffff,
 };
@@ -60,7 +61,7 @@ int listitem_refresh(listitem_t *l);
 
 int listitem_clear(void);
 
-int listitem_move(listitem_t *l, int dir);
+int listitem_move(listitem_t *l, u8 dir, u8 size);
 
 int listitem_size(listitem_t *l);
 

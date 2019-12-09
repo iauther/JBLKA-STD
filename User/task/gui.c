@@ -48,8 +48,6 @@ static void ir_proc(key_t key)
     int r;
     s16 g;
     node_t n;
-    dsp_data_t dd={0};
-    Dsp_Paras *dsp=&gParams.dsp;
 
     switch(key.value) {
         case KEY_LOCK:

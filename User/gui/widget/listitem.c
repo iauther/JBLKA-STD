@@ -137,7 +137,7 @@ static void draw_paras_label(listitem_t *l, u8 index, item_info_t *info, para_in
     r.w = rect->w/3;
     lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinfo->name, FONT_16, color, bgcolor, ALIGN_RIGHT, 0);
 }
-static void draw_paras_value(listitem_t *l, u8 index, item_info_t *info, para_info_t *pinfo, rect_t *rect, u16 color, u16 bgcolor)
+static void draw_paras_value(listitem_t *l, u8 index, item_info_t *info, para_info_t *pinfo, rect_t *rect, u16 color, u16 bgcolor, u8 drawbox)
 {
     char *ptxt;
     char tmp[20];
@@ -166,7 +166,10 @@ static void draw_paras_value(listitem_t *l, u8 index, item_info_t *info, para_in
         ptxt = tmp;
     }
 
-    lcd_draw_rect(r.x, r.y, r.w, r.h, color);
+    if(drawbox) {
+        lcd_draw_rect(r.x, r.y, r.w, r.h, color);
+    }
+    lcd_fill_rect(r.x+1, r.y+1, r.w-2, r.h-2, bgcolor);
     lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)ptxt, FONT_16, color, bgcolor, ALIGN_MIDDLE, 0);
 }
 static void draw_paras_unit(listitem_t *l, u8 index, item_info_t *info, para_info_t *pinfo, rect_t *rect, u16 color, u16 bgcolor)
@@ -187,17 +190,17 @@ static void draw_value(listitem_t *l, int id, u16 color, u16 bgcolor)
     
     r.h = ITEM_HEIGHT;
     r.y = r.y+index*ITEM_HEIGHT;
-    draw_paras_value(l, index, info, pinfo, &r, color, bgcolor);
+    draw_paras_value(l, index, info, pinfo, &r, color, bgcolor, 0);
 }
-static void draw_paras(listitem_t *l, u8 index, item_info_t *info, u16 color, u16 bgcolor)
+static void draw_paras(listitem_t *l, u8 index, int id, item_info_t *info, u16 color, u16 bgcolor)
 {
     rect_t r=INPUTBOX_RECT;
-    para_info_t *pinfo=(para_info_t*)&PARA_INFO[info->cmd].info[index];
+    para_info_t *pinfo=(para_info_t*)&PARA_INFO[info->cmd].info[id];
     
     r.h = ITEM_HEIGHT;
     r.y = r.y+index*ITEM_HEIGHT;
     draw_paras_label(l, index, info, pinfo, &r, color, bgcolor);
-    draw_paras_value(l, index, info, pinfo, &r, color, bgcolor);
+    draw_paras_value(l, index, info, pinfo, &r, color, bgcolor, 1);
     draw_paras_unit (l, index, info, pinfo, &r, color, bgcolor);
 }
 
@@ -209,13 +212,13 @@ static void draw_item(listitem_t *l, int id, u16 color, u16 bgcolor, u8 clear)
 
     if(inf->control==CONTROL_LIST) {
         if(clear) {
-            //lcd_fill_rect(l->rect.x+1, l->rect.y+index*(ITEM_HEIGHT+1), l->rect.w-2, ITEM_HEIGHT-2, LCD_BC);
+            lcd_fill_rect(l->rect.x+1, l->rect.y+index*(ITEM_HEIGHT+1), l->rect.w-2, ITEM_HEIGHT-2, LCD_BC);
         }
         lcd_draw_round_rect(l->rect.x, l->rect.y+index*ITEM_HEIGHT, l->rect.w, ITEM_HEIGHT, r, color);
         lcd_draw_string_align(l->rect.x, l->rect.y+index*ITEM_HEIGHT, l->rect.w, ITEM_HEIGHT, (u8*)inf->txt, FONT_24, color, bgcolor, ALIGN_MIDDLE, 0);
     }
     else if(inf->control==CONTROL_INPUTBOX){
-        draw_paras(l, index, inf, color, bgcolor);
+        draw_paras(l, index, id, inf, color, bgcolor);
     }
 }
 static void draw_title(listitem_t *l, u16 font_color, u16 bgcolor)
@@ -247,7 +250,6 @@ static void draw_arrow(listitem_t *l, u16 color, u16 bgcolor)
 int listitem_refresh(listitem_t *l)
 {
     u8  i,maxId;
-    u16 color,bgcolor;
 
     if(!l) {
         return -1;
@@ -271,15 +273,19 @@ int listitem_refresh(listitem_t *l)
         draw_arrow(l, LCD_FC, LCD_BC);
     }
     else {
-        if(l->refreshFlag & REFRESH_FOCUS) {
+        if(l->refreshFlag & REFRESH_MOVE) {
             draw_item(l, l->prev_focusId, LCD_FC, LCD_BC, 1);
             draw_item(l, l->focusId, ITEM_FOCUS_COLOR, LCD_BC, 0);
 
             draw_arrow(l, LCD_FC, LCD_BC);
         }
-       
+    
+        if(l->refreshFlag & REFRESH_FOCUS) {
+            draw_item(l, l->focusId, ITEM_FOCUS_COLOR, LCD_BC, 0);
+        }
+
         if(l->refreshFlag & REFRESH_VALUE) {
-            draw_value(l, l->focusId, ITEM_FOCUS_COLOR, LCD_BC);
+            draw_value(l, l->focusId, ITEM_EDIT_COLOR, LCD_BC);
         }
 
         if(l->refreshFlag & REFRESH_TXT_SCROLL) {
@@ -306,50 +312,89 @@ int listitem_clear(void)
 }
 
 
-int listitem_move(listitem_t *l, int dir)
+static int adjust_value(listitem_t *l, u8 dir, u8 size)
+{
+    u8 index=l->focusId;
+    s16 *pv=*(s16**)l->data+index;
+    item_info_t *info=listitem_get(l, l->focusId);
+    para_info_t *pinfo=(para_info_t*)&PARA_INFO[info->cmd].info[index];
+    
+    if(dir==UP) {
+        if(*pv==pinfo->min) {
+            return -1;
+        }
+
+        if(*pv-pinfo->step*size <= pinfo->min) {
+            *pv = pinfo->min;
+        }
+        else {
+            *pv -= pinfo->step*size;
+        }
+    }
+    else {
+        if(*pv==pinfo->max) {
+            return -1;
+        }
+
+        if(*pv+pinfo->step*size >= pinfo->max) {
+            *pv = pinfo->max;
+        }
+        else {
+            *pv += pinfo->step*size;
+        }
+    }
+    return 0;
+}
+int listitem_move(listitem_t *l, u8 dir, u8 size)
 {
     if(!l) {
         return -1;
     }
 
-    if(dir==UP) {
-        if(l->firstId>0) {
-            l->focusId--;
-            if(l->focusId<=l->firstId) {
-                l->firstId = l->focusId;
-            }
-        }
-        else {
-            if(l->focusId>0) {
-                l->focusId--;
-            }
-        }
+    if(l->inEdit) {
+        int r=adjust_value(l, dir, size);
+        l->refreshFlag |= REFRESH_VALUE;
     }
-    else if(dir==DOWN) {
-        if(l->firstId>0) {
-            if(l->focusId<slist_size(l->list)-1) {
-                l->focusId++;
-                l->firstId++;
+    else {
+        if(dir==UP) {
+            if(l->firstId>0) {
+                l->focusId--;
+                if(l->focusId<=l->firstId) {
+                    l->firstId = l->focusId;
+                }
             }
-        }
-        else {
-            if(l->focusId<slist_size(l->list)-1) {
-                l->focusId++;
-                if(l->focusId>=l->dispItems) {
-                    l->firstId++;
+            else {
+                if(l->focusId>0) {
+                    l->focusId--;
                 }
             }
         }
-    }
-    else {
-        return -1;
-    }
+        else if(dir==DOWN) {
+            if(l->firstId>0) {
+                if(l->focusId<slist_size(l->list)-1) {
+                    l->focusId++;
+                    l->firstId++;
+                }
+            }
+            else {
+                if(l->focusId<slist_size(l->list)-1) {
+                    l->focusId++;
+                    if(l->focusId>=l->dispItems) {
+                        l->firstId++;
+                    }
+                }
+            }
+        }
+        else {
+            return -1;
+        }
 
-    if(l->firstId != l->prev_firstId) {
-        l->refreshFlag |= REFRESH_LIST;
-    }
-    else if(l->focusId != l->prev_focusId){
-        l->refreshFlag |= REFRESH_FOCUS;
+        if(l->firstId != l->prev_firstId) {
+            l->refreshFlag |= REFRESH_LIST;
+        }
+        else if(l->focusId != l->prev_focusId){
+            l->refreshFlag |= REFRESH_MOVE;
+        }
     }
 
     return 0;
@@ -402,11 +447,11 @@ int listitem_handle(listitem_t **l, key_t key)
 
     switch(key.value) {
         case KEY_UP:
-        listitem_move(*l, UP);
+        listitem_move(*l, UP, key.times);
         break;
 
         case KEY_DOWN:
-        listitem_move(*l, DOWN);
+        listitem_move(*l, DOWN, key.times);
         break;
 
         case KEY_ENTER:
@@ -422,7 +467,10 @@ int listitem_handle(listitem_t **l, key_t key)
                 }
             }
             else {
-                (*l)->inEdit = 1;
+                if(!(*l)->inEdit) {
+                    (*l)->inEdit = 1;
+                    (*l)->refreshFlag |= REFRESH_VALUE;
+                }
             }
         }
         break;
@@ -431,17 +479,24 @@ int listitem_handle(listitem_t **l, key_t key)
         {
             listitem_t *pl=*l;
             listitem_t *parent=(*l)->parent;
-            if(parent) {
-                listitem_free(&pl);
-                *l = parent;        //退到父列表
-                (*l)->refreshFlag |= REFRESH_ALL;
+
+            if(pl->inEdit) {
+                pl->inEdit = 0;
+                pl->refreshFlag |= REFRESH_FOCUS;
             }
             else {
-                //listitem_free(l);     //退出菜单，是否释放？
-                listitem_reset((*l));
-                listitem_clear();
-                //(*l)->refreshFlag |= REFRESH_ALL;
-                gM = MENU_HOME;
+                if(parent) {
+                    listitem_free(&pl);
+                    *l = parent;        //退到父列表
+                    (*l)->refreshFlag |= REFRESH_ALL;
+                }
+                else {
+                    //listitem_free(l);     //退出菜单，是否释放？
+                    listitem_reset((*l));
+                    listitem_clear();
+                    //(*l)->refreshFlag |= REFRESH_ALL;
+                    gM = MENU_HOME;
+                }
             }
         }
         break;
