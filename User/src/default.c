@@ -265,7 +265,7 @@ const paras_info_t PARA_INFO[CMD_ID_NUM]={
 
     {//CMD_ID_Gain
         {
-            {"GAIN",                "",                 1,                  1000,               1,                  1,              0,              NULL},
+            {"GAIN",                "",                 0,                  100,                1,                  1,              0,              NULL},
             {"MUTE",                "",                 0,                  1,                  1,                  1,              0,              &ONOFF_TXT},
             {"",                    "",                 1,                  1,                  1,                  1,              0,              NULL},
         }

@@ -347,13 +347,17 @@ static int adjust_value(listitem_t *l, u8 dir, u8 size)
 }
 int listitem_move(listitem_t *l, u8 dir, u8 size)
 {
+    int r;
+
     if(!l) {
         return -1;
     }
 
     if(l->inEdit) {
-        int r=adjust_value(l, dir, size);
-        l->refreshFlag |= REFRESH_VALUE;
+        r = adjust_value(l, dir, size);
+        if(r==0) {
+            l->refreshFlag |= REFRESH_VALUE;
+        }
     }
     else {
         if(dir==UP) {
