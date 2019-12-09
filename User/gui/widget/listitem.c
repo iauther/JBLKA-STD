@@ -130,38 +130,38 @@ int listitem_set_refresh(listitem_t *l, u32 flag)
 }
 
 
-static void draw_paras_label(listitem_t *l, u8 index, item_info_t *info, rect_t *rect, u16 color, u16 bgcolor)
+static void draw_paras_label(listitem_t *l, u8 index, item_info_t *info, para_info_t *pinfo, rect_t *rect, u16 color, u16 bgcolor)
 {
     rect_t r=*rect;
-    const para_info_t *pi=&PARA_INFO[info->cmd].info[index];
 
-    r.w = rect->w/2;
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pi->name, FONT_24, color, bgcolor, ALIGN_RIGHT, 0);
+    r.w = rect->w/3;
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinfo->name, FONT_16, color, bgcolor, ALIGN_RIGHT, 0);
 }
-static void draw_paras_value(listitem_t *l, u8 index, item_info_t *info, rect_t *rect, u16 color, u16 bgcolor)
+static void draw_paras_value(listitem_t *l, u8 index, item_info_t *info, para_info_t *pinfo, rect_t *rect, u16 color, u16 bgcolor)
 {
     char *ptxt;
     char tmp[20];
     rect_t r=*rect;
-    const para_info_t *pi=&PARA_INFO[info->cmd].info[index];
-    s16 v=*((s16*)info->data+index);
+    s16 v=*(*(s16**)l->data+index);
 
-    r.x = rect->w/2;
-    r.w = rect->w/4;
-    if(pi->ptxt) {
+    r.x = rect->w/3+10;
+    r.y += 2;
+    r.w = rect->w/3-10;
+    r.h -= 4;
+    if(pinfo->ptxt) {
         if(info->cmd==CMD_ID_PitchShift) {
-            ptxt = (char*)pi->ptxt->txt[v+5];
+            ptxt = (char*)pinfo->ptxt->txt[v+5];
         }
         else {
-            ptxt = (char*)pi->ptxt->txt[v];
+            ptxt = (char*)pinfo->ptxt->txt[v];
         }
     }
     else{
-        if(pi->flt) {
-            sprintf(tmp, "%.1f", (f32)v/pi->step);
+        if(pinfo->flt) {
+            sprintf(tmp, "%.1f", (f32)v/pinfo->step);
         }
         else {
-            sprintf(tmp, "%d", v/(int)pi->step);
+            sprintf(tmp, "%d", v/(int)pinfo->step);
         }
         ptxt = tmp;
     }
@@ -169,25 +169,36 @@ static void draw_paras_value(listitem_t *l, u8 index, item_info_t *info, rect_t 
     lcd_draw_rect(r.x, r.y, r.w, r.h, color);
     lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)ptxt, FONT_16, color, bgcolor, ALIGN_MIDDLE, 0);
 }
-static void draw_paras_unit(listitem_t *l, u8 index, item_info_t *info, rect_t *rect, u16 color, u16 bgcolor)
+static void draw_paras_unit(listitem_t *l, u8 index, item_info_t *info, para_info_t *pinfo, rect_t *rect, u16 color, u16 bgcolor)
 {
     rect_t r=*rect;
-    const para_info_t *pi=&PARA_INFO[info->cmd].info[index];
 
-    r.x = rect->w*3/4;
-    r.w = rect->w/4;
+    r.x = rect->w*2/3+6;
+    r.w = rect->w/3-4;
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinfo->unit, FONT_16, color, bgcolor, ALIGN_LEFT, 0);
+}
 
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pi->unit, FONT_16, color, bgcolor, ALIGN_MIDDLE, 0);
+static void draw_value(listitem_t *l, int id, u16 color, u16 bgcolor)
+{
+    u8 index=l->focusId-l->firstId;
+    rect_t r=INPUTBOX_RECT;
+    item_info_t *info=listitem_get(l, id);
+    para_info_t *pinfo=(para_info_t*)&PARA_INFO[info->cmd].info[index];
+    
+    r.h = ITEM_HEIGHT;
+    r.y = r.y+index*ITEM_HEIGHT;
+    draw_paras_value(l, index, info, pinfo, &r, color, bgcolor);
 }
 static void draw_paras(listitem_t *l, u8 index, item_info_t *info, u16 color, u16 bgcolor)
 {
     rect_t r=INPUTBOX_RECT;
+    para_info_t *pinfo=(para_info_t*)&PARA_INFO[info->cmd].info[index];
     
     r.h = ITEM_HEIGHT;
     r.y = r.y+index*ITEM_HEIGHT;
-    draw_paras_label(l, index, info, &r, color, bgcolor);
-    draw_paras_value(l, index, info, &r, color, bgcolor);
-    draw_paras_unit (l, index, info, &r, color, bgcolor);
+    draw_paras_label(l, index, info, pinfo, &r, color, bgcolor);
+    draw_paras_value(l, index, info, pinfo, &r, color, bgcolor);
+    draw_paras_unit (l, index, info, pinfo, &r, color, bgcolor);
 }
 
 
@@ -198,7 +209,7 @@ static void draw_item(listitem_t *l, int id, u16 color, u16 bgcolor, u8 clear)
 
     if(inf->control==CONTROL_LIST) {
         if(clear) {
-            lcd_fill_rect(l->rect.x+1, l->rect.y+index*(ITEM_HEIGHT+1), l->rect.w-2, ITEM_HEIGHT-2, LCD_BC);
+            //lcd_fill_rect(l->rect.x+1, l->rect.y+index*(ITEM_HEIGHT+1), l->rect.w-2, ITEM_HEIGHT-2, LCD_BC);
         }
         lcd_draw_round_rect(l->rect.x, l->rect.y+index*ITEM_HEIGHT, l->rect.w, ITEM_HEIGHT, r, color);
         lcd_draw_string_align(l->rect.x, l->rect.y+index*ITEM_HEIGHT, l->rect.w, ITEM_HEIGHT, (u8*)inf->txt, FONT_24, color, bgcolor, ALIGN_MIDDLE, 0);
@@ -247,8 +258,9 @@ int listitem_refresh(listitem_t *l)
     }
 
     if(l->refreshFlag & REFRESH_LIST) {
+        rect_t r=INPUTBOX_RECT;
         maxId = MIN((slist_size(l->list)-1),(l->firstId+l->dispItems-1));
-        lcd_fill_rect(l->rect.x, l->rect.y, l->rect.w, l->rect.h, LCD_BC);
+        lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
         for(i=l->firstId; i<=maxId; i++) {
             if(i!=l->focusId) {
                 draw_item(l, i, LCD_FC, LCD_BC, 0);
@@ -258,17 +270,22 @@ int listitem_refresh(listitem_t *l)
 
         draw_arrow(l, LCD_FC, LCD_BC);
     }
-    else if(l->refreshFlag & REFRESH_FOCUS) {
-        draw_item(l, l->prev_focusId, LCD_FC, LCD_BC, 1);
-        draw_item(l, l->focusId, ITEM_FOCUS_COLOR, LCD_BC, 0);
+    else {
+        if(l->refreshFlag & REFRESH_FOCUS) {
+            draw_item(l, l->prev_focusId, LCD_FC, LCD_BC, 1);
+            draw_item(l, l->focusId, ITEM_FOCUS_COLOR, LCD_BC, 0);
 
-        draw_arrow(l, LCD_FC, LCD_BC);
+            draw_arrow(l, LCD_FC, LCD_BC);
+        }
+       
+        if(l->refreshFlag & REFRESH_VALUE) {
+            draw_value(l, l->focusId, ITEM_FOCUS_COLOR, LCD_BC);
+        }
+
+        if(l->refreshFlag & REFRESH_TXT_SCROLL) {
+
+        }
     }
-
-    if(l->refreshFlag & REFRESH_TXT_SCROLL) {
-
-    }
-    
     l->prev_firstId = l->firstId;
     l->prev_focusId = l->focusId;
     l->refreshFlag = 0;
@@ -344,7 +361,7 @@ int listitem_size(listitem_t *l)
     return l?-1:slist_size(l->list);
 }
 
-listitem_t* listitem_create(cchr *title, item_info_t *info)
+listitem_t* listitem_create(cchr *title, item_info_t *info, void *data)
 {
     u8 i,n;
     listitem_t *l;
@@ -363,7 +380,8 @@ listitem_t* listitem_create(cchr *title, item_info_t *info)
     if(!l) {
         return NULL;
     }
-
+    
+    l->data = data;
     for(i=0;;i++) {
         inf = info+i;
         if(inf->control==CONTROL_NONE) {
@@ -396,7 +414,7 @@ int listitem_handle(listitem_t **l, key_t key)
             listitem_t *child;
             item_info_t *info=listitem_get((*l), (*l)->focusId);
             if(info->control==CONTROL_LIST) {
-                child = listitem_create(info->txt, (item_info_t*)info->info);
+                child = listitem_create(info->txt, (item_info_t*)info->info, info->data);
                 if(child) {
                     listitem_set_child(*l, child);
                     *l = child;     //进到子列表

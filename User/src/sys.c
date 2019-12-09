@@ -75,7 +75,7 @@ static void adda_reset(void)      //PB5, µÕµÁ∆Ω∏¥Œª£¨ ±º‰÷¡…Ÿ1√Î£¨(ø™ª˙ƒ¨»œµÕµÁ∆
 u32 tmr_cnt=0;
 static void timer_cb(void)
 {
-    if(tmr_cnt%4==0) {
+    if(tmr_cnt%15==0) {
         adc_tmr_cb();
     }
     knob_tmr_cb();
@@ -104,7 +104,7 @@ int sys_init(void)
 #ifndef RTX
     sys_audio_init();
 #else
-    tim_init(TIMER4, 50, timer_cb);
+    tim_init(TIMER4, 20, timer_cb);
 #endif
 
     return 0;

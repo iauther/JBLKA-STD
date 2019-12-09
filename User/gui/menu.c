@@ -227,12 +227,7 @@ static void trigger_refresh(void)
 {
     gui_post_refresh();
 }
-static u8 get_num(item_info_t *info)
-{
-    u8 i=0;
-    while(info[i].control!=CONTROL_NONE) i++;
-    return i;
-}
+
 static void add_items(u8 menu)
 {
     item_info_t *info;
@@ -242,7 +237,7 @@ static void add_items(u8 menu)
     }
 
     info = (item_info_t*)gInfos[menu];
-    gLists[menu] = listitem_create(gTitles[menu], info);
+    gLists[menu] = listitem_create(gTitles[menu], info, NULL);
 }
 
 

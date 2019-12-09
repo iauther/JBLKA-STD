@@ -72,10 +72,10 @@ static u8 knob_key_remap(u8 value)
 {
     if(gM!=MENU_HOME) {
         if(value==KEY_EFFECT_DN) {
-            return KEY_DOWN;
+            return KEY_UP;
         }
         else if(value==KEY_EFFECT_UP) {
-            return KEY_UP;
+            return KEY_DOWN;
         }
     }
 

@@ -190,14 +190,14 @@ const def_dsp_t DEF_DSP={
 const para_txt_t HLPF_TXT={
     {
         "BYPASS",
-        "12dB BUTTERWORTH",
-        "12dB BESSEL",
-        "12dB LINKRILEY",
-        "18dB BUTTERWORTH",
-        "18dB BESSEL",
-        "24dB BUTTERWORTH",
-        "24dB BESSEL",
-        "24dB LINKRILEY",
+        "12-BUTT",     //"12dB BUTTERWORTH",
+        "12-BESS",     //"12dB BESSEL",
+        "12-LINK",     //"12dB LINKRILEY",
+        "18-BUTT",     //"18dB BUTTERWORTH",
+        "18-BESS",     //"18dB BESSEL",
+        "24-BUTT",     //"24dB BUTTERWORTH",
+        "24-BESS",     //"24dB BESSEL",
+        "24-LINK",     //"24dB LINKRILEY",
     }
 };
 para_txt_t PITCH_TXT={
@@ -283,8 +283,8 @@ const paras_info_t PARA_INFO[CMD_ID_NUM]={
         {
             {"FREQ",                "Hz",               20,                 20000,              1,                  1,              0,              NULL},
             {"GAIN",                "dB",               -24,                12,                 0.1,                1,              0,              NULL},
-            {"Q",                   "",                 1,                  1280,               1,                  10,             1,              &EQTYPE_TXT},
-            {"TYPE",                "",                 0,                  2,                  1,                  1,              0,              NULL},
+            {"Q",                   "",                 1,                  1280,               1,                  10,             1,              NULL},
+            {"TYPE",                "",                 0,                  2,                  1,                  1,              0,              &EQTYPE_TXT},
             {"BYPASS",              "",                 0,                  1,                  1,                  1,              0,              NULL},
             {"",                    "",                 1,                  1,                  1,                  1,              0,              NULL},
         }

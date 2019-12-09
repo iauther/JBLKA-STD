@@ -586,6 +586,10 @@ void lcd_draw_string_align(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 col
     y2 = y+(h-info.height)/2;
     h2 = info.height;
     
+    if(w2>w) {
+        w2 = w;
+    }
+
     if(align==ALIGN_LEFT) {
         x2 = x;
     }

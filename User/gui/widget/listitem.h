@@ -8,8 +8,9 @@
 enum {
     REFRESH_TITLE       = 1<<0,
     REFRESH_FOCUS       = 1<<1,
-    REFRESH_LIST        = 1<<2,
-    REFRESH_TXT_SCROLL  = 1<<3,
+    REFRESH_VALUE       = 1<<2,
+    REFRESH_LIST        = 1<<3,
+    REFRESH_TXT_SCROLL  = 1<<4,
 
     REFRESH_ALL         = 0xffff,
 };
@@ -28,6 +29,7 @@ typedef struct _listitem {
     u32     refreshFlag;
     u8      inEdit;
 
+    void    *data;
     struct _listitem *parent;
     struct _listitem *child;
 }listitem_t;
@@ -62,7 +64,7 @@ int listitem_move(listitem_t *l, int dir);
 
 int listitem_size(listitem_t *l);
 
-listitem_t* listitem_create(cchr *title, item_info_t *info);
+listitem_t* listitem_create(cchr *title, item_info_t *info, void *data);
 
 int listitem_handle(listitem_t **l, key_t key);
 

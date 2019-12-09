@@ -25,6 +25,16 @@ static void key_proc(key_t key)
         case KEY_PRESET:
         menu_switch(MENU_PRESET);
         break;
+    
+        case KEY_SHARP:      //#
+        case KEY_0:          //
+        case KEY_b:
+        {
+            int r;node_t n;
+            r = dsp_set_pitch(key.value, NULL, &n);
+            if(r==0) e2p_put(&n);
+        }
+        break;
 
         default:
         menu_handle(key);
@@ -49,29 +59,11 @@ static void ir_proc(key_t key)
         break;
 
         case KEY_INPUT:
-        {
-            dsp->Array_Input.input = (dsp->Array_Input.input+1)%INPUT_MAX;
-            sys_set_input(dsp->Array_Input.input);
-            dd.id = CMD_ID_Input;
-            dd.dlen = sizeof(TypeS_Input);
-            r = dsp_send(&dd);
-            n.ptr = &dsp->Array_Input;
-            n.len = sizeof(TypeS_Input);
-        }
+        r = dsp_set_input(NULL, &n);
         break;
 
         case KEY_MUTE:
-        {
-            u8 i;
-            dd.id = CMD_ID_Mute;
-            for(i=0; i<Mute_CH_NUM; i++) {
-                dd.ch = i;
-                dd.dlen = sizeof(TypeS_Mute);
-                r = dsp_send(&dd);
-            }
-            n.ptr = dsp->Array_Mute;
-            n.len = sizeof(dsp->Array_Mute);
-        } 
+        r = dsp_set_mute(NULL, &n);
         break;
 
 #if 0        
@@ -90,38 +82,13 @@ static void ir_proc(key_t key)
         case KEY_M1:
         case KEY_M2:
         case KEY_M3:
-        {
-            if(key.value==KEY_MODE) {
-                gParams.pre = (gParams.pre+1)%PRESET_MAX;
-            }
-            else {
-                gParams.pre = key.value-KEY_M1;
-            }
-            
-            paras_read_preset(gParams.pre, dsp);
-            r = dsp_download();
-            n.ptr = &gParams.pre;
-            n.len = sizeof(gParams.pre);
-        }
+        r = dsp_set_preset(key.value, NULL, &n);
         break;
         
         case KEY_SHARP:      //#
         case KEY_0:          //
         case KEY_b:
-        if(key.value==KEY_SHARP) {
-            dsp->Array_PitchShift.PitchShift = (dsp->Array_PitchShift.PitchShift+1)%5;
-        }
-        else if(key.value==KEY_0) {
-            dsp->Array_PitchShift.PitchShift = 0;
-        }
-        else {
-            dsp->Array_PitchShift.PitchShift = (dsp->Array_PitchShift.PitchShift-1)%5;
-        }
-        dd.id = CMD_ID_PitchShift;
-        dd.dlen = sizeof(TypeS_PitchShift);
-        r = dsp_send(&dd);
-        n.ptr = &dsp->Array_PitchShift;
-        n.len = sizeof(dsp->Array_PitchShift);
+        r = dsp_set_pitch(key.value, NULL, &n);
         break;
         
         case KEY_MUSIC_UP:
@@ -137,9 +104,7 @@ static void ir_proc(key_t key)
         return;  
     }
 
-    if(r==0) {
-        e2p_put(&n);
-    }
+    if(r==0) e2p_put(&n);
 }
 static void knob_proc(key_t key)
 {

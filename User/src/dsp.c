@@ -866,7 +866,7 @@ int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
     }
     
     dd.dlen = nd.len;
-    dsp_send(&dd);
+    r = dsp_send(&dd);
     
     if(g) {
         *g = *gain/step;
@@ -882,6 +882,118 @@ quit:
     return r;
 }
 
+
+int dsp_set_pitch(u8 key, s16 *g, node_t *n)
+{
+    int r;
+    dsp_data_t dd={0};
+    Dsp_Paras *dsp=&gParams.dsp;
+
+    if(key==KEY_SHARP) {
+        dsp->Array_PitchShift.PitchShift = (dsp->Array_PitchShift.PitchShift+1)%5;
+    }
+    else if(key==KEY_0) {
+        dsp->Array_PitchShift.PitchShift = 0;
+    }
+    else {
+        dsp->Array_PitchShift.PitchShift = (dsp->Array_PitchShift.PitchShift-1)%5;
+    }
+
+    dd.id = CMD_ID_PitchShift;
+    dd.dlen = sizeof(TypeS_PitchShift);
+    r = dsp_send(&dd);
+    if(r==0 && n) {
+        n->ptr = &dsp->Array_PitchShift;
+        n->len = sizeof(dsp->Array_PitchShift);
+        if(g) {
+            *g = dsp->Array_PitchShift.PitchShift;
+        }
+    }
+
+    return r;
+}
+
+
+int dsp_set_preset(u8 key, s16 *g, node_t *n)
+{
+    int r;
+    Dsp_Paras *dsp=&gParams.dsp;
+
+    if(key==KEY_MODE) {
+        gParams.pre = (gParams.pre+1)%PRESET_MAX;
+    }
+    else {
+        gParams.pre = key-KEY_M1;
+    }
+    
+    paras_read_preset(gParams.pre, dsp);
+    r = dsp_download();
+    if(r==0 && n) {
+        n->ptr = &gParams.pre;
+        n->len = sizeof(gParams.pre);
+        if(g) {
+            *g = gParams.pre;
+        }
+    }
+
+    return r;
+}
+
+
+int dsp_set_input(s16 *g, node_t *n)
+{
+    int r;
+    dsp_data_t dd={0};
+    Dsp_Paras *dsp=&gParams.dsp;
+
+    dsp->Array_Input.input = (dsp->Array_Input.input+1)%INPUT_MAX;
+    sys_set_input(dsp->Array_Input.input);
+    dd.id = CMD_ID_Input;
+    dd.dlen = sizeof(TypeS_Input);
+    r = dsp_send(&dd);
+    if(r==0 && n) {
+        n->ptr = &dsp->Array_Input;
+        n->len = sizeof(dsp->Array_Input);
+        if(g) {
+            *g = dsp->Array_Input.input;
+        }
+    }
+
+    return r;
+}
+
+int dsp_set_mute(s16 *g, node_t *n)
+{
+    u16 mute;
+    int r,i;
+    dsp_data_t dd={0};
+    Dsp_Paras *dsp=&gParams.dsp;
+
+    if((dsp->Array_Gain[Gain_CH_Music].Mute && dsp->Array_Gain[Gain_CH_Mic].Mute) || 
+       (dsp->Array_Gain[Gain_CH_Music].Gain==0 && dsp->Array_Gain[Gain_CH_Mic].Gain==0)) {
+        mute = 0;
+    }
+    else {
+        mute = 1;
+    }
+
+    dd.id = CMD_ID_Gain;
+    for(i=0; i<Gain_CH_Eff; i++) {
+        dd.ch = i;
+        dsp->Array_Gain[i].Mute = mute;
+        dd.dlen = sizeof(TypeS_Gain);
+        r = dsp_send(&dd);
+    }
+    if(r==0 && n) {
+        n->ptr = &dsp->Array_Gain;
+        n->len = sizeof(dsp->Array_Gain);
+        if(g) {
+            *g = mute;
+        }
+    }
+    
+    return r;
+}
 
 /////////////////////////////////////////////////////////
 

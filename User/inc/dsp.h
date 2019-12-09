@@ -526,6 +526,14 @@ int dsp_update(dsp_data_t *dsp, node_t *node);
 
 int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n);
 
+int dsp_set_pitch(u8 key, s16 *g, node_t *n);
+
+int dsp_set_preset(u8 key, s16 *g, node_t *n);
+
+int dsp_set_input(s16 *g, node_t *n);
+
+int dsp_set_mute(s16 *g, node_t *n);
+
 void dsp_test(void);
 
 #ifdef __cplusplus

@@ -168,32 +168,22 @@
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>inf</ItemText>
+          <ItemText>info</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>gLists</ItemText>
+          <ItemText>pinfo</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>gM</ItemText>
+          <ItemText>pinfo-&gt;ptxt[0]</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>child</ItemText>
-        </Ww>
-        <Ww>
-          <count>7</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>key_times_cnt</ItemText>
-        </Ww>
-        <Ww>
-          <count>8</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>l</ItemText>
+          <ItemText>v</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>
