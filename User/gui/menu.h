@@ -36,16 +36,11 @@ enum {
 typedef struct{
     void *(*init)(rect_t *r, void *data);
     int (*free)(void **p);
-    int (*handle)(void *p, key_t key);
+    int (*handle)(void *p, key_t *key);
     int (*refresh)(void *p);
     int (*clear)(void *p);
 }control_func_t;
 
-#define DEF_CONTROL_FUNC(XX) \
-    int XX##_init(rect_t *r, void *data); \
-    int XX##_free(void **p); \
-    int XX##_handle(void *p, key_t key); \
-    int XX##_refresh(void *p);
 
 int menu_init(void);
 
@@ -57,7 +52,7 @@ int menu_switch(u8 menu);
 
 int menu_refresh(void);
 
-int menu_handle(key_t key);
+int menu_handle(key_t *key);
 
 extern u8 gM;
 

@@ -68,9 +68,10 @@ static void keyPool_init(void)
         keyPool[knobTab[i].code] = knobTab[i].key;
     }
 }
+
 static u8 knob_key_remap(u8 value)
 {
-    if(gM!=MENU_HOME) {
+    if(gM!=MENU_HOME || msgbox_is_show()) {
         if(value==KEY_EFFECT_DN) {
             return KEY_UP;
         }

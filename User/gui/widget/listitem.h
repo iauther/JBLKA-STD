@@ -16,6 +16,7 @@ enum {
     REFRESH_ALL         = 0xffff,
 };
 
+
 typedef struct _listitem {
     cchr    *title;
     rect_t  rect;
@@ -31,9 +32,13 @@ typedef struct _listitem {
     u8      inEdit;
 
     void    *data;
+    trigger_fn trigger;
     struct _listitem *parent;
     struct _listitem *child;
 }listitem_t;
+
+
+
 
 listitem_t *listitem_init(cchr *title, u8 max, int node_size);
 
@@ -65,8 +70,10 @@ int listitem_move(listitem_t *l, u8 dir, u8 size);
 
 int listitem_size(listitem_t *l);
 
+int listitem_set_trigger(listitem_t *l, trigger_fn trigger);
+
 listitem_t* listitem_create(cchr *title, item_info_t *info, void *data);
 
-int listitem_handle(listitem_t **l, key_t key);
+int listitem_handle(listitem_t **l, key_t *key);
 
 #endif

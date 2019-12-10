@@ -205,14 +205,14 @@ CONST item_info_t effItems[]={
 };
 /////////////////////////////////////////////////////////////////////////////////
 CONST item_info_t preItems[]={
-    {CONTROL_TEXT,     "PRESET1",     0,                NULL,               NULL},
-    {CONTROL_TEXT,     "PRESET2",     0,                NULL,               NULL},
-    {CONTROL_TEXT,     "PRESET3",     0,                NULL,               NULL},
-    {CONTROL_TEXT,     "PRESET4",     0,                NULL,               NULL},
-    {CONTROL_TEXT,     "PRESET5",     0,                NULL,               NULL},
-    {CONTROL_TEXT,     "PRESET6",     0,                NULL,               NULL},
-    {CONTROL_TEXT,     "PRESET7",     0,                NULL,               NULL},
-    {CONTROL_TEXT,     "PRESET8",     0,                NULL,               NULL},
+    {CONTROL_LIST,     "PRESET1",     0,                NULL,               NULL},
+    {CONTROL_LIST,     "PRESET2",     0,                NULL,               NULL},
+    {CONTROL_LIST,     "PRESET3",     0,                NULL,               NULL},
+    {CONTROL_LIST,     "PRESET4",     0,                NULL,               NULL},
+    {CONTROL_LIST,     "PRESET5",     0,                NULL,               NULL},
+    {CONTROL_LIST,     "PRESET6",     0,                NULL,               NULL},
+    {CONTROL_LIST,     "PRESET7",     0,                NULL,               NULL},
+    {CONTROL_LIST,     "PRESET8",     0,                NULL,               NULL},
     {CONTROL_NONE,     "",            0,                NULL,               NULL},
 };
 ///////////////////////////////////////////////////////////////////////////////
@@ -223,13 +223,9 @@ cchr *gTitles[MENU_MAX]={"HOME", "MIC", "MUSIC", "EFFECT", "PRESET"};
 CONST item_info_t *gInfos[MENU_MAX]={NULL, micItems, mscItems, effItems, preItems};
 
 
-static void trigger_refresh(void)
-{
-    gui_post_refresh();
-}
-
 static void add_items(u8 menu)
 {
+    listitem_t *l;
     item_info_t *info;
 
     if(menu>=MENU_MAX) {
@@ -237,7 +233,9 @@ static void add_items(u8 menu)
     }
 
     info = (item_info_t*)gInfos[menu];
-    gLists[menu] = listitem_create(gTitles[menu], info, NULL);
+    l = listitem_create(gTitles[menu], info, NULL);
+    listitem_set_trigger(l, gui_post_refresh);
+    gLists[menu] = l;
 }
 
 
@@ -269,8 +267,6 @@ int menu_switch(u8 menu)
 {
     if(gM!=menu) {
         gM = menu;
-        listitem_set_refresh(gLists[gM], REFRESH_ALL);
-        trigger_refresh();
     }
     else {
         #if 0
@@ -281,13 +277,21 @@ int menu_switch(u8 menu)
         }
         #endif
     }
+    listitem_set_refresh(gLists[gM], REFRESH_ALL);
 
     return 0;
 }
 
 int menu_refresh(void)
 {
-    listitem_refresh(gLists[gM]);
+    if(gM==MENU_HOME) {
+        //
+    }
+    else {
+        listitem_refresh(gLists[gM]);
+    }
+
+    
     return 0;
 }
 
@@ -304,11 +308,13 @@ int menu_clear(void)
 }
 
 
-int menu_handle(key_t key)
+int menu_handle(key_t *key)
 {
-    int r = listitem_handle(&gLists[gM], key);
-    if(r==0) {
-        trigger_refresh();
+    if(gM==MENU_HOME) {
+        //
+    }
+    else {
+        listitem_handle(&gLists[gM], key);
     }
 
     return 0;

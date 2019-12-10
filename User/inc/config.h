@@ -38,6 +38,7 @@
 #define TITLE_RECT              {0,     24,     LCD_WIDTH,      24}
 #define MENU_RECT               {80,    60,     LCD_WIDTH-160,  LCD_HEIGHT-80}
 #define INPUTBOX_RECT           {0,     60,     LCD_WIDTH,      LCD_HEIGHT-80}
+#define MSGBOX_RECT             {75,    60,     LCD_WIDTH-150,  LCD_HEIGHT-120}
 
 #define LCD_FC                  WHITE   //0x0000
 #define LCD_BC                  BLACK   //0xFFFF

@@ -7,9 +7,9 @@
 extern u8 adc_key_using;
 extern paras_data_t gParams;
 msg_t *gui_msg=NULL;
-static void key_proc(key_t key)
+static void key_proc(key_t *key)
 {
-    switch(key.value) {
+    switch(key->value) {
         case KEY_MUSIC:
         menu_switch(MENU_MUSIC);
         break;
@@ -31,7 +31,7 @@ static void key_proc(key_t key)
         case KEY_b:
         {
             int r;node_t n;
-            r = dsp_set_pitch(key.value, NULL, &n);
+            r = dsp_set_pitch(key->value, NULL, &n);
             if(r==0) e2p_put(&n);
         }
         break;
@@ -43,13 +43,13 @@ static void key_proc(key_t key)
 
     adc_key_using = 0;
 }
-static void ir_proc(key_t key)
+static void ir_proc(key_t *key)
 {
     int r;
     s16 g;
     node_t n;
 
-    switch(key.value) {
+    switch(key->value) {
         case KEY_LOCK:
         {
             //
@@ -80,13 +80,13 @@ static void ir_proc(key_t key)
         case KEY_M1:
         case KEY_M2:
         case KEY_M3:
-        r = dsp_set_preset(key.value, NULL, &n);
+        r = dsp_set_preset(key->value, NULL, &n);
         break;
         
         case KEY_SHARP:      //#
         case KEY_0:          //
         case KEY_b:
-        r = dsp_set_pitch(key.value, NULL, &n);
+        r = dsp_set_pitch(key->value, NULL, &n);
         break;
         
         case KEY_MUSIC_UP:
@@ -95,7 +95,7 @@ static void ir_proc(key_t key)
         case KEY_EFFECT_DN:
         case KEY_MIC_UP:
         case KEY_MIC_DN:
-        r = dsp_gain_step(key.value, 1, &g, &n);
+        r = dsp_gain_step(key->value, 1, &g, &n);
         break;
 
         default:
@@ -104,14 +104,14 @@ static void ir_proc(key_t key)
 
     if(r==0) e2p_put(&n);
 }
-static void knob_proc(key_t key)
+static void knob_proc(key_t *key)
 {
     int r;
     s16 g;
     u8 tmp[20];
     node_t n;
 
-    r = dsp_gain_step(key.value, key.times, &g, &n);
+    r = dsp_gain_step(key->value, key->times, &g, &n);
     if(r) {
         return;
     }
@@ -152,15 +152,15 @@ void gui_task(void *arg)
                     switch(k->src) {
                         
                         case SRC_IR:
-                        ir_proc(e.key);
+                        ir_proc(&e.key);
                         break;
 
                         case SRC_KEY:
-                        key_proc(e.key);
+                        key_proc(&e.key);
                         break;
                     
                         case SRC_KNOB:
-                        knob_proc(e.key);
+                        knob_proc(&e.key);
                         break;
                     }
                 }

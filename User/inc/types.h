@@ -26,8 +26,6 @@ typedef const char cchr;
 #define MIN(a,b)    ((a<b)?a:b)
 #define ABS(a,b)    ((a>b)?(a-b):(b-a))
 
-
-
 typedef enum {
     MODE_IT,
     MODE_DMA,

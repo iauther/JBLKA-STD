@@ -16,11 +16,19 @@ static void li_reset(listitem_t *l)
     l->prev_firstId = 0;
     l->prev_focusId = 0;
     l->refreshFlag  = 0;//REFRESH_ALL;
+    l->trigger = NULL;
     l->parent = NULL;
     l->child  = NULL;
 
     l->inEdit = 0;
 }
+static void set_refresh(listitem_t *l, u32 flag)
+{
+
+    l->refreshFlag |= flag;
+    if(l->trigger) l->trigger();
+}
+
 
 
 listitem_t *listitem_init(cchr *title, u8 max, int node_size)
@@ -124,7 +132,7 @@ int listitem_set_refresh(listitem_t *l, u32 flag)
         return -1;
     }
 
-    l->refreshFlag |= flag;
+    set_refresh(l, flag);
 
     return 0;
 }
@@ -246,8 +254,7 @@ static void draw_arrow(listitem_t *l, u16 color, u16 bgcolor)
 }
 
 
-
-int listitem_refresh(listitem_t *l)
+static int list_refresh(listitem_t *l)
 {
     u8  i,maxId;
 
@@ -297,6 +304,19 @@ int listitem_refresh(listitem_t *l)
     l->refreshFlag = 0;
     
     return 0;
+}
+int listitem_refresh(listitem_t *l)
+{
+    int r=0;
+
+    if(msgbox_is_show()) {
+        msgbox_refresh();
+    }
+    else {
+        r = list_refresh(l);
+    }
+
+    return r;
 }
 
 
@@ -356,7 +376,7 @@ int listitem_move(listitem_t *l, u8 dir, u8 size)
     if(l->inEdit) {
         r = adjust_value(l, dir, size);
         if(r==0) {
-            l->refreshFlag |= REFRESH_VALUE;
+            set_refresh(l, REFRESH_VALUE);
         }
     }
     else {
@@ -394,10 +414,10 @@ int listitem_move(listitem_t *l, u8 dir, u8 size)
         }
 
         if(l->firstId != l->prev_firstId) {
-            l->refreshFlag |= REFRESH_LIST;
+            set_refresh(l, REFRESH_LIST);
         }
         else if(l->focusId != l->prev_focusId){
-            l->refreshFlag |= REFRESH_MOVE;
+            set_refresh(l, REFRESH_MOVE);
         }
     }
 
@@ -409,6 +429,18 @@ int listitem_size(listitem_t *l)
 {
     return l?-1:slist_size(l->list);
 }
+
+
+int listitem_set_trigger(listitem_t *l, trigger_fn trigger)
+{
+    if(!l) {
+        return -1;
+    }
+    l->trigger = trigger;
+
+    return 0;
+}
+
 
 listitem_t* listitem_create(cchr *title, item_info_t *info, void *data)
 {
@@ -442,38 +474,44 @@ listitem_t* listitem_create(cchr *title, item_info_t *info, void *data)
     return l;
 }
 
-
-int listitem_handle(listitem_t **l, key_t key)
+const cchr *MSGBOX_TXT[2]={
+    "LOAD THIS PRESET?",
+    "SAVE THIS PRESET?",
+};
+static int list_handle(listitem_t **l, key_t *key)
 {
-    if(!l || !(*l)) {
-        return -1;
-    }
-
-    switch(key.value) {
+    switch(key->value) {
         case KEY_UP:
-        listitem_move(*l, UP, key.times);
+        listitem_move(*l, UP, key->times);
         break;
 
         case KEY_DOWN:
-        listitem_move(*l, DOWN, key.times);
+        listitem_move(*l, DOWN, key->times);
         break;
 
         case KEY_ENTER:
         {
             listitem_t *child;
             item_info_t *info=listitem_get((*l), (*l)->focusId);
-            if(info->control==CONTROL_LIST) {
-                child = listitem_create(info->txt, (item_info_t*)info->info, info->data);
-                if(child) {
-                    listitem_set_child(*l, child);
-                    *l = child;     //进到子列表
-                    (*l)->refreshFlag |= REFRESH_ALL;
-                }
+            if(gM==MENU_PRESET) {
+                msgbox_show("WARNNING", (char *)MSGBOX_TXT[0], 0, (*l)->trigger);
+                
             }
             else {
-                if(!(*l)->inEdit) {
-                    (*l)->inEdit = 1;
-                    (*l)->refreshFlag |= REFRESH_VALUE;
+                if(info->control==CONTROL_LIST) {
+                    child = listitem_create(info->txt, (item_info_t*)info->info, info->data);
+                    if(child) {
+                        listitem_set_child(*l, child);
+                        *l = child;     //进到子列表
+                        set_refresh(*l, REFRESH_ALL);
+                    }
+                }
+                else {
+                    if(!(*l)->inEdit) {
+                        (*l)->inEdit = 1;
+                        (*l)->refreshFlag |= REFRESH_VALUE;
+                        set_refresh(*l, REFRESH_VALUE);
+                    }
                 }
             }
         }
@@ -486,13 +524,13 @@ int listitem_handle(listitem_t **l, key_t key)
 
             if(pl->inEdit) {
                 pl->inEdit = 0;
-                pl->refreshFlag |= REFRESH_FOCUS;
+                set_refresh(pl, REFRESH_FOCUS);
             }
             else {
                 if(parent) {
                     listitem_free(&pl);
                     *l = parent;        //退到父列表
-                    (*l)->refreshFlag |= REFRESH_ALL;
+                    set_refresh(*l, REFRESH_ALL);
                 }
                 else {
                     //listitem_free(l);     //退出菜单，是否释放？
@@ -508,6 +546,7 @@ int listitem_handle(listitem_t **l, key_t key)
         case KEY_SAVE:
         if(gM==MENU_PRESET) {
             //do something ...
+            msgbox_show("WARNNING", (char *)MSGBOX_TXT[1], 0, (*l)->trigger);
         }
         break;
 
@@ -516,6 +555,37 @@ int listitem_handle(listitem_t **l, key_t key)
     }
 
     return 0;
+}
+int listitem_handle(listitem_t **l, key_t *key)
+{
+    int r=0;
+
+    if(!l || !(*l) || !key) {
+        return -1;
+    }
+
+    if(msgbox_is_show()) {
+        r = msgbox_handle(key);
+        if(gM==MENU_PRESET) {
+            if(key->value==KEY_EXIT) {
+                msgbox_clear();
+                set_refresh(*l, REFRESH_LIST);
+            }
+            else if(key->value==KEY_ENTER){
+                //LOAD PRESET
+                set_refresh(*l, REFRESH_LIST);
+            }
+            else if(key->value==KEY_SAVE){
+                //SAVE PRESET
+                set_refresh(*l, REFRESH_LIST);
+            }
+        }
+    }
+    else {
+        r = list_handle(l, key);
+    }
+
+    return r;
 }
 
 
