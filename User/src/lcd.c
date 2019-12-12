@@ -393,31 +393,73 @@ void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
     }
 }
 
+u16 tmpBuf[600];
+void lcd_draw_char2(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor, u8 pure)
+{
+    u16 i,j,len;
+    font_info_t inf = font_get(font);
+        
+    if(font==FONT_96) {
+        if(c=='.') c = 10;
+        else if(c>='0' && c<='9') c = c-'0';
+        else return;
+    }
+    else {
+        c = c - ' ';
+    }
+    
+    for(i=0; i<inf.size; i++) {
+        //һ��һ�е�ˢ
+        
 
+
+
+    }
+
+
+}
 void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor, u8 pure)
 {                             
     u16 temp, t1, t;
     u16 y0 = y;
     font_info_t inf = font_get(font);
     
-    c = c - ' ';    /* 得到偏移后的值（ASCII字库是从空格开始取模，所�?' '就是对应字符的字库） */
-    for(t = 0; t < inf.size; t++) { /*遍历打印所有像素点到LCD */
+    if(font==FONT_96) {
+        if(c=='.') {
+            c = 10;
+        }
+        else if(c>='0' && c<='9'){
+            c = c-'0';
+        }
+        else {
+            return;
+        }
+    }
+    else {
+        c = c - ' ';
+    }
+
+
+    for(t = 0; t < inf.size; t++) {
         if(FONT_16 == font) {
-            temp = font_1608[c][t];   /* 调用1608字体 */
+            temp = font_1608[c][t];
         }
         else if(FONT_24 == font) {
-            temp = font_2412[c][t];   /* 调用2412字体 */
+            temp = font_2412[c][t];
         }
         else if(FONT_32 == font) {
-            temp = font_3216[c][t];   /* 调用3216数码管字�?*/
+            temp = font_3216[c][t];
         }
         else if(FONT_48 == font){
-            temp = font_4824[c][t];   /* 调用4824数码管字�?*/
+            temp = font_4824[c][t];
+        }
+        else if(FONT_96 == font){
+            temp = font_9648[c][t];
         }
         else {   
-            return;     /* 没有找到对应的字�?*/
+            return;
         }
-        for(t1 = 0; t1 < 8; t1++) { /* 打印一个像素点到液�?*/
+        for(t1 = 0; t1 < 8; t1++) {
                        
             if(temp & 0x80) {
                 lcd_draw_point(x, y, color);
@@ -432,13 +474,13 @@ void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor, u8 pure)
             y++;
             
             if(y >= LCD_HEIGHT) {
-                return;     /* 超区域了 */
+                return;
             }
             if((y - y0) == inf.height) {
                 y = y0;
                 x++;
                 if(x >= LCD_WIDTH) {
-                    return; /* 超区域了 */
+                    return;
                 }
                 break;
             }
@@ -572,6 +614,52 @@ void lcd_fill_rect(u16 x, u16 y, u16 w, u16 h, u16 color)
             size = size_remain;
             size_remain = 0;
         }
+    }
+}
+
+
+void lcd_fill_round_rect(u16 x, u16 y, u16 w, u16 h, u16 r, u16 color)
+{
+    u16 x2,y2,x3,y3,xd;
+    x2 = x+w;
+    y2 = y+h;
+
+    if (x2 < x) {
+        x3 = x2;
+        x2 = x;
+        x = x3;
+    }
+
+   if ( y2 < y ) {
+        y3 = y2;
+        y2 = y;
+        y = y3;
+   }
+
+    xd = 3-(r<<1);
+    x3 = 0;
+    y3 = r;
+    
+    lcd_fill_rect(x+r, y, w-r*2, h, color);
+    while (x3 <= y3) {
+        if( y3 > 0 ) {
+            lcd_draw_line(x2+x3-r, y-y3+r, x2+x3-r, y3+y2-r, color);
+            lcd_draw_line(x-x3+r, y-y3+r, x-x3+r, y3+y2-r, color);
+        }
+
+        if(x3 > 0) {
+            lcd_draw_line(x - y3 + r, y - x3 + r, x - y3 + r, x3 + y2 - r, color);
+            lcd_draw_line(x2 + y3 - r, y - x3 + r, x2 + y3 - r, x3 + y2 - r, color);
+        }
+
+        if (xd < 0) {
+            xd += (x3 << 2) + 6;
+        }
+        else {
+            xd += ((x3-y3)<<2)+10;
+            y3--;
+        }
+        x3++;
     }
 }
 

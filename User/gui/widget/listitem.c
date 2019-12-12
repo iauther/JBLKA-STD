@@ -220,7 +220,7 @@ static void draw_item(listitem_t *l, int id, u16 color, u16 bgcolor, u8 clear)
 
     if(inf->control==CONTROL_LIST) {
         if(clear) {
-            lcd_fill_rect(l->rect.x+1, l->rect.y+index*(ITEM_HEIGHT+1), l->rect.w-2, ITEM_HEIGHT-2, LCD_BC);
+            lcd_fill_round_rect(l->rect.x+1, l->rect.y+index*ITEM_HEIGHT+1, l->rect.w-2, ITEM_HEIGHT-2, r, bgcolor);
         }
         lcd_draw_round_rect(l->rect.x, l->rect.y+index*ITEM_HEIGHT, l->rect.w, ITEM_HEIGHT, r, color);
         lcd_draw_string_align(l->rect.x, l->rect.y+index*ITEM_HEIGHT, l->rect.w, ITEM_HEIGHT, (u8*)inf->txt, FONT_24, color, bgcolor, ALIGN_MIDDLE, 0);
@@ -236,20 +236,39 @@ static void draw_title(listitem_t *l, u16 font_color, u16 bgcolor)
     lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)l->title, FONT_24, font_color, bgcolor, ALIGN_MIDDLE, 0);
     //lcd_draw_line(r.x, r.y+r.h+4, r.w, r.h, font_color);
 }
-static void draw_arrow(listitem_t *l, u16 color, u16 bgcolor)
+
+static void draw_arraw(u8 dir, u16 color)
 {
+    u16 x,y,x1,y1,x2,y2;
+    rect_t r,r1=UP_ARROW_RECT,r2=DOWN_ARROW_RECT;
+    
+    r = (dir==UP)?r1:r2;
+    x = r.x+r.w/2;
+    y = r.y;
+    x1 = r.x;
+    y1 = r.y+r.h;
+    x2 = r.x+r.w;
+    y2 = r.y+r.h;
+
+    lcd_draw_line(x, y, x1, y1, color);
+    lcd_draw_line(x, y, x2, y2, color);
+}
+
+static void draw_arrows(listitem_t *l, u16 color, u16 bgcolor)
+{
+    return;
     if(l->firstId>0) {
-        //lcd_fill_rect(r.x, r.h, r.w, r.h, bgcolor);
+        draw_arraw(UP, color);
     }
     else {
-        //
+        draw_arraw(UP, bgcolor);
     }
 
     if(l->firstId+l->dispItems>listitem_size(l)) {
-        //lcd_fill_rect(r.x, r.h, r.w, r.h, bgcolor);
+        draw_arraw(DOWN, color);
     }
     else {
-
+        draw_arraw(DOWN, bgcolor);
     }
 }
 
@@ -274,21 +293,21 @@ static int list_refresh(listitem_t *l)
             if(i!=l->focusId) {
                 draw_item(l, i, LCD_FC, LCD_BC, 0);
             }
-            draw_item(l, l->focusId, ITEM_FOCUS_COLOR, LCD_BC, 0);
         }
+        draw_item(l, l->focusId, ITEM_FOCUS_COLOR, ITEM_FOCUS_BGCOLOR, 1);
 
-        draw_arrow(l, LCD_FC, LCD_BC);
+        draw_arrows(l, LCD_FC, LCD_BC);
     }
     else {
         if(l->refreshFlag & REFRESH_MOVE) {
             draw_item(l, l->prev_focusId, LCD_FC, LCD_BC, 1);
-            draw_item(l, l->focusId, ITEM_FOCUS_COLOR, LCD_BC, 0);
+            draw_item(l, l->focusId, ITEM_FOCUS_COLOR, ITEM_FOCUS_BGCOLOR, 1);
 
-            draw_arrow(l, LCD_FC, LCD_BC);
+            draw_arrows(l, LCD_FC, LCD_BC);
         }
     
         if(l->refreshFlag & REFRESH_FOCUS) {
-            draw_item(l, l->focusId, ITEM_FOCUS_COLOR, LCD_BC, 0);
+            draw_item(l, l->focusId, ITEM_FOCUS_COLOR, ITEM_FOCUS_BGCOLOR, 1);
         }
 
         if(l->refreshFlag & REFRESH_VALUE) {
@@ -322,8 +341,13 @@ int listitem_refresh(listitem_t *l)
 
 int listitem_clear(void)
 {
+    rect_t a1=UP_ARROW_RECT;
+    rect_t a2=DOWN_ARROW_RECT;
     rect_t r1=TITLE_RECT;
     rect_t r2=INPUTBOX_RECT;
+
+    lcd_fill_rect(a1.x, a1.y, a1.w, a1.h, LCD_BC);
+    lcd_fill_rect(a2.x, a2.y, a2.w, a2.h, LCD_BC);
 
     lcd_fill_rect(r1.x, r1.y, r1.w, r1.h, LCD_BC);
     lcd_fill_rect(r2.x, r2.y, r2.w, r2.h, LCD_BC);

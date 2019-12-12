@@ -1,7 +1,7 @@
 #include "task.h"
 #include "menu.h"
 
-#define MSG_MAX         6
+#define MSG_MAX         20
 
 #ifdef RTX
 extern u8 adc_key_using;
@@ -104,6 +104,15 @@ static void ir_proc(key_t *key)
 
     if(r==0) e2p_put(&n);
 }
+
+
+static void lcd_draw_digit(s16 v, u8 cmd, u8 index)
+{
+    u8 tmp[20];
+
+    sprintf((char*)tmp, "%d", v);
+    lcd_draw_string_align(0, 100, LCD_WIDTH, 60, tmp, FONT_96, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
+}
 static void knob_proc(key_t *key)
 {
     int r;
@@ -121,8 +130,8 @@ static void knob_proc(key_t *key)
         menu_refresh();
     }
     
-    sprintf((char*)tmp, "%d", g);
-    lcd_draw_string_align(0, 100, LCD_WIDTH, 60, tmp, FONT_32, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
+    lcd_draw_digit(g, 0, 0);
+    
     e2p_put(&n);
 }
 

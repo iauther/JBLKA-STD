@@ -245,13 +245,9 @@ int menu_init(void)
 {
     u8 m;
     
-#if 1
     for(m=0; m<MENU_MAX; m++) {
         add_items(m);
     }
-#else
-    add_items(MENU_MUSIC);
-#endif
 
     return 0;
 }
@@ -267,6 +263,7 @@ int menu_switch(u8 menu)
 {
     if(gM!=menu) {
         gM = menu;
+        listitem_set_refresh(gLists[gM], REFRESH_ALL);
     }
     else {
         #if 0
@@ -277,7 +274,7 @@ int menu_switch(u8 menu)
         }
         #endif
     }
-    listitem_set_refresh(gLists[gM], REFRESH_ALL);
+    
 
     return 0;
 }
