@@ -322,75 +322,37 @@ inline void lcd_draw_point(u16 x, u16 y, u16 color)
 
 void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
 {
-    u16  delta_x = 0, delta_y = 0;
-    s8   incx = 0, incy = 0;
-    u16  distance = 0;
-    u16  t = 0;
-    u16  x = 0, y = 0;
-    u16  x_temp = 0, y_temp = 0;
-
-    /* 画斜线（Bresenham算法�?*/
-    delta_x = x2 - x1;
-    delta_y = y2 - y1;
-    if(delta_x > 0) {
-        //斜线(从左到右)
-        incx = 1;
-    }
-    else if(delta_x == 0) {
-        //垂直斜线(竖线)
-        incx = 0;
-    }
-    else{
-        //斜线(从右到左)
-        incx = -1;
-        delta_x = -delta_x;
-    }
-
-    if(delta_y > 0) {
-        //斜线(从左到右)
-        incy = 1;
-    }
-    else if(delta_y == 0) {
-        //水平斜线(水平�?
-        incy = 0;
-    }
-    else {
-        //斜线(从右到左)
-        incy = -1;
-        delta_y = -delta_y;
-    }           
-    
-    /* 计算画笔打点距离(取两个间距中的最大�? */
-    if(delta_x > delta_y) {
-        distance = delta_x;
-    }
-    else {
-        distance = delta_y;
-    }
-    
-    /* 开始打�?*/
-    x = x1;
-    y = y1;
-    //第一个点无效，所以t的次数加一
-    for(t = 0; t <= distance + 1;t++) {
-        lcd_draw_point(x, y, color);
-    
-        /* 判断离实际值最近的像素�?*/
-        x_temp += delta_x;  
-        if(x_temp > distance) {
-            //x方向越界，减去距离值，为下一次检测做准备
-            x_temp -= distance;     
-            //在x方向递增打点
-            x += incx;
-        }
-        y_temp += delta_y;
-        if(y_temp > distance) {
-            //y方向越界，减去距离值，为下一次检测做准备
-            y_temp -= distance;
-            //在y方向递增打点
-            y += incy;
-        }
-    }
+    u16 t; 
+	int xerr=0,yerr=0,delta_x,delta_y,distance; 
+	int incx,incy,uRow,uCol; 
+	delta_x=x2-x1; //������������ 
+	delta_y=y2-y1; 
+	uRow=x1; 
+	uCol=y1; 
+	if(delta_x>0)incx=1; //���õ������� 
+	else if(delta_x==0)incx=0;//��ֱ�� 
+	else {incx=-1;delta_x=-delta_x;} 
+	if(delta_y>0)incy=1; 
+	else if(delta_y==0)incy=0;//ˮƽ�� 
+	else{incy=-1;delta_y=-delta_y;} 
+	if( delta_x>delta_y)distance=delta_x; //ѡȡ�������������� 
+	else distance=delta_y; 
+	for(t=0;t<=distance+1;t++ )//������� 
+	{  
+		lcd_draw_point(uRow,uCol,color);//���� 
+		xerr+=delta_x ; 
+		yerr+=delta_y ; 
+		if(xerr>distance) 
+		{ 
+			xerr-=distance; 
+			uRow+=incx; 
+		} 
+		if(yerr>distance) 
+		{ 
+			yerr-=distance; 
+			uCol+=incy; 
+		} 
+	}  
 }
 
 u16 tmpBuf[600];

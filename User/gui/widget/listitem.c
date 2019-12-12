@@ -237,18 +237,28 @@ static void draw_title(listitem_t *l, u16 font_color, u16 bgcolor)
     //lcd_draw_line(r.x, r.y+r.h+4, r.w, r.h, font_color);
 }
 
-static void draw_arraw(u8 dir, u16 color)
+static void draw_arraw(listitem_t *l, u8 dir, u16 color)
 {
+    u8 wh=6,offset=2;
     u16 x,y,x1,y1,x2,y2;
-    rect_t r,r1=UP_ARROW_RECT,r2=DOWN_ARROW_RECT;
+    rect_t r=l->rect;
     
-    r = (dir==UP)?r1:r2;
-    x = r.x+r.w/2;
-    y = r.y;
-    x1 = r.x;
-    y1 = r.y+r.h;
-    x2 = r.x+r.w;
-    y2 = r.y+r.h;
+    if(dir==UP) {
+        x = r.x+r.w/2;
+        y = r.y-wh-offset;
+        x1 = r.x+r.w/2-wh/2;
+        y1 = r.y-offset;
+        x2 = r.x+r.w/2+wh/2;
+        y2 = r.y-offset;
+    }
+    else {
+        x = r.x+r.w/2;
+        y = r.y+l->dispItems*ITEM_HEIGHT+wh+offset;
+        x1 = r.x+r.w/2-wh/2;
+        y1 = r.y+l->dispItems*ITEM_HEIGHT+offset;
+        x2 = r.x+r.w/2+wh/2;
+        y2 = r.y+l->dispItems*ITEM_HEIGHT+offset;
+    }
 
     lcd_draw_line(x, y, x1, y1, color);
     lcd_draw_line(x, y, x2, y2, color);
@@ -256,19 +266,20 @@ static void draw_arraw(u8 dir, u16 color)
 
 static void draw_arrows(listitem_t *l, u16 color, u16 bgcolor)
 {
-    return;
+    int size=listitem_size(l);
+    //return;
     if(l->firstId>0) {
-        draw_arraw(UP, color);
+        draw_arraw(l, UP, color);
     }
     else {
-        draw_arraw(UP, bgcolor);
+        draw_arraw(l, UP, bgcolor);
     }
 
-    if(l->firstId+l->dispItems>listitem_size(l)) {
-        draw_arraw(DOWN, color);
+    if(l->firstId+l->dispItems<size) {
+        draw_arraw(l, DOWN, color);
     }
     else {
-        draw_arraw(DOWN, bgcolor);
+        draw_arraw(l, DOWN, bgcolor);
     }
 }
 
@@ -341,13 +352,8 @@ int listitem_refresh(listitem_t *l)
 
 int listitem_clear(void)
 {
-    rect_t a1=UP_ARROW_RECT;
-    rect_t a2=DOWN_ARROW_RECT;
     rect_t r1=TITLE_RECT;
     rect_t r2=INPUTBOX_RECT;
-
-    lcd_fill_rect(a1.x, a1.y, a1.w, a1.h, LCD_BC);
-    lcd_fill_rect(a2.x, a2.y, a2.w, a2.h, LCD_BC);
 
     lcd_fill_rect(r1.x, r1.y, r1.w, r1.h, LCD_BC);
     lcd_fill_rect(r2.x, r2.y, r2.w, r2.h, LCD_BC);
@@ -451,7 +457,7 @@ int listitem_move(listitem_t *l, u8 dir, u8 size)
 
 int listitem_size(listitem_t *l)
 {
-    return l?-1:slist_size(l->list);
+    return l?slist_size(l->list):-1;
 }
 
 
