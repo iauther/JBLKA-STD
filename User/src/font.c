@@ -1716,4 +1716,47 @@ font_info_t font_get(u8 font)
 }
 
 
+static u8 get_index(u8 font, s8 c)
+{
+    if(font==FONT_96) {
+        if(c=='.') {
+            c = 10;
+        }
+        else if(c>='0' && c<='9'){
+            c = c-'0';
+        }
+        else {
+            return;
+        }
+    }
+    else {
+        c = c - ' ';
+    }
+}
 
+
+u8* font_get_char(u8 font, s8 c)
+{
+    u8 *pchr,idx=get_index(font, c);
+
+    if(FONT_16 == font) {
+        pchr = (u8*)font_1608[idx];
+    }
+    else if(FONT_24 == font) {
+        pchr = (u8*)font_2412[idx];
+    }
+    else if(FONT_32 == font) {
+        pchr = (u8*)font_3216[idx];
+    }
+    else if(FONT_48 == font){
+        pchr = (u8*)font_4824[idx];
+    }
+    else if(FONT_96 == font){
+        pchr = (u8*)font_9648[idx];
+    }
+    else {   
+        return 0;
+    }
+
+    return pchr;
+}

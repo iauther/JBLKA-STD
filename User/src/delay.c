@@ -20,7 +20,7 @@ void delay_ms(u32 ms)
 {
     u32 i;
 
-#ifdef RTX
+#if 0//def RTX
     if(osKernelGetState()==osKernelRunning) {
         osDelay(ms);
     }

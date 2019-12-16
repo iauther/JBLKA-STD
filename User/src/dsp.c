@@ -612,7 +612,7 @@ static int val_adjust(s16 *ptr, int min, int max, int fac, int val, int step)
 
     return 0;
 }
-int dsp_gain_step(u8 key, u16 times, s16 *g, node_t *n)
+int dsp_set_gain(u8 key, u16 times, s16 *g, node_t *n)
 {
     s16 *gain;
     node_t nd;

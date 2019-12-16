@@ -246,17 +246,17 @@ static void draw_arraw(listitem_t *l, u8 dir, u16 color)
     if(dir==UP) {
         x = r.x+r.w/2;
         y = r.y-wh-offset;
-        x1 = r.x+r.w/2-wh/2;
+        x1 = r.x+r.w/2-wh;
         y1 = r.y-offset;
-        x2 = r.x+r.w/2+wh/2;
+        x2 = r.x+r.w/2+wh;
         y2 = r.y-offset;
     }
     else {
         x = r.x+r.w/2;
         y = r.y+l->dispItems*ITEM_HEIGHT+wh+offset;
-        x1 = r.x+r.w/2-wh/2;
+        x1 = r.x+r.w/2-wh;
         y1 = r.y+l->dispItems*ITEM_HEIGHT+offset;
-        x2 = r.x+r.w/2+wh/2;
+        x2 = r.x+r.w/2+wh;
         y2 = r.y+l->dispItems*ITEM_HEIGHT+offset;
     }
 
@@ -352,11 +352,9 @@ int listitem_refresh(listitem_t *l)
 
 int listitem_clear(void)
 {
-    rect_t r1=TITLE_RECT;
-    rect_t r2=INPUTBOX_RECT;
+    rect_t r=BODY_RECT;
 
-    lcd_fill_rect(r1.x, r1.y, r1.w, r1.h, LCD_BC);
-    lcd_fill_rect(r2.x, r2.y, r2.w, r2.h, LCD_BC);
+    lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
 
     return 0;
 }
