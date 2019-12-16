@@ -282,7 +282,7 @@ int menu_switch(u8 menu)
 int menu_refresh(void)
 {
     if(gM==MENU_HOME) {
-        //
+        home_refresh();
     }
     else {
         listitem_refresh(gLists[gM]);

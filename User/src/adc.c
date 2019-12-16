@@ -174,7 +174,8 @@ u8 adc_key_using=0;
 void adc_tmr_cb(void)
 {
 #ifdef RTX
-    {
+    extern int pc_is_tuning(void);
+    if(!pc_is_tuning()) {
         u8 key;
 
         key = get_key();

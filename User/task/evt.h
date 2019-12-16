@@ -10,6 +10,7 @@ enum {
 
     EVT_HID,
     EVT_RS485,
+    EVT_TUNE,
 
     EVT_TIMER,
     EVT_REFRESH,

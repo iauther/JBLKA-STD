@@ -1,7 +1,9 @@
 #include "menu.h"
 #include "default.h"
 
+static s16 prevValue=0;
 static u8 prevKey=KEY_NONE;
+static key_info_t *prevInfo=NULL;
 static void draw_title(key_info_t *info)
 {
     rect_t r=TITLE_RECT;
@@ -162,10 +164,19 @@ static int need_refresh_all(u8 key)
 }
 
 
-int home_refresh(u8 key, s16 v, key_info_t *info)
+int home_refresh(void)
+{
+    home_refresh2(KEY_NONE, prevValue, prevInfo);
+    
+    return 0;
+}
+
+int home_refresh2(u8 key, s16 v, key_info_t *info)
 {
     rect_t r=INPUTBOX_RECT;
 
+    prevValue = v;
+    prevInfo = info;
     if(need_refresh_all(key)) {
         draw_clear();
         draw_title(info);
@@ -179,6 +190,8 @@ int home_refresh(u8 key, s16 v, key_info_t *info)
     
     return 0;
 }
+
+
 
 
 

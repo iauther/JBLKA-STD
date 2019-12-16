@@ -135,16 +135,19 @@ void TIM2_IRQHandler(void)
         if(pIR->bits==32 || pIR->repeat==1) {
             //send ir key to task
 #ifdef RTX
-            evt_gui_t e={0};
-            key_t *k=&e.key;
+            extern int pc_is_tuning(void);
+            if(!pc_is_tuning()) {
+                evt_gui_t e={0};
+                key_t *k=&e.key;
 
-            k->value = get_cmd(pIR->key);
-            k->src = SRC_IR;
-            k->updown = 0;
-            k->longPress = pIR->repeat;
+                k->value = get_cmd(pIR->key);
+                k->src = SRC_IR;
+                k->updown = 0;
+                k->longPress = pIR->repeat;
 
-            e.evt = EVT_KEY;
-            gui_post_evt(&e);
+                e.evt = EVT_KEY;
+                gui_post_evt(&e);
+            }
 #endif
         } 
     }  

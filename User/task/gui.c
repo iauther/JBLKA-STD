@@ -304,10 +304,18 @@ static void knob_proc(key_t *key, key_info_t *info)
         menu_refresh();
     }
     
-    home_refresh(key->value, g, info);
+    home_refresh2(key->value, g, info);
     e2p_put(&n);
 }
 
+static void draw_tune(void)
+{
+    rect_t r=BODY_RECT;
+    char *txt="PC IS TUNNING!";
+
+    lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)txt, FONT_24, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
+}
 
 void gui_task(void *arg)
 {
@@ -346,6 +354,19 @@ void gui_task(void *arg)
                         case SRC_KNOB:
                         knob_proc(&e.key, &info);
                         break;
+                    }
+                }
+                break;
+
+                case EVT_TUNE:
+                {
+                    extern int pc_is_tuning(void);
+                    if(pc_is_tuning()) {
+                        gM = MENU_HOME;
+                        draw_tune();
+                    }
+                    else {
+                        menu_refresh();
                     }
                 }
                 break;

@@ -9,7 +9,6 @@
 
 #define KQ_MAX      10
 
-
 u8 knobValue=0;
 u8 keyPool[40];
 u16 keyTimes[40];
@@ -94,13 +93,11 @@ static int kfind(queue_t *q, int index, void *p1, void *p2)
 
     return -1;
 }
-int knob_cnt=0;
-int knob_cnt2=0;
+
 static void knob_rx_cb(u8 *data, u16 data_len)
 {
     u8 value;
     keyTimes[knobValue]++;
-knob_cnt++;
 #ifdef RTX
     {
         key_t k;
@@ -125,7 +122,8 @@ knob_cnt++;
 void knob_tmr_cb(void)
 {
 #ifdef RTX
-    {
+    extern int pc_is_tuning(void);
+    if(!pc_is_tuning()) {
         int r=-1;
         node_t n;
         evt_gui_t e;
@@ -135,7 +133,6 @@ void knob_tmr_cb(void)
         n.len = sizeof(e.key);
         r = queue_get(kq, &n, NULL);
         if(r==0) {
-            knob_cnt2++;
             gui_post_evt(&e);
         }
     }

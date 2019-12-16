@@ -2,9 +2,9 @@
 
 
 #define MSG_MAX         8
+u8 gAppRunning=0;
 
 #ifdef RTX
-u8 gAppExit=1;
 msg_t *com_msg=NULL;
 static int set_default(void)
 {
@@ -19,6 +19,16 @@ static int set_default(void)
     e2p_put(&n);
     
     return 0;
+}
+static void tune_trigger(u8 flag)
+{
+    if(gAppRunning != flag) {
+        evt_gui_t e;
+
+        gAppRunning = flag;
+        e.evt = EVT_TUNE;
+        gui_post_evt(&e);
+    }
 }
 
 static int hid_single_proc(packet_t *pkt)
@@ -79,10 +89,6 @@ static int hid_single_proc(packet_t *pkt)
         break;
 
         case TYPE_STATUS:
-        break;
-
-        case TYPE_APP_EXIT:
-        gAppExit = 1;
         break;
 
         case TYPE_ACK:
@@ -169,8 +175,20 @@ static void hid_proc(packet_t *pkt)
     else {
         hid_single_proc(pkt);
     }
+
+    if(pkt->type==TYPE_APP_EXIT) {
+        tune_trigger(0);
+    }
+    else {
+        tune_trigger(1);
+    }
 }
 
+
+int pc_is_tuning(void)
+{
+    return (gAppRunning && usbd_is_plugin());
+}
 
 
 void com_task(void *arg)
