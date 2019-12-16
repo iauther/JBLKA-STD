@@ -1,7 +1,27 @@
 #include "device.h"
 #include "sys.h"
 
-
+#ifdef RTX
+osTimerId_t  s_tmr=0;
+#endif
+u32 tmr_cnt=0;
+static void timer_cb(void *p)
+{
+    if(tmr_cnt%2==0) {
+        adc_tmr_cb();
+    }
+    knob_tmr_cb();
+    usbd_tmr_cb();
+    tmr_cnt++;
+}
+static void tmr_start(void)
+{
+    //tim_init(TIMER4, 50, timer_cb);
+    s_tmr = osTimerNew(timer_cb, osTimerPeriodic, NULL, NULL);
+    if(s_tmr) {
+        osTimerStart(s_tmr, 50);
+    }
+}
 static void rcc_init(void)
 {
     ErrorStatus HSEStartUpStatus;
@@ -71,22 +91,11 @@ static void adda_reset(void)      //PB5, µÕµÁ∆Ω∏¥Œª£¨ ±º‰÷¡…Ÿ1√Î£¨(ø™ª˙ƒ¨»œµÕµÁ∆
     delay_ms(10);
     GPIO_SetBits(GPIOB, GPIO_Pin_5);
 }
-
-u32 tmr_cnt=0;
-static void timer_cb(void)
-{
-    if(tmr_cnt%15==0) {
-        adc_tmr_cb();
-    }
-    knob_tmr_cb();
-    usbd_tmr_cb();
-    tmr_cnt++;
-}
 ///////////////////////////////////////////////
 
 int sys_init(void)
 {
-    //rcc_init();
+    rcc_init();
     gpio_init();
     
     lock_init();
@@ -103,8 +112,6 @@ int sys_init(void)
 
 #ifndef RTX
     sys_audio_init();
-#else
-    tim_init(TIMER4, 20, timer_cb);
 #endif
 
     return 0;
@@ -125,6 +132,8 @@ int sys_audio_init(void)
 
     sys_set_iodat(0);
     sys_set_input(gParams.dsp.Array_Input.input);
+
+    tmr_start();
     
     return 0;
 }

@@ -109,9 +109,11 @@ static void ir_proc(key_t *key)
 static void lcd_draw_digit(s16 v, u8 cmd, u8 index)
 {
     u8 tmp[20];
+    u8 font=FONT_48; //FONT_96
 
     sprintf((char*)tmp, "%d", v);
-    lcd_draw_string_align(0, 100, LCD_WIDTH, 60, tmp, FONT_96, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
+    //lcd_draw_string_align(0, 20, LCD_WIDTH, LCD_HEIGHT-20, tmp, font, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
+    lcd_draw_string_align(0, 100, LCD_WIDTH, 100, tmp, font, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
 }
 static void knob_proc(key_t *key)
 {

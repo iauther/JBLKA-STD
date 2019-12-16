@@ -10,7 +10,7 @@ msg_t *dev_msg=NULL;
 
 extern paras_data_t gParams;
 
-static void e2p_proc(void)
+static void e2p_check(void)
 {
     int r;
     node_t n;
@@ -20,6 +20,56 @@ static void e2p_proc(void)
         paras_write(n.ptr, n.len);
     }
 }
+static void pwr_check(void)
+{
+    u16 amp_pwr1,amp_pwr2;
+    
+    amp_pwr1 = adc_read(ADC_CH_AMP_PWR1)*3300/4096;     //20%
+    amp_pwr2 = adc_read(ADC_CH_AMP_PWR2)*3300/4096;     //<500mv
+
+    if(amp_pwr1<(1760-176*2) || amp_pwr1>(1760+176*2) || (amp_pwr2>500)) {
+        power_en(DEV_AMP, 0);
+    }
+    else {
+        power_en(DEV_AMP, 1);
+    }
+
+    
+
+}
+static void temp_check(void)
+{
+    u16 amp_temp, pwr_temp;
+    amp_temp = adc_read(ADC_CH_AMP_TEMP);
+    pwr_temp = adc_read(ADC_CH_PWR_TEMP);
+
+    //do something...
+    //topbar_set();
+}
+static void amp_check(void)
+{
+    static u8 low_cnt=0;
+        
+    if(amp_get_level()) {
+        low_cnt = 0;
+    }
+
+    low_cnt++;
+    if(low_cnt%2) {
+        amp_pwr(0);
+    }
+}
+static void dev_check(void)
+{
+    amp_check();
+    pwr_check();
+    temp_check();
+    e2p_check();
+}
+
+
+
+
 static void tmr1_fun (void *arg)
 {
     evt_dev_t e={0};
@@ -50,7 +100,7 @@ void dev_task(void *arg)
                 
                 case EVT_TIMER:
                 {
-                    e2p_proc();
+                    dev_check();
                 }
                 break;
                 

@@ -89,7 +89,7 @@ int queue_put(queue_t *q, node_t *n, qiterater iter)
 	}
     
     q->locked = 1;
-    if(iter) {
+    if(iter && q->size>0) {
         i = do_iterate(q, n->ptr, iter);
     }
 
@@ -100,7 +100,9 @@ int queue_put(queue_t *q, node_t *n, qiterater iter)
     }
     n2 = &q->nodes[i];
     n2->len = q->bsz;
-    memcpy(n2->ptr, n->ptr, n2->len);
+    if(n2->ptr) {
+        memcpy(n2->ptr, n->ptr, n2->len);
+    }
     q->locked = 0;
 	
 	return 0;
@@ -116,7 +118,7 @@ int queue_get(queue_t *q, node_t *n, qiterater iter)
 	}
     
     q->locked = 1;
-    if(iter) {
+    if(iter && q->size>0) {
         i = do_iterate(q, n->ptr, iter);
         if(i<0) {
             q->locked = 0;
@@ -129,7 +131,9 @@ int queue_get(queue_t *q, node_t *n, qiterater iter)
         q->head = (q->head + 1) % q->max;	// circular queue
     }
     
-    memcpy(n->ptr, q->nodes[i].ptr, q->nodes[i].len);
+    if(n->ptr) {
+        memcpy(n->ptr, q->nodes[i].ptr, q->nodes[i].len);
+    }
     n->len = q->nodes[i].len;
 	
 	q->size--;
