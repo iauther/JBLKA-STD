@@ -8,6 +8,9 @@
 #include "stm32f10x_gpio.h"
 #include "config.h"
 
+#define LCD_OPTION
+
+
 #define BACKLIGHT_USE_DAC
 
 #define LCD_PWR(n)  (n?GPIO_WriteBit(LCD_PWR_GRP, LCD_PWR_PIN, Bit_SET):GPIO_WriteBit(LCD_PWR_GRP, LCD_PWR_PIN, Bit_RESET))
@@ -16,7 +19,7 @@
 #define LCD_CS(n)   (n?GPIO_WriteBit(LCD_CS_GRP, LCD_CS_PIN, Bit_SET):GPIO_WriteBit(LCD_CS_GRP, LCD_CS_PIN, Bit_RESET))
 
 
-#define LCD_BUF_SIZE 2000
+#define LCD_BUF_SIZE 4000
 u8 lcd_buf[LCD_BUF_SIZE];
 
 static void gpio_output_set(GPIO_TypeDef  *grp, u32 pin)
@@ -351,54 +354,42 @@ void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
 	}  
 }
 
-u8 tmpBuf[600];
+
 static inline void set_point(u8 *ptr, u16 c)
 {
     ptr[0] = c>>8;
     ptr[1] = c;
 }
+
 void lcd_draw_char2(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor, u8 pure)
 {
-    u8 tmp,*pchr;
-    u16 offset;
-    u16 i,j=0,k,l;
+    u16 B,b,offset;
+    int i,j,k,l,bytes;
+    u8 tmp,*pchar,*prow;
     font_info_t inf=font_get(font);
-
-    pchr = font_get_char(font, c);
-    for(k=0; k<inf.size; k++) {
-        if(k && k%inf.width==0) {
-            j++;
-        }
     
-        tmp = pchr[k];
-        for(l=0; l<8; l++) {
-            offset = j*inf.width+i;
-            if(tmp & 0x80) {
-                set_point(tmpBuf+offset*2, color);
+    bytes = inf.height/8;
+    pchar = font_get_char(font, c);
+    for(i=0; i<inf.height; i++) {
+        B=i/8; b=(1<<(7-(i%8)));
+        for(j=0; j<inf.width; j++) {
+            
+            offset = (i*inf.width+j)*2;
+            tmp = pchar[j*bytes+B]&b;
+            if(tmp) {
+                set_point(lcd_buf+offset, color);
             }
             else {
                 if(!pure) {
-                    set_point(tmpBuf+offset*2, bgcolor);
+                    set_point(lcd_buf+offset, bgcolor);
                 }
             }
-            tmp <<= 1;
-            i++;
-
-            if(i+x>=LCD_WIDTH) {
-                continue;
-            }
-            else if(i>=inf.width){
-                i = 0;
-            }
-        }
-        if(j+y >= LCD_HEIGHT) {
-            continue;
         }
     }
 
     lcd_set_address(x, y, x+inf.width, y+inf.height);
     LCD_RS(1);
-    lcd_write(tmpBuf, inf.size);
+    lcd_write(lcd_buf, inf.size*16);
 }
 void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor, u8 pure)
 {                             
@@ -456,8 +447,11 @@ void lcd_draw_string(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u1
         if(y >= h) {   
             break;
         }
+#ifdef LCD_OPTION
+        lcd_draw_char2(x, y, *str, font, color, bgcolor, pure);
+#else
         lcd_draw_char(x, y, *str, font, color, bgcolor, pure);
-        //lcd_draw_char2(x, y, *str, font, color, bgcolor, pure);
+#endif
         x += inf.height/2;
         str++;
     }  

@@ -58,8 +58,8 @@ static void draw_unit(rect_t rect, key_info_t *info)
 static int draw_clear(void)
 {
     rect_t r=BODY_RECT;
-
     lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
+    return 0;
 }
 
 static int need_refresh_all(u8 key)

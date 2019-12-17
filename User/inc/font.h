@@ -11,14 +11,12 @@
 
 extern const u8 font_1608[95][16]; 
 extern const u8 font_2412[95][36];
-extern const u8 font_3216[95][64];
 extern const u8 font_4824[95][144];
 extern const u8 font_9648[11][576];
 
 enum {
     FONT_16=0,
     FONT_24,
-    FONT_32,
     FONT_48,
     FONT_96,
 
