@@ -470,7 +470,7 @@ int listitem_set_trigger(listitem_t *l, trigger_fn trigger)
 }
 
 
-listitem_t* listitem_create(cchr *title, item_info_t *info, void *data)
+listitem_t* listitem_create(cchr *title, item_info_t *info, void *data, trigger_fn trigger)
 {
     u8 i,n;
     listitem_t *l;
@@ -489,6 +489,7 @@ listitem_t* listitem_create(cchr *title, item_info_t *info, void *data)
     if(!l) {
         return NULL;
     }
+    listitem_set_trigger(l, trigger);
     
     l->data = data;
     for(i=0;;i++) {
@@ -527,7 +528,7 @@ static int list_handle(listitem_t **l, key_t *key)
             }
             else {
                 if(info->control==CONTROL_LIST) {
-                    child = listitem_create(info->txt, (item_info_t*)info->info, info->data);
+                    child = listitem_create(info->txt, (item_info_t*)info->info, info->data, (*l)->trigger);
                     if(child) {
                         listitem_set_child(*l, child);
                         *l = child;     //进到子列表

@@ -233,8 +233,7 @@ static void add_items(u8 menu)
     }
 
     info = (item_info_t*)gInfos[menu];
-    l = listitem_create(gTitles[menu], info, NULL);
-    listitem_set_trigger(l, gui_post_refresh);
+    l = listitem_create(gTitles[menu], info, NULL, gui_post_refresh);
     gLists[menu] = l;
 }
 

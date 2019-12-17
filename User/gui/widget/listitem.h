@@ -72,7 +72,7 @@ int listitem_size(listitem_t *l);
 
 int listitem_set_trigger(listitem_t *l, trigger_fn trigger);
 
-listitem_t* listitem_create(cchr *title, item_info_t *info, void *data);
+listitem_t* listitem_create(cchr *title, item_info_t *info, void *data, trigger_fn trigger);
 
 int listitem_handle(listitem_t **l, key_t *key);
 
