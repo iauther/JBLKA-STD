@@ -2,6 +2,11 @@
 
 
 #define MSG_MAX         8
+//static const osThreadAttr_t comAttr = {
+//  .stack_size = 400U
+//};
+
+
 u8 gAppRunning=0;
 
 #ifdef RTX
