@@ -30,9 +30,10 @@ typedef struct {
 }font_info_t;
 
 
-font_info_t font_get(u8 font);
+font_info_t font_info(u8 font);
 
-u8* font_get_char(u8 font, s8 c);
+u8* font_get_ptr(u8 font, u8 c);
+
 
 #endif
 

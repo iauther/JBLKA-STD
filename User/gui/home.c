@@ -9,7 +9,7 @@ static void draw_title(rect_t rect, key_info_t *info)
     rect_t r=rect;
 
     r.h = 32;
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)info->title, FONT_24, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)info->title, FONT_24, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
 
 
@@ -21,13 +21,13 @@ static void draw_name(rect_t rect, key_info_t *info)
     r.w = r.w*2/5;
     r.y = 100;
     r.h = 60;
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)info->name, font, LCD_FC, LCD_BC, ALIGN_RIGHT, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)info->name, font, LCD_FC, LCD_BC, ALIGN_RIGHT);
 }
 
 static void draw_value(rect_t rect, s16 v, key_info_t *info)
 {
     u8 tmp[20];
-    u8 font=FONT_48;
+    u8 font=FONT_48;//FONT_96;
     rect_t r=rect;
 
     r.x += r.w*2/5;
@@ -36,14 +36,12 @@ static void draw_value(rect_t rect, s16 v, key_info_t *info)
     r.h = 60;
     sprintf((char*)tmp, "%d", v);
     lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, font, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, font, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
 
 
 static void draw_unit(rect_t rect, key_info_t *info)
 {
-    int len;
-    u8 tmp[20];
     u8 font=FONT_16;
     rect_t r=rect;
     para_info_t *pinfo=(para_info_t*)&PARA_INFO[info->cmd].info[info->index];
@@ -52,7 +50,7 @@ static void draw_unit(rect_t rect, key_info_t *info)
     r.y = 100;
     r.w = r.w/5;
     r.h = 60;
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinfo->unit, font, LCD_FC, LCD_BC, ALIGN_LEFT, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinfo->unit, font, LCD_FC, LCD_BC, ALIGN_LEFT);
 }
 
 static int draw_clear(void)

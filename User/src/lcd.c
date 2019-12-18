@@ -8,8 +8,6 @@
 #include "stm32f10x_gpio.h"
 #include "config.h"
 
-#define LCD_OPTION
-
 
 #define BACKLIGHT_USE_DAC
 
@@ -101,6 +99,8 @@ static void lcd_spi_init(void)
     SPI_Cmd(SPI2, ENABLE);
 }
 
+#define SWAP16(a)   ((u16)((a<<8)|(a>>8)))
+
 static inline void spi_write(u8 *data, u16 len)
 {
     u16 i;
@@ -127,35 +127,52 @@ static inline void lcd_write(u8 *data, u16 len)
 }
 #endif
 
-static void lcd_write_cmd(u8 cmd)
+static inline void lcd_write_cmd(u8 cmd)
 {
     LCD_RS(0);
     lcd_write(&cmd, 1);
 }
 
-static void lcd_write_data(u8 data)
+static inline void lcd_write_data(u8 data)
 {
     LCD_RS(1);
     lcd_write(&data, 1);
 }
 
+static inline void lcd_write_datas(u8 *data, int len)
+{
+    LCD_RS(1);
+    lcd_write(data, len);
+}
 
-static void lcd_set_address(u16 x1, u16 y1, u16 x2, u16 y2)
+static void lcd_write_reg(u8 reg, u8 data)
+{
+    LCD_RS(0);
+    lcd_write(&reg, 1);
+
+    LCD_RS(1);
+    lcd_write(&data, 1);
+}
+
+
+
+static void lcd_set_rect(u16 x, u16 y, u16 w, u16 h)
 {
     lcd_write_cmd(0x2a);
-    lcd_write_data(x1 >> 8);
-    lcd_write_data(x1);
-    lcd_write_data(x2 >> 8);
-    lcd_write_data(x2);
+    lcd_write_data(x >> 8);
+    lcd_write_data(x);
+    lcd_write_data(x+w-1 >> 8);
+    lcd_write_data(x+w-1);
 
     lcd_write_cmd(0x2b);
-    lcd_write_data(y1 >> 8);
-    lcd_write_data(y1);
-    lcd_write_data(y2 >> 8);
-    lcd_write_data(y2);
+    lcd_write_data(y >> 8);
+    lcd_write_data(y);
+    lcd_write_data(y+h-1 >> 8);
+    lcd_write_data(y+h-1);
 
     lcd_write_cmd(0x2C);
 }
+
 
 
 static void lcd_display(int on)
@@ -190,7 +207,6 @@ void lcd_init(void)
     delay_ms(120);
 
     /* Memory Data Access Control */
-    lcd_write_cmd(0x36);
 /*
     D7  MY,  page addr order         0: top to bottom              1: bottom to top
     D6  MX,  colum addr order        0: left to right              1: right to left
@@ -199,12 +215,11 @@ void lcd_init(void)
     D3  RGB, RGB order:              0: RGB                        1: BGR
     D2  MH,  data latch data order   0: refresh left to right      1: refresh right to left
 */
-    lcd_write_data(0x60);
-    //lcd_write_data(0xA0);
+    lcd_write_reg(0x36, 0x60);
+    //lcd_write_reg(0x36, 0xA0);
 
     /* RGB 5-6-5-bit  */
-    lcd_write_cmd(0x3A);
-    lcd_write_data(0x55);
+    lcd_write_reg(0x3A, 0x55);
 
     /* Porch Setting 
     lcd_write_cmd(0xB2);
@@ -215,32 +230,25 @@ void lcd_init(void)
     lcd_write_data(0x33);*/
 
     /*  Gate Control */
-    lcd_write_cmd(0xB7);
-    lcd_write_data(0x72);
+    lcd_write_reg(0xB7, 0x72);
 
     /* VCOM Setting */
-    lcd_write_cmd(0xBB);
-    lcd_write_data(0x3D);   //Vcom=1.625V
+    lcd_write_reg(0xBB, 0x3D);  //Vcom=1.625V 
 
     /* LCM Control */
-    lcd_write_cmd(0xC0);
-    lcd_write_data(0x2C);
+    lcd_write_reg(0xC0, 0x2C);
 
     /* VDV and VRH Command Enable */
-    lcd_write_cmd(0xC2);
-    lcd_write_data(0x01);
+    lcd_write_reg(0xC2, 0x01);
 
     /* VRH Set */
-    lcd_write_cmd(0xC3);
-    lcd_write_data(0x19);
+    lcd_write_reg(0xC3, 0x19);
 
     /* VDV Set */
-    lcd_write_cmd(0xC4);
-    lcd_write_data(0x20);
+    lcd_write_reg(0xC4, 0x20);
 
     /* Frame Rate Control in Normal Mode */
-    lcd_write_cmd(0xC6);
-    lcd_write_data(0x0F);   //60MHZ
+    lcd_write_reg(0xC6, 0x0F);  //60MHZ 
 
     /* Power Control 1 */
     lcd_write_cmd(0xD0);
@@ -309,13 +317,11 @@ void lcd_set_bright(u8 percent)
 
 inline void lcd_draw_point(u16 x, u16 y, u16 color)
 {
-    u8 tmp[2];
-    lcd_set_address(x, y, x, y);
+    u16 tmp;
+    lcd_set_rect(x, y, 1, 1);
 
-    LCD_RS(1);
-    tmp[0] = color>>8;
-    tmp[1] = color;
-    lcd_write(tmp, 2);
+    tmp = SWAP16(color);
+    lcd_write_datas((u8*)&tmp, 2);
 }
 
 
@@ -355,86 +361,49 @@ void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
 }
 
 
-static inline void set_point(u8 *ptr, u16 c)
-{
-    ptr[0] = c>>8;
-    ptr[1] = c;
-}
 
-void lcd_draw_char2(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor, u8 pure)
+void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor)
 {
-    u16 B,b,offset;
-    int i,j,k,l,bytes;
-    u8 tmp,*pchar,*prow;
-    font_info_t inf=font_get(font);
-    
+    u8 *pchr;
+    int i,j,k,bytes;
+    font_info_t inf;
+    u16 lines,times,tlen,len;
+    u16 *plcd=(u16*)lcd_buf;
+    u16 B,b,index,offset,color2;
+
+    inf = font_info(font);
     bytes = inf.height/8;
-    pchar = font_get_char(font, c);
-    for(i=0; i<inf.height; i++) {
-        B=i/8; b=(1<<(7-(i%8)));
-        for(j=0; j<inf.width; j++) {
-            
-            offset = (i*inf.width+j)*2;
-            tmp = pchar[j*bytes+B]&b;
-            if(tmp) {
-                set_point(lcd_buf+offset, color);
-            }
-            else {
-                if(!pure) {
-                    set_point(lcd_buf+offset, bgcolor);
-                }
+    pchr  = font_get_ptr(font, c);
+
+    tlen = inf.width*inf.height*2;
+    times = tlen/LCD_BUF_SIZE;
+    lines = LCD_BUF_SIZE/(inf.width*2);
+    
+    //for(k=0; k<times; k++) {
+        for(i=0; i<inf.height; i++) {
+            B=i/8; b=1<<(7-(i%8));
+            for(j=0; j<inf.width; j++) {
+                
+                index  = j*bytes+B;
+                color2 = (pchr[index]&b)?SWAP16(color):SWAP16(bgcolor);
+
+                offset = i*inf.width+j;
+                plcd[offset] = color2;
             }
         }
-    }
+        
+    //}
+    
 
-    lcd_set_address(x, y, x+inf.width, y+inf.height);
-    LCD_RS(1);
-    lcd_write(lcd_buf, inf.size*16);
-}
-void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor, u8 pure)
-{                             
-    u16 temp, t1, t;
-    u16 y0 = y;
-    u8 *pchr;
-    font_info_t inf=font_get(font);
-
-    pchr = font_get_char(font, c);
-    for(t = 0; t < inf.size; t++) {
-        temp = pchr[t];
-        for(t1 = 0; t1 < 8; t1++) {
-                       
-            if(temp & 0x80) {
-                lcd_draw_point(x, y, color);
-            }
-            else {
-                if(!pure) {
-                    lcd_draw_point(x, y, bgcolor);
-                }
-            }
-
-            temp <<= 1;
-            y++;
-            
-            if(y >= LCD_HEIGHT) {
-                return;
-            }
-            if((y - y0) == inf.height) {
-                y = y0;
-                x++;
-                if(x >= LCD_WIDTH) {
-                    return;
-                }
-                break;
-            }
-        }    
-    }                     
+    lcd_set_rect(x, y, inf.width, inf.height);
+    lcd_write_datas(lcd_buf, tlen); 
 }
 
 
-void lcd_draw_string(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u16 bgcolor, u8 pure)
+void lcd_draw_string(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u16 bgcolor)
 {
     u16 x0 = x;
-    font_info_t inf = font_get(font);
+    font_info_t inf = font_info(font);
     
     w += x;
     h += y;
@@ -447,11 +416,8 @@ void lcd_draw_string(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u1
         if(y >= h) {   
             break;
         }
-#ifdef LCD_OPTION
-        lcd_draw_char2(x, y, *str, font, color, bgcolor, pure);
-#else
-        lcd_draw_char(x, y, *str, font, color, bgcolor, pure);
-#endif
+
+        lcd_draw_char(x, y, *str, font, color, bgcolor);
         x += inf.height/2;
         str++;
     }  
@@ -527,29 +493,23 @@ void lcd_draw_round_rect(u16 x, u16 y, u16 w, u16 h, u16 r, u16 color)
 void lcd_fill_rect(u16 x, u16 y, u16 w, u16 h, u16 color)
 {
     u16 i = 0;
-    u16 x2,y2;
     u8 *p8=lcd_buf;
     u32 size = 0, size_remain = 0;
     
-    x2 = x + w;
-    y2 = y + h;
-    size = (x2 - x + 1) * (y2 - y + 1)*2;
-
+    size = w*h*2;
     if(size > LCD_BUF_SIZE) {
         size_remain = size - LCD_BUF_SIZE;
         size = LCD_BUF_SIZE;
     }
 
-    lcd_set_address(x, y, x2, y2);
+    lcd_set_rect(x, y, w, h);
     while(1) {
         for(i=0; i<size/2; i++) {
             p8[i*2]   = color>>8;
             p8[i*2+1] = color;
         }
 
-        LCD_RS(1);
-        lcd_write(p8, size);
-
+        lcd_write_datas(p8, size);
         if(size_remain == 0)
             break;
 
@@ -612,12 +572,12 @@ void lcd_fill_round_rect(u16 x, u16 y, u16 w, u16 h, u16 r, u16 color)
 }
 
 
-void lcd_draw_string_align(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u16 bgcolor, u8 align, u8 pure)
+void lcd_draw_string_align(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u16 bgcolor, u8 align)
 {
     font_info_t info;
     u16 x2,y2,w2,h2;
     
-    info = font_get(font);
+    info = font_info(font);
     w2 = strlen((char*)str)*info.width;
     y2 = y+(h-info.height)/2;
     h2 = info.height;
@@ -647,7 +607,7 @@ void lcd_draw_string_align(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 col
     lcd_fill_rect(x2, y2+h2, w2, h-h2-(y2-y), bgcolor);
 #endif
 
-    lcd_draw_string(x2, y2, w2, h2, str, font, color, bgcolor, pure);
+    lcd_draw_string(x2, y2, w2, h2, str, font, color, bgcolor);
 }
 
 

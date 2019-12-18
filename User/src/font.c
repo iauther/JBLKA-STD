@@ -1577,7 +1577,7 @@ const u8 font_9648[11][576]={
     },
 };
 
-font_info_t font_get(u8 font)
+font_info_t font_info(u8 font)
 {
     font_info_t fi;
 
@@ -1612,9 +1612,10 @@ font_info_t font_get(u8 font)
 }
 
 
-static s8 get_index(u8 font, s8 c)
+
+int get_index(u8 font, u8 c)
 {
-    s8 idx;
+    int idx;
 
     if(font==FONT_96) {
         if(c=='.') {
@@ -1635,25 +1636,24 @@ static s8 get_index(u8 font, s8 c)
 }
 
 
-u8* font_get_char(u8 font, s8 c)
+u8* font_get_ptr(u8 font, u8 c)
 {
-    u8 *pchr,idx=get_index(font, c);
+    int index=get_index(font, c);
 
     if(FONT_16 == font) {
-        pchr = (u8*)font_1608[idx];
+        return (u8*)font_1608[index];
     }
     else if(FONT_24 == font) {
-        pchr = (u8*)font_2412[idx];
+        return (u8*)font_2412[index];
     }
     else if(FONT_48 == font){
-        pchr = (u8*)font_4824[idx];
+        return (u8*)font_4824[index];
     }
     else if(FONT_96 == font){
-        pchr = (u8*)font_9648[idx];
+        return (u8*)font_9648[index];
     }
     else {   
         return 0;
     }
-
-    return pchr;
 }
+

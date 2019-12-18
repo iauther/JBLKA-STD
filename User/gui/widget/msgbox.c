@@ -107,7 +107,7 @@ static void draw_title(rect_t rect, char *title, u16 color, u16 bgcolor)
 
     r.h = 32;
     lcd_fill_rect(r.x+1, r.y+1, r.w-2, r.h-2, bgcolor);
-    lcd_draw_string_align(r.x+4, r.y, r.w, r.h, (u8*)title, FONT_16, color, bgcolor, ALIGN_LEFT, 0);
+    lcd_draw_string_align(r.x+4, r.y, r.w, r.h, (u8*)title, FONT_16, color, bgcolor, ALIGN_LEFT);
 
 }
 static void draw_message(rect_t rect, char *message, u16 color, u16 bgcolor)
@@ -117,7 +117,7 @@ static void draw_message(rect_t rect, char *message, u16 color, u16 bgcolor)
     r.x += 4;
     r.y += 40;
     r.h = 32;
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)message, FONT_16, color, bgcolor, ALIGN_LEFT, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)message, FONT_16, color, bgcolor, ALIGN_LEFT);
 }
 static void draw_button(rect_t rect, u16 color, u16 bgcolor)
 {
@@ -135,7 +135,7 @@ static void draw_button(rect_t rect, u16 color, u16 bgcolor)
         
         lcd_fill_rect(r.x, r.y, r.w, r.h, (i==mbox.focusId)?BTN_FOCUS_BGCOLOR:bgcolor);
         lcd_draw_rect(r.x, r.y, r.w, r.h, color);
-        lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)btnTxt[i], FONT_16, color, bgcolor, ALIGN_MIDDLE, 0);
+        lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)btnTxt[i], FONT_16, color, bgcolor, ALIGN_MIDDLE);
     }
 }
 

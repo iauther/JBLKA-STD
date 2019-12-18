@@ -314,7 +314,7 @@ static void draw_tune(void)
     char *txt="PC IS TUNNING!";
 
     lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)txt, FONT_24, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)txt, FONT_24, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
 
 void gui_task(void *arg)

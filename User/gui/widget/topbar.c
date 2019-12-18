@@ -31,7 +31,7 @@ static void show_temp(void)
     r.w = mTopbar.rect.w/4;
     sprintf((char*)tmp, "%02d", mTopbar.stat->pwr_temp);
     
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
 
 static void show_bt(void)
@@ -43,7 +43,7 @@ static void show_bt(void)
     r.w = mTopbar.rect.w/4;
     sprintf((char*)tmp, "BT/USB");
     
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
 
 static void show_input(void)
@@ -57,7 +57,7 @@ static void show_input(void)
     r.w = mTopbar.rect.w/4;
     sprintf((char*)tmp, "%s", str[input]);
     
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
 
 static void show_preset(void)
@@ -69,7 +69,7 @@ static void show_preset(void)
     r.w = mTopbar.rect.w/4;
     sprintf((char*)tmp, "%d", gParams.pre);
     
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
 
 

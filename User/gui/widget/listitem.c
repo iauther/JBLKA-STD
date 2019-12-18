@@ -143,7 +143,7 @@ static void draw_paras_label(listitem_t *l, u8 index, item_info_t *info, para_in
     rect_t r=*rect;
 
     r.w = rect->w/3;
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinfo->name, FONT_16, color, bgcolor, ALIGN_RIGHT, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinfo->name, FONT_16, color, bgcolor, ALIGN_RIGHT);
 }
 static void draw_paras_value(listitem_t *l, u8 index, item_info_t *info, para_info_t *pinfo, rect_t *rect, u16 color, u16 bgcolor, u8 drawbox)
 {
@@ -178,7 +178,7 @@ static void draw_paras_value(listitem_t *l, u8 index, item_info_t *info, para_in
         lcd_draw_rect(r.x, r.y, r.w, r.h, color);
     }
     lcd_fill_rect(r.x+1, r.y+1, r.w-2, r.h-2, bgcolor);
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)ptxt, FONT_16, color, bgcolor, ALIGN_MIDDLE, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)ptxt, FONT_16, color, bgcolor, ALIGN_MIDDLE);
 }
 static void draw_paras_unit(listitem_t *l, u8 index, item_info_t *info, para_info_t *pinfo, rect_t *rect, u16 color, u16 bgcolor)
 {
@@ -186,7 +186,7 @@ static void draw_paras_unit(listitem_t *l, u8 index, item_info_t *info, para_inf
 
     r.x = rect->w*2/3+6;
     r.w = rect->w/3-4;
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinfo->unit, FONT_16, color, bgcolor, ALIGN_LEFT, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinfo->unit, FONT_16, color, bgcolor, ALIGN_LEFT);
 }
 
 static void draw_value(listitem_t *l, int id, u16 color, u16 bgcolor)
@@ -223,7 +223,7 @@ static void draw_item(listitem_t *l, int id, u16 color, u16 bgcolor, u8 clear)
             lcd_fill_round_rect(l->rect.x+1, l->rect.y+index*ITEM_HEIGHT+1, l->rect.w-2, ITEM_HEIGHT-2, r, bgcolor);
         }
         lcd_draw_round_rect(l->rect.x, l->rect.y+index*ITEM_HEIGHT, l->rect.w, ITEM_HEIGHT, r, color);
-        lcd_draw_string_align(l->rect.x, l->rect.y+index*ITEM_HEIGHT, l->rect.w, ITEM_HEIGHT, (u8*)inf->txt, FONT_24, color, bgcolor, ALIGN_MIDDLE, 0);
+        lcd_draw_string_align(l->rect.x, l->rect.y+index*ITEM_HEIGHT, l->rect.w, ITEM_HEIGHT, (u8*)inf->txt, FONT_24, color, bgcolor, ALIGN_MIDDLE);
     }
     else if(inf->control==CONTROL_INPUTBOX){
         draw_paras(l, index, id, inf, color, bgcolor);
@@ -233,7 +233,7 @@ static void draw_title(listitem_t *l, u16 font_color, u16 bgcolor)
 {
     rect_t r=TITLE_RECT;
     lcd_fill_rect(r.x, r.h, r.w, r.h, bgcolor);
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)l->title, FONT_24, font_color, bgcolor, ALIGN_MIDDLE, 0);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)l->title, FONT_24, font_color, bgcolor, ALIGN_MIDDLE);
     //lcd_draw_line(r.x, r.y+r.h+4, r.w, r.h, font_color);
 }
 
