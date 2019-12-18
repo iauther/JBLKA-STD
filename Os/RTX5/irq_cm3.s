@@ -24,6 +24,7 @@
 ; */
                 IF :DEF:RTX
 
+
 I_T_RUN_OFS     EQU      20                     ; osRtxInfo.thread.run offset
 TCB_SP_OFS      EQU      56                     ; TCB.SP offset
 
