@@ -14,7 +14,13 @@ static int msg_put(msg_t *m, void *ptr, int len)
         return -1;
     }
 
-    st = osMessageQueuePut(m->mq, ptr, 0, 0);
+    p = osMemoryPoolAlloc(m->mp, 0);
+    if(!p) {
+        return -1;
+    }
+    
+    memcpy(p, ptr, len);
+    st = osMessageQueuePut(m->mq, &p, 0, 0);
     if(st!=osOK) {
         return -1;
     }
@@ -33,7 +39,8 @@ msg_t* msg_init(int max, int msg_size)
     }
 
 #ifdef RTX
-    m->mq = osMessageQueueNew(max, msg_size, NULL);
+    m->mq = osMessageQueueNew(max, sizeof(void*), NULL);
+    m->mp = osMemoryPoolNew(max, msg_size, NULL);
     m->ef = osEventFlagsNew(NULL);
     m->ack = 0;
 #endif
@@ -89,10 +96,13 @@ int msg_recv(msg_t *m, void *ptr, int len)
 
 #ifdef RTX
     osStatus_t st;
-    st = osMessageQueueGet(m->mq, ptr, NULL, osWaitForever);
+    st = osMessageQueueGet(m->mq, &p, NULL, osWaitForever);
     if(st!=osOK) {
         return -1;
     }
+    
+    memcpy(ptr, p, len);
+    osMemoryPoolFree(m->mp, p);
 #endif
 
     return r;
@@ -148,6 +158,7 @@ int msg_free(msg_t **m)
 #ifdef RTX
     osStatus_t st;
     osMessageQueueDelete((*m)->mq);
+    osMemoryPoolDelete((*m)->mp);
     osEventFlagsDelete((*m)->ef);
     free(*m);
 #endif
