@@ -13,10 +13,10 @@ int main(void)
 #ifdef RTX
     //SystemCoreClockUpdate();
     osKernelInitialize();
-    
     osThreadNew(com_task, NULL, NULL);
     osThreadNew(dev_task, NULL, NULL);
     osThreadNew(gui_task, NULL, NULL);
+    osThreadNew(eep_task, NULL, NULL);
     osKernelStart();
 #endif
 

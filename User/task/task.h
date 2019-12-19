@@ -17,4 +17,7 @@ void dev_post_evt(evt_dev_t *e);
 void com_task(void *arg);
 void com_post_evt(evt_com_t *e);
 
+void eep_task(void *arg);
+void eep_post_evt(evt_eep_t *e);
+
 #endif

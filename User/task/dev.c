@@ -10,16 +10,6 @@ msg_t *dev_msg=NULL;
 
 extern paras_data_t gParams;
 
-static void e2p_check(void)
-{
-    int r;
-    node_t n;
-
-    r = e2p_get(&n);
-    if(r==0) {
-        paras_write(n.ptr, n.len);
-    }
-}
 static void pwr_check(void)
 {
     u16 amp_pwr1,amp_pwr2;
@@ -64,9 +54,12 @@ static void dev_check(void)
     amp_check();
     pwr_check();
     temp_check();
-    e2p_check();
 }
-
+static void eep_trigger(void)
+{
+    evt_eep_t e={EVT_E2P};
+    eep_post_evt(&e);
+}
 
 
 
@@ -100,6 +93,7 @@ void dev_task(void *arg)
                 
                 case EVT_TIMER:
                 {
+                    eep_trigger();
                     dev_check();
                 }
                 break;

@@ -9,6 +9,7 @@ enum {
     EVT_DSP,
 
     EVT_HID,
+    EVT_E2P,
     EVT_RS485,
     EVT_TUNE,
 
@@ -33,6 +34,8 @@ typedef struct {
     }param;
 }evt_com_t;
 
-
+typedef struct {
+    u8              evt;
+}evt_eep_t;
 
 #endif
