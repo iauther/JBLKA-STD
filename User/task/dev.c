@@ -2,6 +2,11 @@
 
 
 #define MSG_MAX         6
+//static const osThreadAttr_t devAttr = {
+//  .stack_size = 400U
+//};
+
+
 
 status_data_t gStatus;
 #ifdef RTX

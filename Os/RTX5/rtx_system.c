@@ -123,9 +123,6 @@ void osRtxTick_Handler (void) {
   OS_Tick_AcknowledgeIRQ();
   osRtxInfo.kernel.tick++;
 
-  //extern void HAL_IncTick(void);
-  //HAL_IncTick();
-
   // Process Timers
   if (osRtxInfo.timer.tick != NULL) {
     osRtxInfo.timer.tick();
