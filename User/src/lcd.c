@@ -17,7 +17,7 @@
 #define LCD_CS(n)   (n?GPIO_WriteBit(LCD_CS_GRP, LCD_CS_PIN, Bit_SET):GPIO_WriteBit(LCD_CS_GRP, LCD_CS_PIN, Bit_RESET))
 
 
-#define LCD_BUF_SIZE 4000
+#define LCD_BUF_SIZE 2000
 u8 lcd_buf[LCD_BUF_SIZE];
 
 static void gpio_output_set(GPIO_TypeDef  *grp, u32 pin)
@@ -361,42 +361,52 @@ void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
 }
 
 
+static void draw_char_rows(u16 x, u16 y, u16 offset_x, u16 offset_y, u16 w, u16 h, u8 *pchr, u16 hbytes, u16 color, u16 bgcolor)
+{
+    u16 len;
+    int i,j;
+    u16 *plcd=(u16*)lcd_buf;
+    u16 B,b,index,offset,color2;
+    
+    len = w*h*2;
+    for(i=0; i<h; i++) {
+        B=(i+offset_y)/8; b=1<<(7-((i+offset_y)%8));
+        for(j=0; j<w; j++) {
+            
+            index  = (j+offset_x)*hbytes+B;
+            color2 = (pchr[index]&b)?SWAP16(color):SWAP16(bgcolor);
 
+            offset = i*w+j;
+            plcd[offset] = color2;
+        }
+    }
+    lcd_set_rect(x+offset_x, y+offset_y, w, h);
+    lcd_write_datas((u8*)plcd, len);
+}
 void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor)
 {
     u8 *pchr;
-    int i,j,k,bytes;
+    int k,bytes;
     font_info_t inf;
-    u16 lines,times,tlen,len;
-    u16 *plcd=(u16*)lcd_buf;
-    u16 B,b,index,offset,color2;
+    u16 rows,times,remain,tlen;
 
     inf = font_info(font);
     bytes = inf.height/8;
     pchr  = font_get_ptr(font, c);
+    if(!pchr) {
+        return;
+    }
 
     tlen = inf.width*inf.height*2;
     times = tlen/LCD_BUF_SIZE;
-    lines = LCD_BUF_SIZE/(inf.width*2);
+    rows = LCD_BUF_SIZE/(inf.width*2);
+    remain = inf.height-rows*times;
     
-    //for(k=0; k<times; k++) {
-        for(i=0; i<inf.height; i++) {
-            B=i/8; b=1<<(7-(i%8));
-            for(j=0; j<inf.width; j++) {
-                
-                index  = j*bytes+B;
-                color2 = (pchr[index]&b)?SWAP16(color):SWAP16(bgcolor);
-
-                offset = i*inf.width+j;
-                plcd[offset] = color2;
-            }
-        }
-        
-    //}
+    for(k=0; k<times; k++) {
+        draw_char_rows(x, y, 0, k*rows, inf.width, rows, pchr, bytes, color, bgcolor);
+    }
     
-
-    lcd_set_rect(x, y, inf.width, inf.height);
-    lcd_write_datas(lcd_buf, tlen); 
+    draw_char_rows(x, y, 0, k*rows, inf.width, remain, pchr, bytes, color, bgcolor);  
 }
 
 
@@ -493,7 +503,7 @@ void lcd_draw_round_rect(u16 x, u16 y, u16 w, u16 h, u16 r, u16 color)
 void lcd_fill_rect(u16 x, u16 y, u16 w, u16 h, u16 color)
 {
     u16 i = 0;
-    u8 *p8=lcd_buf;
+    u16 *plcd=(u16*)lcd_buf;
     u32 size = 0, size_remain = 0;
     
     size = w*h*2;
@@ -505,11 +515,10 @@ void lcd_fill_rect(u16 x, u16 y, u16 w, u16 h, u16 color)
     lcd_set_rect(x, y, w, h);
     while(1) {
         for(i=0; i<size/2; i++) {
-            p8[i*2]   = color>>8;
-            p8[i*2+1] = color;
+            plcd[i] = SWAP16(color);
         }
 
-        lcd_write_datas(p8, size);
+        lcd_write_datas((u8*)plcd, size);
         if(size_remain == 0)
             break;
 

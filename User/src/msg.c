@@ -43,6 +43,7 @@ msg_t* msg_init(int max, int msg_size)
     m->mp = osMemoryPoolNew(max, msg_size, NULL);
     m->ef = osEventFlagsNew(NULL);
     m->ack = 0;
+    m->msg_size = msg_size;
 #endif
 
     return m;
@@ -53,7 +54,7 @@ int msg_send(msg_t *m, void *ptr, int len)
 {
     int r;
     
-    if(!m || !ptr || !len) {
+    if(!m || !ptr || !len || len>m->msg_size) {
         return -1;
     }
 
@@ -73,7 +74,7 @@ int msg_post(msg_t *m, void *ptr, int len)
 {
     int r=0;
 
-    if(!m || !ptr || !len) {
+    if(!m || !ptr || !len || len>m->msg_size) {
         return -1;
     }
 
@@ -90,7 +91,7 @@ int msg_recv(msg_t *m, void *ptr, int len)
     int r=0;
     void *p=NULL;
 
-    if(!m || !ptr || !len) {
+    if(!m || !ptr || !len || len<m->msg_size) {
         return -1;
     }
 

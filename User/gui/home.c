@@ -1,61 +1,63 @@
 #include "menu.h"
 #include "default.h"
 
+static u16 prevLength=0;
 static s16 prevValue=0;
 static u8 prevKey=KEY_NONE;
 static key_info_t *prevInfo=NULL;
 static void draw_title(rect_t rect, key_info_t *info)
 {
+    int len;
+    u8 tmp[50];
     rect_t r=rect;
 
-    r.h = 32;
+    r.y +=30;
+    r.h = 40;
     lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)info->title, FONT_24, LCD_FC, LCD_BC, ALIGN_MIDDLE);
+    
+    r.y = 190;
+    r.h = 20;
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)info->name, FONT_24, YELLOW, LCD_BC, ALIGN_MIDDLE);
 }
 
-
-static void draw_name(rect_t rect, key_info_t *info)
-{
-    u8 font=FONT_24;
-    rect_t r=rect;
-
-    r.w = r.w*2/5;
-    r.y = 100;
-    r.h = 60;
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)info->name, font, LCD_FC, LCD_BC, ALIGN_RIGHT);
-}
 
 static void draw_value(rect_t rect, s16 v, key_info_t *info)
 {
+    int len;
     u8 tmp[20];
-    u8 font=FONT_48;//FONT_96;
+    u8 font;
     rect_t r=rect;
-
-    r.x += r.w*2/5;
-    r.y = 100;
-    r.w = r.w*2/5;
-    r.h = 60;
-    sprintf((char*)tmp, "%d", v);
-    lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, font, LCD_FC, LCD_BC, ALIGN_MIDDLE);
-}
-
-
-static void draw_unit(rect_t rect, key_info_t *info)
-{
-    u8 font=FONT_16;
-    rect_t r=rect;
+    font_info_t inf1,inf2;
     para_info_t *pinfo=(para_info_t*)&PARA_INFO[info->cmd].info[info->index];
 
-    r.x += r.w*4/5;
-    r.y = 100;
-    r.w = r.w/5;
-    r.h = 60;
+    r.y = 80;
+    r.h = 100;
+    
+    font = FONT_96;
+    inf1 = font_info(font);
+    sprintf((char*)tmp, "%d", v);
+    len = inf1.width*strlen((char*)tmp);
+    if(len<prevLength) {
+        lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
+    }
+    prevLength = len;
+
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, font, LCD_FC, LCD_BC, ALIGN_MIDDLE);
+
+    font = FONT_24;
+    inf2 = font_info(font);
+    r.x = r.x+r.w/2+len/2+10;
+    r.y = r.y+r.h/2+inf1.height/2-40;
+    r.h = inf2.height;
     lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinfo->unit, font, LCD_FC, LCD_BC, ALIGN_LEFT);
 }
+
 
 static int draw_clear(void)
 {
     rect_t r=BODY_RECT;
+
+    prevLength = 0;
     lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
     return 0;
 }
@@ -179,16 +181,14 @@ int home_refresh(void)
 
 int home_refresh2(u8 key, s16 v, key_info_t *info)
 {
-    rect_t r=INPUTBOX_RECT;
-
+    rect_t r=BODY_RECT;
+    
     prevValue = v;
     prevInfo = info;
     if(need_refresh_all(key)) {
         draw_clear();
         draw_title(r, info);
-        draw_name(r, info);
         draw_value(r, v, info);
-        draw_unit(r, info);
     }
     else {
         draw_value(r, v, info);

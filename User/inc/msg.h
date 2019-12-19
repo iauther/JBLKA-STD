@@ -11,6 +11,7 @@ typedef struct {
     osEventFlagsId_t    ef;
     osMutexId_t         mtx;
     u8                  ack;
+    int                 msg_size;
 }msg_t;
 
 

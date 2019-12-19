@@ -2,6 +2,10 @@
 
 
 #define MSG_MAX         6
+//static const osThreadAttr_t eepAttr = {
+//  .stack_size = 400U
+//};
+
 
 #ifdef RTX
 msg_t *e2p_msg=NULL;
