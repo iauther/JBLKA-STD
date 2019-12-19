@@ -7,7 +7,7 @@ osTimerId_t  s_tmr=0;
 u32 tmr_cnt=0;
 static void timer_cb(void *p)
 {
-    if(tmr_cnt%2==0) {
+    if(tmr_cnt%4==0) {
         adc_tmr_cb();
     }
     knob_tmr_cb();

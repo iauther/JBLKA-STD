@@ -76,4 +76,6 @@ listitem_t* listitem_create(cchr *title, item_info_t *info, void *data, trigger_
 
 int listitem_handle(listitem_t **l, key_t *key);
 
+int listitem_quit(listitem_t *l);
+
 #endif

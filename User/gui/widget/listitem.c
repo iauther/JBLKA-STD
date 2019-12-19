@@ -16,7 +16,6 @@ static void li_reset(listitem_t *l)
     l->prev_firstId = 0;
     l->prev_focusId = 0;
     l->refreshFlag  = 0;//REFRESH_ALL;
-    l->trigger = NULL;
     l->parent = NULL;
     l->child  = NULL;
 
@@ -220,7 +219,7 @@ static void draw_item(listitem_t *l, int id, u16 color, u16 bgcolor, u8 clear)
 
     if(inf->control==CONTROL_LIST) {
         if(clear) {
-            lcd_fill_round_rect(l->rect.x+1, l->rect.y+index*ITEM_HEIGHT+1, l->rect.w-2, ITEM_HEIGHT-2, r, bgcolor);
+            lcd_fill_round_rect(l->rect.x+1, l->rect.y+index*ITEM_HEIGHT+1, l->rect.w-2, ITEM_HEIGHT-1, r, bgcolor);
         }
         lcd_draw_round_rect(l->rect.x, l->rect.y+index*ITEM_HEIGHT, l->rect.w, ITEM_HEIGHT, r, color);
         lcd_draw_string_align(l->rect.x, l->rect.y+index*ITEM_HEIGHT, l->rect.w, ITEM_HEIGHT, (u8*)inf->txt, FONT_24, color, bgcolor, ALIGN_MIDDLE);
@@ -239,7 +238,7 @@ static void draw_title(listitem_t *l, u16 font_color, u16 bgcolor)
 
 static void draw_arraw(listitem_t *l, u8 dir, u16 color)
 {
-    u8 wh=6,offset=2;
+    u8 wh=6,offset=4;
     u16 x,y,x1,y1,x2,y2;
     rect_t r=l->rect;
     
@@ -425,7 +424,9 @@ int listitem_move(listitem_t *l, u8 dir, u8 size)
             if(l->firstId>0) {
                 if(l->focusId<slist_size(l->list)-1) {
                     l->focusId++;
-                    l->firstId++;
+                    if(l->focusId-l->firstId>=l->dispItems) {
+                        l->firstId++;
+                    }
                 }
             }
             else {
@@ -617,6 +618,25 @@ int listitem_handle(listitem_t **l, key_t *key)
     return r;
 }
 
+
+int listitem_quit(listitem_t *l)
+{
+    if(!l) {
+        return -1;
+    }
+
+    if(l->child) {
+        listitem_quit(l->child);
+        listitem_free(&l->child);
+        l->child = NULL;
+    }
+
+    if(!l->parent) {
+        listitem_reset(l);
+    }
+
+    return 0;
+}
 
 
 

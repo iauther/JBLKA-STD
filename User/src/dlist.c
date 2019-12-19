@@ -23,11 +23,11 @@ dlist_t* dlist_init(int max, int node_size)
     l->max  = max;
     l->size = 0;
 
-    pd = l->pool+sizeof(lnode_t)*l->max;
+    pd = (u8*)l->pool+sizeof(lnode_t)*l->max;
     lf = ll = (lnode_t*)l->pool;
     l->head = l->tail = NULL;
     for(i=0; i<l->max; i++) {
-        lf->data.ptr = pd+node_size*i;
+        lf->data.ptr = (u8*)pd+node_size*i;
         lf->data.len = node_size;
         lf->prev = (i==0)?NULL:(ll+i-1);
         lf->next = (i==l->max-1)?NULL:(ll+i+1);

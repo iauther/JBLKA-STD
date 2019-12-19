@@ -264,16 +264,6 @@ int menu_switch(u8 menu)
         gM = menu;
         listitem_set_refresh(gLists[gM], REFRESH_ALL);
     }
-    else {
-        #if 0
-        if(gM!=MENU_HOME) {
-            listitem_reset(gLists[gM]);
-            listitem_clear();
-            gM = MENU_HOME;
-        }
-        #endif
-    }
-    
 
     return 0;
 }
@@ -287,6 +277,16 @@ int menu_refresh(void)
         listitem_refresh(gLists[gM]);
     }
 
+    
+    return 0;
+}
+
+int menu_quit(void)
+{
+    if(gM!=MENU_HOME) {
+        listitem_quit(gLists[gM]);
+        gM = MENU_HOME;
+    }
     
     return 0;
 }

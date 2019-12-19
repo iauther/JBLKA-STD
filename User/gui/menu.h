@@ -55,6 +55,8 @@ int menu_free(void);
 
 int menu_clear(void);
 
+int menu_quit(void);
+
 int menu_switch(u8 menu);
 
 int menu_refresh(void);

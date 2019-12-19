@@ -302,11 +302,7 @@ static void knob_proc(key_t *key, key_info_t *info)
         return;
     }
 
-    if(gM!=MENU_HOME) {
-        gM = MENU_HOME;
-        menu_refresh();
-    }
-    
+    menu_quit();
     home_refresh2(key->value, g, info);
     e2p_put(&n);
 }
