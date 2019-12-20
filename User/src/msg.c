@@ -10,10 +10,6 @@ static int msg_put(msg_t *m, void *ptr, int len)
 
 #ifdef RTX
     osStatus_t st;
-    if(!m || !ptr || !len) {
-        return -1;
-    }
-
     p = osMemoryPoolAlloc(m->mp, 0);
     if(!p) {
         return -1;
@@ -98,7 +94,7 @@ int msg_recv(msg_t *m, void *ptr, int len)
 #ifdef RTX
     osStatus_t st;
     st = osMessageQueueGet(m->mq, &p, NULL, osWaitForever);
-    if(st!=osOK) {
+    if(st!=osOK || !p) {
         return -1;
     }
     
@@ -144,14 +140,12 @@ int msg_reset(msg_t *m)
     r = (st==osOK)?0:-1;
 #endif
 
-    return 0;
+    return r;
 }
 
 
 int msg_free(msg_t **m)
 {
-    int r=0;
-
     if(!m) {
         return -1;
     }

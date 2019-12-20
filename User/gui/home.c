@@ -7,8 +7,6 @@ static u8 prevKey=KEY_NONE;
 static key_info_t *prevInfo=NULL;
 static void draw_title(rect_t rect, key_info_t *info)
 {
-    int len;
-    u8 tmp[50];
     rect_t r=rect;
 
     r.y +=30;
@@ -40,7 +38,7 @@ static void draw_value(rect_t rect, s16 v, key_info_t *info)
     if(len<prevLength) {
         lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
     }
-    prevLength = len;
+    
 
     lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, font, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 
@@ -49,7 +47,12 @@ static void draw_value(rect_t rect, s16 v, key_info_t *info)
     r.x = r.x+r.w/2+len/2+10;
     r.y = r.y+r.h/2+inf1.height/2-40;
     r.h = inf2.height;
+
+    if(prevLength!=len) {
+        lcd_fill_rect(r.x-10, r.y, 10, r.h, LCD_BC);
+    }
     lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinfo->unit, font, LCD_FC, LCD_BC, ALIGN_LEFT);
+    prevLength = len;
 }
 
 

@@ -94,14 +94,14 @@ static int kfind(queue_t *q, int index, void *p1, void *p2)
     return -1;
 }
 
-int knob_cntttt=0;
 static void knob_rx_cb(u8 *data, u16 data_len)
 {
     u8 value;
     keyTimes[knobValue]++;
-knob_cntttt++;
+
 #ifdef RTX
     {
+        int r;
         key_t k;
         node_t n;
 
@@ -114,8 +114,10 @@ knob_cntttt++;
 
         n.ptr = &k;
         n.len = sizeof(k);
-        queue_put(kq, &n, kfind);
-        keyTimes[knobValue] = 0;
+        r = queue_put(kq, &n, kfind);
+        if(r==0) {
+            keyTimes[knobValue] = 0;
+        }
     }
 #endif
 }

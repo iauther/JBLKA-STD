@@ -10,12 +10,12 @@
 #include "tmr.h"
 #include "usb_desc.h"
 
-uart_paras_t uartParas[UART_MAX]={0};
-DMA_Channel_TypeDef      *dmaChannel[UART_MAX]={DMA1_Channel5, DMA1_Channel6, DMA1_Channel3, DMA2_Channel3, NULL};
-USART_TypeDef      *uartDef[UART_MAX]={USART1, USART2, USART3, UART4, UART5};
-IRQn_Type          uartIRQn[UART_MAX]={USART1_IRQn, USART2_IRQn, USART3_IRQn, UART4_IRQn, UART5_IRQn};
-IRQn_Type          dmaIRQn[UART_MAX]={DMA1_Channel5_IRQn, DMA1_Channel6_IRQn, DMA1_Channel3_IRQn, DMA2_Channel3_IRQn, NonMaskableInt_IRQn};
-u32                rccUartPeriph[UART_MAX]={RCC_APB2Periph_USART1, RCC_APB1Periph_USART2, RCC_APB1Periph_USART3, RCC_APB1Periph_UART4, RCC_APB1Periph_UART5};
+uart_paras_t            uartParas[UART_MAX]={0};
+DMA_Channel_TypeDef     *dmaChannel[UART_MAX]={DMA1_Channel5, DMA1_Channel6, DMA1_Channel3, DMA2_Channel3, NULL};
+USART_TypeDef           *uartDef[UART_MAX]={USART1, USART2, USART3, UART4, UART5};
+IRQn_Type               uartIRQn[UART_MAX]={USART1_IRQn, USART2_IRQn, USART3_IRQn, UART4_IRQn, UART5_IRQn};
+IRQn_Type               dmaIRQn[UART_MAX]={DMA1_Channel5_IRQn, DMA1_Channel6_IRQn, DMA1_Channel3_IRQn, DMA2_Channel3_IRQn, NonMaskableInt_IRQn};
+u32                     rccUartPeriph[UART_MAX]={RCC_APB2Periph_USART1, RCC_APB1Periph_USART2, RCC_APB1Periph_USART3, RCC_APB1Periph_UART4, RCC_APB1Periph_UART5};
 
 
 static void rcc_config(eUART uart)

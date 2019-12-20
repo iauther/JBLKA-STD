@@ -296,7 +296,7 @@ void lcd_init(void)
 
 void lcd_clear(u16 color)
 {   
-    lcd_fill_rect(0, 0, LCD_WIDTH-1, LCD_HEIGHT-1, color);
+    lcd_fill_rect(0, 0, LCD_WIDTH, LCD_HEIGHT, color);
 }
 
 

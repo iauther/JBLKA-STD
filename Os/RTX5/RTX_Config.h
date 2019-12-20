@@ -44,7 +44,7 @@
 //   <i> Defines the combined global dynamic memory size.
 //   <i> Default: 4096
 #ifndef OS_DYNAMIC_MEM_SIZE
-#define OS_DYNAMIC_MEM_SIZE         4096
+#define OS_DYNAMIC_MEM_SIZE         8192
 #endif
  
 //   <o>Kernel Tick Frequency [Hz] <1-1000000>
@@ -57,7 +57,7 @@
 //   <e>Round-Robin Thread switching
 //   <i> Enables Round-Robin Thread switching.
 #ifndef OS_ROBIN_ENABLE
-#define OS_ROBIN_ENABLE             1
+#define OS_ROBIN_ENABLE             0
 #endif
  
 //     <o>Round-Robin Timeout <1-1000>
@@ -93,7 +93,7 @@
 //   <e>Object specific Memory allocation
 //   <i> Enables object specific memory allocation.
 #ifndef OS_THREAD_OBJ_MEM
-#define OS_THREAD_OBJ_MEM           1
+#define OS_THREAD_OBJ_MEM           0
 #endif
  
 //     <o>Number of user Threads <1-1000>
@@ -107,7 +107,7 @@
 //     <i> Defines maximum number of user threads with default stack size.
 //     <i> Applies to user threads with zero stack size specified.
 #ifndef OS_THREAD_DEF_STACK_NUM
-#define OS_THREAD_DEF_STACK_NUM     4
+#define OS_THREAD_DEF_STACK_NUM     0
 #endif
  
 //     <o>Total Stack size [bytes] for user Threads with user-provided Stack size <0-1073741824:8>
@@ -287,7 +287,7 @@
 //   <e>Object specific Memory allocation
 //   <i> Enables object specific memory allocation.
 #ifndef OS_MEMPOOL_OBJ_MEM
-#define OS_MEMPOOL_OBJ_MEM          1
+#define OS_MEMPOOL_OBJ_MEM          0
 #endif
  
 //     <o>Number of Memory Pool objects <1-1000>
@@ -315,7 +315,7 @@
 //   <e>Object specific Memory allocation
 //   <i> Enables object specific memory allocation.
 #ifndef OS_MSGQUEUE_OBJ_MEM
-#define OS_MSGQUEUE_OBJ_MEM         1
+#define OS_MSGQUEUE_OBJ_MEM         0
 #endif
  
 //     <o>Number of Message Queue objects <1-1000>

@@ -2,9 +2,7 @@
 #include "menu.h"
 
 #define MSG_MAX         20
-//static const osThreadAttr_t guiAttr = {
-//  .stack_size = 400U
-//};
+
 
 #ifdef RTX
 extern u8 adc_key_using;
