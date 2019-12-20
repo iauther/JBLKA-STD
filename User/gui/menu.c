@@ -261,6 +261,10 @@ int menu_free(void)
 int menu_switch(u8 menu)
 {
     if(gM!=menu) {
+        if(gM==MENU_HOME) {
+            home_clear();
+        }
+
         gM = menu;
         listitem_set_refresh(gLists[gM], REFRESH_ALL);
     }

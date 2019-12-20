@@ -174,6 +174,12 @@ static int need_refresh_all(u8 key)
     return flag;
 }
 
+int home_clear(void)
+{
+    draw_clear();
+    return 0;
+}
+
 
 int home_refresh(void)
 {

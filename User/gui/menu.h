@@ -64,6 +64,7 @@ int menu_refresh(void);
 int menu_handle(key_t *key);
 
 /////////////////////////////////
+int home_clear(void);
 int home_refresh(void);
 int home_refresh2(u8 key, s16 v, key_info_t *info);
 

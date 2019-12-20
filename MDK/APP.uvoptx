@@ -152,34 +152,34 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>122</LineNumber>
+          <LineNumber>114</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>0</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>0</BreakIfRCount>
-          <Filename>..\User\src\knob.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression></Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>124</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134287508</Address>
+          <Address>134262168</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\User\src\knob.c</Filename>
+          <Filename>..\User\src\stm32f10x_it.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\APP\../User/src/knob.c\124</Expression>
+          <Expression>\\APP\../User/src/stm32f10x_it.c\114</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>459</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134304584</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Os\RTX5\rtx_msgqueue.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\APP\../Os/RTX5/rtx_msgqueue.c\459</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -217,6 +217,11 @@
           <count>6</count>
           <WinNumber>1</WinNumber>
           <ItemText>r</ItemText>
+        </Ww>
+        <Ww>
+          <count>7</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>knob_times</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>
