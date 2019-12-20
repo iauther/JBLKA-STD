@@ -141,7 +141,7 @@ static void draw_paras_label(listitem_t *l, u8 index, item_info_t *info, para_in
 {
     rect_t r=*rect;
 
-    r.w = rect->w/3;
+    r.w = rect->w*2/5;
     lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinfo->name, FONT_16, color, bgcolor, ALIGN_RIGHT);
 }
 static void draw_paras_value(listitem_t *l, u8 index, item_info_t *info, para_info_t *pinfo, rect_t *rect, u16 color, u16 bgcolor, u8 drawbox)
@@ -151,9 +151,9 @@ static void draw_paras_value(listitem_t *l, u8 index, item_info_t *info, para_in
     rect_t r=*rect;
     s16 v=*(*(s16**)l->data+index);
 
-    r.x = rect->w/3+10;
+    r.x = rect->w*2/5+10;
     r.y += 2;
-    r.w = rect->w/3-10;
+    r.w = rect->w/4-10;
     r.h -= 4;
     if(pinfo->ptxt) {
         if(info->cmd==CMD_ID_PitchShift) {
@@ -165,10 +165,10 @@ static void draw_paras_value(listitem_t *l, u8 index, item_info_t *info, para_in
     }
     else{
         if(pinfo->flt) {
-            sprintf(tmp, "%.1f", (f32)v/pinfo->step);
+            sprintf(tmp, "%.1f", (f32)v/pinfo->div);
         }
         else {
-            sprintf(tmp, "%d", v/(int)pinfo->step);
+            sprintf(tmp, "%d", v/(int)pinfo->div);
         }
         ptxt = tmp;
     }
@@ -183,8 +183,8 @@ static void draw_paras_unit(listitem_t *l, u8 index, item_info_t *info, para_inf
 {
     rect_t r=*rect;
 
-    r.x = rect->w*2/3+6;
-    r.w = rect->w/3-4;
+    r.x = rect->w*3/4-20;
+    r.w = rect->w/4;
     lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinfo->unit, FONT_16, color, bgcolor, ALIGN_LEFT);
 }
 

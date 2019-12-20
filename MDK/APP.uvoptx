@@ -170,7 +170,7 @@
           <Type>0</Type>
           <LineNumber>459</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134304608</Address>
+          <Address>134304620</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -216,12 +216,17 @@
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>r</ItemText>
+          <ItemText>pinfo</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>knob_times</ItemText>
+          <ItemText>v</ItemText>
+        </Ww>
+        <Ww>
+          <count>8</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>tmp</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>

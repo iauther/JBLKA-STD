@@ -30,9 +30,9 @@ static void tune_trigger(u8 flag)
     if(gAppRunning != flag) {
         evt_gui_t e;
 
-        gAppRunning = flag;
-        e.evt = EVT_TUNE;
-        gui_post_evt(&e);
+        //gAppRunning = flag;
+        //e.evt = EVT_TUNE;
+        //gui_post_evt(&e);
     }
 }
 
