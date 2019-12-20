@@ -2,7 +2,7 @@
 #include <string.h>
 #include "msg.h"
 
-#define FLAGS_MASK   0x00000001
+#define FLAGS_MASK   0x00000001U
 
 static int msg_put(msg_t *m, void *ptr, int len)
 {
@@ -55,10 +55,9 @@ int msg_send(msg_t *m, void *ptr, int len)
     }
 
 #ifdef RTX
-    osStatus_t st;
     r = msg_put(m, ptr, len);
     if(r==0) {
-        st = osEventFlagsWait(m->ef, FLAGS_MASK, osFlagsWaitAny, osWaitForever);
+        osEventFlagsWait(m->ef, FLAGS_MASK, osFlagsWaitAny, osWaitForever);
     }
 #endif
 
@@ -151,7 +150,6 @@ int msg_free(msg_t **m)
     }
 
 #ifdef RTX
-    osStatus_t st;
     osMessageQueueDelete((*m)->mq);
     osMemoryPoolDelete((*m)->mp);
     osEventFlagsDelete((*m)->ef);
