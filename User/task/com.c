@@ -2,9 +2,6 @@
 
 
 #define MSG_MAX         8
-static const osThreadAttr_t comAttr = {
-  .stack_size = 400U
-};
 
 
 u8 gAppRunning=0;
@@ -202,9 +199,6 @@ void com_task(void *arg)
     evt_com_t e;
     osStatus_t st;
     
-    sys_audio_init();
-    //menu_init();
-
     com_msg = msg_init(MSG_MAX, sizeof(e));
     if(!com_msg) {
         return;

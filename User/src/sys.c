@@ -93,6 +93,70 @@ static void adda_reset(void)      //PB5, µÕµÁ∆Ω∏¥Œª£¨ ±º‰÷¡…Ÿ1√Î£¨(ø™ª˙ƒ¨»œµÕµÁ∆
 }
 ///////////////////////////////////////////////
 
+static void show_startup(rect_t r1, rect_t r2)
+{
+    char *txt="STARTTING NOW...";
+    
+    lcd_draw_string_align(r1.x, r1.y, r1.w, r1.h, (u8*)txt, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
+    lcd_draw_rect(r2.x, r2.y, r2.w, r2.h, BLUE);
+}
+static void show_progress(rect_t rect, u8 cur, u8 max)
+{
+    u16 total,ox=0;
+    static u16 prev_x=0;
+    rect_t r={rect.x+1, rect.y+1, rect.w, rect.h-1};
+    
+    total = r.x+rect.w*cur/max;
+    if(prev_x && prev_x<total) {
+        ox = total-prev_x;
+    }
+
+    r.x = prev_x?prev_x:r.x;
+    r.w = r.w/max+ox;
+    lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_FC);
+    prev_x = r.x+r.w;
+    
+}
+static void show_clear(rect_t r)
+{
+    lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
+}
+static void delay_show(int ms)
+{
+    int i,time=20;
+    int max=ms/time;
+    rect_t r1={40, 80,  240,  40};
+    rect_t r2={r1.x, r1.y+r1.h, r1.w,  20};
+    rect_t r3={r1.x, r1.y,  r1.w+4,  r1.h+r2.h+2};
+
+    show_startup(r1, r2);
+    for(i=1; i<=max; i++) {
+        delay_ms(time);
+        show_progress(r2, i, max);
+    }
+    show_clear(r3);
+}
+int audio_init(void)
+{
+    
+#if 0
+    dsp_reset();
+#else
+    dsp_init();
+#endif
+    adda_reset();
+    //delay_show(2000);
+    //hdmi_reset(200);
+    sys_mute(0);
+
+    sys_set_iodat(0);
+    sys_set_input(gParams.dsp.Array_Input.input);
+
+    tmr_start();
+    
+    return 0;
+}
+
 int sys_init(void)
 {
     rcc_init();
@@ -110,31 +174,8 @@ int sys_init(void)
     usbd_init();
     ir_init();
 
-#ifndef RTX
-    sys_audio_init();
-#endif
+    audio_init();
 
-    return 0;
-}
-
-
-int sys_audio_init(void)
-{
-#if 0
-    dsp_reset();
-#else
-    dsp_init();
-#endif
-    adda_reset();
-    delay_ms(2000);
-    //hdmi_reset(200);
-    sys_mute(0);
-
-    sys_set_iodat(0);
-    sys_set_input(gParams.dsp.Array_Input.input);
-
-    tmr_start();
-    
     return 0;
 }
 

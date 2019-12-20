@@ -2,10 +2,6 @@
 
 
 #define MSG_MAX         6
-static const osThreadAttr_t devAttr = {
-  .stack_size = 400U
-};
-
 
 
 status_data_t gStatus;
@@ -99,7 +95,7 @@ void dev_task(void *arg)
                 case EVT_TIMER:
                 {
                     eep_trigger();
-                    //dev_check();
+                    dev_check();
                 }
                 break;
                 
