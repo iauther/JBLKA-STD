@@ -176,7 +176,7 @@ static void draw_paras_value(listitem_t *l, u8 index, item_info_t *info, para_in
     if(drawbox) {
         lcd_draw_rect(r.x, r.y, r.w, r.h, color);
     }
-    lcd_fill_rect(r.x+1, r.y+1, r.w-2, r.h-2, bgcolor);
+    lcd_fill_rect(r.x+1, r.y+1, r.w-1, r.h-1, bgcolor);
     lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)ptxt, FONT_16, color, bgcolor, ALIGN_MIDDLE);
 }
 static void draw_paras_unit(listitem_t *l, u8 index, item_info_t *info, para_info_t *pinfo, rect_t *rect, u16 color, u16 bgcolor)
@@ -206,9 +206,9 @@ static void draw_paras(listitem_t *l, u8 index, int id, item_info_t *info, u16 c
     
     r.h = ITEM_HEIGHT;
     r.y = r.y+index*ITEM_HEIGHT;
-    draw_paras_label(l, index, info, pinfo, &r, color, bgcolor);
+    draw_paras_label(l, index, info, pinfo, &r, LCD_FC, LCD_BC);
     draw_paras_value(l, index, info, pinfo, &r, color, bgcolor, 1);
-    draw_paras_unit (l, index, info, pinfo, &r, color, bgcolor);
+    draw_paras_unit (l, index, info, pinfo, &r, LCD_FC, LCD_BC);
 }
 
 
@@ -219,7 +219,7 @@ static void draw_item(listitem_t *l, int id, u16 color, u16 bgcolor, u8 clear)
 
     if(inf->control==CONTROL_LIST) {
         if(clear) {
-            lcd_fill_round_rect(l->rect.x+1, l->rect.y+index*ITEM_HEIGHT+1, l->rect.w-2, ITEM_HEIGHT-1, r, bgcolor);
+            lcd_fill_round_rect(l->rect.x+1, l->rect.y+index*ITEM_HEIGHT+1, l->rect.w-1, ITEM_HEIGHT-1, r, bgcolor);
         }
         lcd_draw_round_rect(l->rect.x, l->rect.y+index*ITEM_HEIGHT, l->rect.w, ITEM_HEIGHT, r, color);
         lcd_draw_string_align(l->rect.x, l->rect.y+index*ITEM_HEIGHT, l->rect.w, ITEM_HEIGHT, (u8*)inf->txt, FONT_24, color, bgcolor, ALIGN_MIDDLE);
