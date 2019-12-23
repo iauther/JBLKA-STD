@@ -1,6 +1,9 @@
 #include "stm32f10x.h"
+#include "cmsis_os2.h"
 #include "tmr.h"
-
+#include "adc.h"
+#include "knob.h"
+#include "usbd.h"
 
 tim_cb tim_cb_fn[TIMER_MAX]={0};
 
@@ -57,7 +60,30 @@ void tim_callback(u8 timer)   //TIMÖÐ¶Ï
 
     
 
+#ifdef RTX
+osTimerId_t  s_tmr=0;
+#endif
+u32 tmr_cnt=0;
+static void timer_cb(void *p)
+{
+    if(tmr_cnt%4==0) {
+        adc_tmr_cb();
+    }
+    knob_tmr_cb();
+    usbd_tmr_cb();
+    tmr_cnt++;
+}
 
+void tmr_start(void)
+{
+    osStatus_t st;
+
+    //tim_init(TIMER4, 50, timer_cb);
+    s_tmr = osTimerNew(timer_cb, osTimerPeriodic, NULL, NULL);
+    if(s_tmr) {
+        st = osTimerStart(s_tmr, 50);
+    }
+}
 
 
 

@@ -22,6 +22,8 @@ void tim_init(u8 timer, u16 ms, tim_cb cb);
 
 void tim_callback(u8 timer);
 
+void tmr_start(void);
+
 #endif
 
 

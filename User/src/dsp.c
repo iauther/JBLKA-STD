@@ -378,6 +378,10 @@ int dsp_send(dsp_data_t *dsp)
     int r;
     node_t n;
     
+    if(!dspStarted) {
+        return -1;
+    }
+
     lock_on(LOCK_DSP);
     r = get_node(dsp, &n);
     if(r) {
@@ -430,6 +434,10 @@ int dsp_version(void)
 
 int dsp_upgrade(u16 index, u8 *data, u16 len, u8 last)
 {
+    if(!dspStarted) {
+        return -1;
+    }
+
     if(len>DOWNLOAD_SIZE || len%2) {
         return -1;
     }

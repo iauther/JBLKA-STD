@@ -97,7 +97,7 @@ int msg_recv(msg_t *m, void *ptr, int len)
         return -1;
     }
     
-    memcpy(ptr, p, len);
+    memcpy(ptr, p, m->msg_size);
     osMemoryPoolFree(m->mp, p);
 #endif
 

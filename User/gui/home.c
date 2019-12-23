@@ -2,9 +2,10 @@
 #include "default.h"
 
 static u16 prevLength=0;
-static s16 prevValue=0;
-static u8 prevKey=KEY_NONE;
-static key_info_t *prevInfo=NULL;
+static s16 curValue=0;
+static u8 curKey=KEY_NONE;
+const key_info_t DEFAULT_INFO={CMD_ID_Gain, 0, "MUSIC", "GAIN"};
+static key_info_t *curInfo=(key_info_t*)&DEFAULT_INFO;
 static void draw_title(rect_t rect, key_info_t *info)
 {
     rect_t r=rect;
@@ -69,95 +70,95 @@ static int need_refresh_all(u8 key)
 {
     int flag=1;
 
-    if(key != prevKey) {
+    if(key != curKey) {
         switch(key) {
             case KEY_MUSIC_UP:
             case KEY_MUSIC_DN:
-            if((key==KEY_MUSIC_UP && prevKey==KEY_MUSIC_DN) || (key==KEY_MUSIC_DN && prevKey==KEY_MUSIC_UP)) {
+            if((key==KEY_MUSIC_UP && curKey==KEY_MUSIC_DN) || (key==KEY_MUSIC_DN && curKey==KEY_MUSIC_UP)) {
                 flag = 0;
             }
             break;
 
             case KEY_EFFECT_UP:
             case KEY_EFFECT_DN:
-            if((key==KEY_EFFECT_UP && prevKey==KEY_EFFECT_DN) || (key==KEY_EFFECT_DN && prevKey==KEY_EFFECT_UP)) {
+            if((key==KEY_EFFECT_UP && curKey==KEY_EFFECT_DN) || (key==KEY_EFFECT_DN && curKey==KEY_EFFECT_UP)) {
                 flag = 0;
             }
             break;
 
             case KEY_MIC_UP:
             case KEY_MIC_DN:
-            if((key==KEY_MIC_UP && prevKey==KEY_MIC_DN) || (key==KEY_MIC_DN && prevKey==KEY_MIC_UP)) {
+            if((key==KEY_MIC_UP && curKey==KEY_MIC_DN) || (key==KEY_MIC_DN && curKey==KEY_MIC_UP)) {
                 flag = 0;
             }
             break;
             
             case KEY_MUSIC_TREBLE_UP:
             case KEY_MUSIC_TREBLE_DN:
-            if((key==KEY_MUSIC_TREBLE_UP && prevKey==KEY_MUSIC_TREBLE_DN) || (key==KEY_MUSIC_TREBLE_DN && prevKey==KEY_MUSIC_TREBLE_UP)) {
+            if((key==KEY_MUSIC_TREBLE_UP && curKey==KEY_MUSIC_TREBLE_DN) || (key==KEY_MUSIC_TREBLE_DN && curKey==KEY_MUSIC_TREBLE_UP)) {
                 flag = 0;
             }
             break;
             
             case KEY_MUSIC_BASS_UP:
             case KEY_MUSIC_BASS_DN:
-            if((key==KEY_MUSIC_BASS_UP && prevKey==KEY_MUSIC_BASS_DN) || (key==KEY_MUSIC_BASS_DN && prevKey==KEY_MUSIC_BASS_UP)) {
+            if((key==KEY_MUSIC_BASS_UP && curKey==KEY_MUSIC_BASS_DN) || (key==KEY_MUSIC_BASS_DN && curKey==KEY_MUSIC_BASS_UP)) {
                 flag = 0;
             }
             break;
             
             case KEY_MIC_TREBLE_UP:
             case KEY_MIC_TREBLE_DN:
-            if((key==KEY_MIC_TREBLE_UP && prevKey==KEY_MIC_TREBLE_DN) || (key==KEY_MIC_TREBLE_DN && prevKey==KEY_MIC_TREBLE_UP)) {
+            if((key==KEY_MIC_TREBLE_UP && curKey==KEY_MIC_TREBLE_DN) || (key==KEY_MIC_TREBLE_DN && curKey==KEY_MIC_TREBLE_UP)) {
                 flag = 0;
             }
             break;
 
             case KEY_MIC_MIDDLE_UP:
             case KEY_MIC_MIDDLE_DN:
-            if((key==KEY_MIC_MIDDLE_UP && prevKey==KEY_MIC_MIDDLE_DN) || (key==KEY_MIC_MIDDLE_DN && prevKey==KEY_MIC_MIDDLE_UP)) {
+            if((key==KEY_MIC_MIDDLE_UP && curKey==KEY_MIC_MIDDLE_DN) || (key==KEY_MIC_MIDDLE_DN && curKey==KEY_MIC_MIDDLE_UP)) {
                 flag = 0;
             }
             break;
 
             case KEY_MIC_BASS_UP:               //-24~+12dB
             case KEY_MIC_BASS_DN:
-            if((key==KEY_MIC_BASS_UP && prevKey==KEY_MIC_BASS_DN) || (key==KEY_MIC_BASS_DN && prevKey==KEY_MIC_BASS_UP)) {
+            if((key==KEY_MIC_BASS_UP && curKey==KEY_MIC_BASS_DN) || (key==KEY_MIC_BASS_DN && curKey==KEY_MIC_BASS_UP)) {
                 flag = 0;
             }
             break;
             
             case KEY_ECHO_LEVEL_UP:
             case KEY_ECHO_LEVEL_DN:
-            if((key==KEY_ECHO_LEVEL_UP && prevKey==KEY_ECHO_LEVEL_DN) || (key==KEY_ECHO_LEVEL_DN && prevKey==KEY_ECHO_LEVEL_UP)) {
+            if((key==KEY_ECHO_LEVEL_UP && curKey==KEY_ECHO_LEVEL_DN) || (key==KEY_ECHO_LEVEL_DN && curKey==KEY_ECHO_LEVEL_UP)) {
                 flag = 0;
             }
             break;
 
             case KEY_ECHO_DELAY_UP:
             case KEY_ECHO_DELAY_DN:
-            if((key==KEY_ECHO_DELAY_UP && prevKey==KEY_ECHO_DELAY_DN) || (key==KEY_ECHO_DELAY_DN && prevKey==KEY_ECHO_DELAY_UP)) {
+            if((key==KEY_ECHO_DELAY_UP && curKey==KEY_ECHO_DELAY_DN) || (key==KEY_ECHO_DELAY_DN && curKey==KEY_ECHO_DELAY_UP)) {
                 flag = 0;
             }
             break;
 
             case KEY_ECHO_REPEAT_UP:
             case KEY_ECHO_REPEAT_DN:
-            if((key==KEY_ECHO_REPEAT_UP && prevKey==KEY_ECHO_REPEAT_DN) || (key==KEY_ECHO_REPEAT_DN && prevKey==KEY_ECHO_REPEAT_UP)) {
+            if((key==KEY_ECHO_REPEAT_UP && curKey==KEY_ECHO_REPEAT_DN) || (key==KEY_ECHO_REPEAT_DN && curKey==KEY_ECHO_REPEAT_UP)) {
                 flag = 0;
             }
             break;
             
             case KEY_REVERB_LEVEL_UP:
             case KEY_REVERB_LEVEL_DN:
-            if((key==KEY_REVERB_LEVEL_UP && prevKey==KEY_REVERB_LEVEL_DN) || (key==KEY_REVERB_LEVEL_DN && prevKey==KEY_REVERB_LEVEL_UP)) {
+            if((key==KEY_REVERB_LEVEL_UP && curKey==KEY_REVERB_LEVEL_DN) || (key==KEY_REVERB_LEVEL_DN && curKey==KEY_REVERB_LEVEL_UP)) {
                 flag = 0;
             }
             break;
 
             case KEY_REVERB_TIME_UP:
             case KEY_REVERB_TIME_DN:
-            if((key==KEY_REVERB_TIME_UP && prevKey==KEY_REVERB_TIME_DN) || (key==KEY_REVERB_TIME_DN && prevKey==KEY_REVERB_TIME_UP)) {
+            if((key==KEY_REVERB_TIME_UP && curKey==KEY_REVERB_TIME_DN) || (key==KEY_REVERB_TIME_DN && curKey==KEY_REVERB_TIME_UP)) {
                 flag = 0;
             }
             break;
@@ -165,7 +166,7 @@ static int need_refresh_all(u8 key)
             default:
             break;
         }
-        prevKey = key;
+        curKey = key;
     }
     else {
         flag = 0;
@@ -183,17 +184,29 @@ int home_clear(void)
 
 int home_refresh(void)
 {
-    home_refresh2(KEY_NONE, prevValue, prevInfo);
+    home_refresh3(KEY_NONE, curValue, curInfo);
     
     return 0;
 }
 
-int home_refresh2(u8 key, s16 v, key_info_t *info)
+
+int home_refresh2(void)
+{
+    dsp_paras_t *dsp=&uiParams.dsp;
+    s16 value=(s16)dsp->music.gain->Gain;
+    
+    home_refresh3(KEY_MUSIC, value, curInfo);
+    
+    return 0;
+}
+
+
+int home_refresh3(u8 key, s16 v, key_info_t *info)
 {
     rect_t r=BODY_RECT;
     
-    prevValue = v;
-    prevInfo = info;
+    curValue = v;
+    curInfo = info;
     if(need_refresh_all(key)) {
         draw_clear();
         draw_title(r, info);

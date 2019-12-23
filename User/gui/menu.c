@@ -247,6 +247,7 @@ int menu_init(void)
     for(m=0; m<MENU_MAX; m++) {
         add_items(m);
     }
+    home_refresh2();
 
     return 0;
 }
@@ -261,12 +262,15 @@ int menu_free(void)
 int menu_switch(u8 menu)
 {
     if(gM!=menu) {
-        if(gM==MENU_HOME) {
+        if(menu==MENU_HOME) {
+            listitem_quit(gLists[gM]);
+        }
+        else {
             home_clear();
+            listitem_set_refresh(gLists[menu], REFRESH_ALL);
         }
 
         gM = menu;
-        listitem_set_refresh(gLists[gM], REFRESH_ALL);
     }
 
     return 0;
@@ -281,16 +285,6 @@ int menu_refresh(void)
         listitem_refresh(gLists[gM]);
     }
 
-    
-    return 0;
-}
-
-int menu_quit(void)
-{
-    if(gM!=MENU_HOME) {
-        listitem_quit(gLists[gM]);
-        gM = MENU_HOME;
-    }
     
     return 0;
 }

@@ -5,7 +5,7 @@
 
 
 #ifdef RTX
-msg_t *e2p_msg=NULL;
+msg_t *eep_msg=NULL;
 
 static void e2p_check(void)
 {
@@ -28,13 +28,13 @@ void eep_task(void *arg)
     evt_eep_t e;
     osStatus_t st;
     
-    e2p_msg = msg_init(MSG_MAX, sizeof(e));
-    if(!e2p_msg) {
+    eep_msg = msg_init(MSG_MAX, sizeof(e));
+    if(!eep_msg) {
         return;
     }
 
     while(1) {
-        r = msg_recv(e2p_msg, &e, sizeof(e));
+        r = msg_recv(eep_msg, &e, sizeof(e));
         if(r==0) {
             switch(e.evt) {
                 
@@ -47,13 +47,13 @@ void eep_task(void *arg)
         }
     }
 
-    msg_free(&e2p_msg);
+    msg_free(&eep_msg);
 }
 
 
 void eep_post_evt(evt_eep_t *e)
 {
-    msg_post(e2p_msg, e, sizeof(*e));
+    msg_post(eep_msg, e, sizeof(*e));
 }
 
 #endif

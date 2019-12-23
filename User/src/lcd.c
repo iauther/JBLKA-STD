@@ -387,7 +387,7 @@ void lcd_draw_line(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
 }
 
 
-static void draw_char_rows(u16 x, u16 y, u16 offset_x, u16 offset_y, u16 w, u16 h, u8 *pchr, u16 hbytes, u16 color, u16 bgcolor)
+static void draw_char_rows(u16 x, u16 y, u16 ox, u16 oy, u16 w, u16 h, u8 *pchr, u16 hbytes, u16 color, u16 bgcolor)
 {
     u16 len;
     int i,j;
@@ -396,17 +396,17 @@ static void draw_char_rows(u16 x, u16 y, u16 offset_x, u16 offset_y, u16 w, u16 
     
     len = w*h*2;
     for(i=0; i<h; i++) {
-        B=(i+offset_y)/8; b=1<<(7-((i+offset_y)%8));
+        B=(i+oy)/8; b=1<<(7-((i+oy)%8));
         for(j=0; j<w; j++) {
             
-            index  = (j+offset_x)*hbytes+B;
+            index  = (j+ox)*hbytes+B;
             color2 = (pchr[index]&b)?SWAP16(color):SWAP16(bgcolor);
 
             offset = i*w+j;
             plcd[offset] = color2;
         }
     }
-    lcd_set_rect(x+offset_x, y+offset_y, w, h);
+    lcd_set_rect(x+ox, y+oy, w, h);
     lcd_write_datas((u8*)plcd, len);
 }
 void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor)
@@ -415,7 +415,7 @@ void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor)
     int k,bytes;
     font_info_t inf;
     u16 rows,times,remain,tlen;
-
+    
     inf = font_info(font);
     bytes = inf.height/8;
     pchr  = font_get_ptr(font, c);
@@ -435,27 +435,61 @@ void lcd_draw_char(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor)
     draw_char_rows(x, y, 0, k*rows, inf.width, remain, pchr, bytes, color, bgcolor);  
 }
 
-
-void lcd_draw_string(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u16 bgcolor)
+void lcd_draw_char2(u16 x, u16 y, u8 c, u8 font, u16 color, u16 bgcolor)
 {
-    u16 x0 = x;
-    font_info_t inf = font_info(font);
+    u8 *pchr;
+    int i,j,bytes;
+    font_info_t inf;
+    u16 B,b,index,color2;
     
-    w += x;
-    h += y;
-    while((*str<='~') && (*str>=' ')) {
-        if(x >= w) {
-            x = x0; 
-            y += inf.height;
-        }
-        
-        if(y >= h) {   
+    inf = font_info(font);
+    bytes = inf.height/8;
+    pchr  = font_get_ptr(font, c);
+    if(!pchr) {
+        return;
+    }
+
+    for(i=0; i<inf.height; i++) {
+
+        if(x+i>=LCD_WIDTH) {
             break;
         }
 
-        lcd_draw_char(x, y, *str, font, color, bgcolor);
-        x += inf.height/2;
-        str++;
+        B=i/8; b=1<<(7-(i%8));
+        for(j=0; j<inf.width; j++) {
+            if(y+j>=LCD_HEIGHT) {
+                break;
+            }
+
+            index  = j*bytes+B;
+            color2 = (pchr[index]&b)?SWAP16(color):SWAP16(bgcolor);
+            lcd_draw_point(x+j, y+i, color2);
+        }
+    }
+}
+void lcd_draw_string(u16 x, u16 y, u16 w, u16 h, u8 *str, u8 font, u16 color, u16 bgcolor)
+{
+    int i=0;
+    u16 x1=x,y1=y;
+    font_info_t inf = font_info(font);
+    
+    if(x>=LCD_WIDTH || x+inf.width>=LCD_WIDTH || y>=LCD_HEIGHT || y+inf.height>=LCD_HEIGHT) {
+        return;
+    }
+
+    while(1) {
+        if(str[i]<='~' && str[i]>=' ') {
+           lcd_draw_char(x1, y1, str[i], font, color, bgcolor);
+            x1 += inf.width;
+            if(x1>=LCD_WIDTH) {
+                x1 = x;
+                y1 += inf.height;
+            }
+        }
+        else {
+            break;
+        }
+        i++;
     }  
 }
 

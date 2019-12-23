@@ -292,16 +292,16 @@ static void ir_proc(key_t *key, key_info_t *info)
 static void knob_proc(key_t *key, key_info_t *info)
 {
     int r;
-    s16 g;
+    s16 v;
     node_t n;
 
-    r = dsp_set_gain(key->value, key->times, &g, &n);
+    r = dsp_set_gain(key->value, key->times, &v, &n);
     if(r) {
         return;
     }
 
-    menu_quit();
-    home_refresh2(key->value, g, info);
+    menu_switch(MENU_HOME);
+    home_refresh3(key->value, v, info);
     e2p_put(&n);
 }
 

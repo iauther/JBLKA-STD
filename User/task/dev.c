@@ -84,6 +84,7 @@ void dev_task(void *arg)
         return;
     }
 
+    tmr_start();
     dev_tmr = osTimerNew(tmr1_fun, osTimerPeriodic, NULL, NULL);
     osTimerStart(dev_tmr, 1000);
 
