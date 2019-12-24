@@ -165,7 +165,7 @@ typedef struct {
 
 //#pragma pack()
 
-
+extern para_txt_t INPUT_TXT;
 extern const def_dsp_t DEF_DSP;
 extern const fw_info_t FW_INFO;
 extern const io_data_t IO_DATA;

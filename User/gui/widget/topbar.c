@@ -3,6 +3,7 @@
 #include "topbar.h"
 #include "font.h"
 #include "lcd.h"
+#include "default.h"
 #include "packet.h"
 
 typedef struct {
@@ -41,7 +42,7 @@ static void show_bt(void)
 
     r.x += mTopbar.rect.w/4;
     r.w = mTopbar.rect.w/4;
-    sprintf((char*)tmp, "BT/USB");
+    sprintf((char*)tmp, "%s", INPUT_TXT.txt[INPUT_BTUSB]);
     
     lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
@@ -49,13 +50,12 @@ static void show_bt(void)
 static void show_input(void)
 {
     u8 tmp[10];
-    const char *str[INPUT_MAX]={"VOD", "DVD", "BGM", "BT/USB", "OPT", "HIN", "HARC"};
     rect_t r = mTopbar.rect;
     u16 input=uiParams.dsp.music.input->input;
 
     r.x += mTopbar.rect.w/2;
     r.w = mTopbar.rect.w/4;
-    sprintf((char*)tmp, "%s", str[input]);
+    sprintf((char*)tmp, "%s", INPUT_TXT.txt[input]);
     
     lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
