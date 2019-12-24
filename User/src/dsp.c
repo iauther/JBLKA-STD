@@ -944,7 +944,7 @@ int dsp_get_info(u8 key, dsp_info_t *info)
 
 
 #include "key.h"
-static int val_adjust(s16 *ptr, int fac, int val, para_info_t *info)
+static int val_adjust(s16 *ptr, s8 fac, int val, para_info_t *info)
 {
     int ost=val*info->step;
 
@@ -975,12 +975,12 @@ static int val_adjust(s16 *ptr, int fac, int val, para_info_t *info)
 }
 int dsp_set_gain(u8 key, u16 times, dsp_info_t *info)
 {
-    int r,fac,val;
+    int r,val;
     para_info_t *pinf;
 
     val = info->fac*times;
     pinf = (para_info_t*)&PARA_INFO[info->dsp.id].info[info->index];
-    r = val_adjust(info->pdata, fac, val, pinf);
+    r = val_adjust(info->pdata, info->fac, val, pinf);
     if(r) {
         return -1;
     }

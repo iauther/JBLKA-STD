@@ -312,7 +312,7 @@ const paras_info_t PARA_INFO[CMD_ID_NUM]={
     {//CMD_ID_EQ
         {
             {"FREQ",                "Hz",               20,                 20000,              1,                  1,              0,              NULL},
-            {"GAIN",                "dB",               -24,                12,                 0.1,                1,              0,              NULL},
+            {"GAIN",                "dB",               -240,               120,                1,                  10,             1,              NULL},
             {"Q",                   "",                 1,                  1280,               1,                  10,             1,              NULL},
             {"TYPE",                "",                 0,                  2,                  1,                  1,              0,              &EQTYPE_TXT},
             {"BYPASS",              "",                 0,                  1,                  1,                  1,              0,              NULL},

@@ -3,6 +3,7 @@
 
 static u16 prevLength=0;
 static u8 curKey=KEY_NONE;
+static u16 refreshFlag=REFRESH_HOME_ALL;
 static void draw_title(rect_t rect, dsp_info_t *info)
 {
     rect_t r=rect;
@@ -60,10 +61,8 @@ static void draw_value(rect_t rect, dsp_info_t *info)
 }
 
 
-static int draw_clear(void)
+static int draw_clear(rect_t r)
 {
-    rect_t r=BODY_RECT;
-
     prevLength = 0;
     lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
     return 0;
@@ -180,18 +179,42 @@ static int need_refresh_all(u8 key)
 
 int home_clear(void)
 {
-    draw_clear();
+    rect_t r=BODY_RECT;
+
+    draw_clear(r);
     return 0;
 }
 
 
+int home_set_refresh(u16 flag)
+{
+    refreshFlag |= flag;
+    gui_post_refresh();
+    return 0;
+}
+
 int home_refresh(void)
 {
     dsp_info_t info;
-
-    dsp_get_info(KEY_MUSIC_UP, &info);
-    home_refresh2(KEY_MUSIC_UP, &info);
+    rect_t r=BODY_RECT;
+    u8 key=(curKey==KEY_NONE)?KEY_MUSIC_UP:curKey;
     
+    dsp_get_info(key, &info);
+
+    if(refreshFlag&REFRESH_HOME_CLEAR) {
+        draw_clear(r);
+    }
+
+    if(refreshFlag&REFRESH_HOME_TITLE) {
+        draw_title(r, &info);
+    }
+
+    if(refreshFlag&REFRESH_HOME_VALUE) {
+        draw_value(r, &info);
+    }
+    
+    refreshFlag = 0;
+
     return 0;
 }
 
@@ -201,7 +224,7 @@ int home_refresh2(u8 key, dsp_info_t *info)
     rect_t r=BODY_RECT;
     
     if(need_refresh_all(key)) {
-        draw_clear();
+        draw_clear(r);
         draw_title(r, info);
         draw_value(r, info);
     }

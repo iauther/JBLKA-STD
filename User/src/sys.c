@@ -14,9 +14,9 @@ static void adda_reset(void)      //PB5, µÕµÁ∆Ω∏¥Œª£¨ ±º‰÷¡…Ÿ1√Î£¨(ø™ª˙ƒ¨»œµÕµÁ∆
 
 static void show_startup(rect_t r1, rect_t r2)
 {
-    char *txt="STARTTING NOW...";
+    char *txt="STARTTING...";
     
-    lcd_draw_string_align(r1.x, r1.y, r1.w, r1.h, (u8*)txt, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
+    lcd_draw_string_align(r1.x, r1.y, r1.w, r1.h, (u8*)txt, FONT_24, LCD_FC, LCD_BC, ALIGN_MIDDLE);
     lcd_draw_rect(r2.x, r2.y, r2.w, r2.h, BLUE);
 }
 static void show_progress(rect_t rect, u8 cur, u8 max)

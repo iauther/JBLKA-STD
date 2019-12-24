@@ -68,7 +68,7 @@ int e2p_put(node_t *n)
 {
     int r;
     node_t n2;
-return -1;    
+    
     lock_on(LOCK_E2P);
     n2.ptr = n;
     n2.len = sizeof(node_t);

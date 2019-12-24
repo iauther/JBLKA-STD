@@ -264,6 +264,7 @@ int menu_switch(u8 menu)
     if(gM!=menu) {
         if(menu==MENU_HOME) {
             listitem_quit(gLists[gM]);
+            home_set_refresh(REFRESH_HOME_ALL);
         }
         else {
             home_clear();

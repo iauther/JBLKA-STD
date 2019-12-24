@@ -55,8 +55,18 @@ int menu_refresh(void);
 int menu_handle(key_t *key);
 
 /////////////////////////////////
+enum {
+    REFRESH_HOME_CLEAR = 1<<0,
+    REFRESH_HOME_TITLE = 1<<1,
+    REFRESH_HOME_VALUE = 1<<2,
+
+    REFRESH_HOME_ALL = 0xff,
+};
+
+
 int home_clear(void);
 int home_refresh(void);
+int home_set_refresh(u16 flag);
 int home_refresh2(u8 key, dsp_info_t *info);
 
 

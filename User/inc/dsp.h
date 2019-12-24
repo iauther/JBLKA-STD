@@ -225,7 +225,7 @@ typedef struct
 typedef struct
 {
     u16  Freq;//20~20000 :   20~20k     (step=1Hz)
-    s16  Gain;//-24~+12dB          (step=0.1dB)
+    s16  Gain;//-240~+120dB          (step=0.1dB)
     u16  Q;   //1~1280 :   0.1~128.0  (step=0.1)
     u16  Type;  //0/1/2 :   PEQ / LS / HS
     u16  Bypass;// 0/1 : no bypass / bypass

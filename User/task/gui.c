@@ -52,8 +52,6 @@ static void ir_proc(key_t *key, dsp_info_t *info)
 {
     int r;
     u8  m;
-    node_t n;
-    u8 cmd,index;
 
     switch(key->value) {
         case KEY_LOCK:
@@ -116,7 +114,6 @@ static void ir_proc(key_t *key, dsp_info_t *info)
 static void knob_proc(key_t *key, dsp_info_t *info)
 {
     int r;
-    s16 v;
     node_t n;
 
     r = dsp_set_gain(key->value, key->times, info);
@@ -126,7 +123,7 @@ static void knob_proc(key_t *key, dsp_info_t *info)
 
     menu_switch(MENU_HOME);
     home_refresh2(key->value, info);
-    e2p_put(&n);
+    e2p_put(&info->node);
 }
 
 static void draw_tune(void)
