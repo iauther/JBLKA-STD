@@ -209,7 +209,7 @@ int home_refresh(void)
     dsp_get_info(key, &info);
 
     if(refreshFlag&REFRESH_HOME_CLEAR) {
-        draw_clear(r);
+        //draw_clear(r);
     }
 
     if(refreshFlag&REFRESH_HOME_TITLE) {

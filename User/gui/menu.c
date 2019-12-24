@@ -261,7 +261,6 @@ int menu_switch(u8 menu)
             home_set_refresh(REFRESH_HOME_ALL);
         }
         else {
-            home_clear();
             listitem_set_refresh(gLists[menu], REFRESH_ALL);
         }
 

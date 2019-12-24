@@ -6,12 +6,13 @@
 #include "default.h"
 
 enum {
-    REFRESH_TITLE       = 1<<0,
-    REFRESH_MOVE        = 1<<1,
-    REFRESH_FOCUS       = 1<<2,
-    REFRESH_VALUE       = 1<<3,
-    REFRESH_LIST        = 1<<4,
-    REFRESH_TXT_SCROLL  = 1<<5,
+    REFRESH_CLEAR       = 1<<0,
+    REFRESH_TITLE       = 1<<1,
+    REFRESH_MOVE        = 1<<2,
+    REFRESH_FOCUS       = 1<<3,
+    REFRESH_VALUE       = 1<<4,
+    REFRESH_LIST        = 1<<5,
+    REFRESH_TXT_SCROLL  = 1<<6,
 
     REFRESH_ALL         = 0xffff,
 };

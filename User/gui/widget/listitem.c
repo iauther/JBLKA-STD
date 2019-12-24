@@ -215,7 +215,6 @@ static void draw_paras(listitem_t *l, u8 index, int id, item_info_t *info, u16 c
     u8 ch;
     rect_t r=INPUTBOX_RECT;
     para_info_t *pinf;
-    para_info_t *pinfo=(para_info_t*)&PARA_INFO[info->cmd].info[id];
     
     if(info->cmd==CMD_ID_Delay) {
         ch = get_ch(l);
@@ -302,7 +301,12 @@ static void draw_arrows(listitem_t *l, u16 color, u16 bgcolor)
         draw_arraw(l, DOWN, bgcolor);
     }
 }
+static void draw_clear(listitem_t *l)
+{
+    rect_t r=BODY_RECT;
 
+    lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
+}
 
 static int list_refresh(listitem_t *l)
 {
@@ -312,6 +316,10 @@ static int list_refresh(listitem_t *l)
         return -1;
     }
     
+    if(l->refreshFlag & REFRESH_CLEAR) {
+        draw_clear(l);
+    }
+
     if(l->refreshFlag & REFRESH_TITLE) {
         draw_title(l, LCD_FC, LCD_BC);
     }
@@ -598,7 +606,7 @@ static int list_handle(listitem_t **l, key_t *key)
                     listitem_reset((*l));
                     listitem_clear();
                     //(*l)->refreshFlag |= REFRESH_ALL;
-                    gM = MENU_HOME;
+                    menu_switch(MENU_HOME);
                 }
             }
         }
