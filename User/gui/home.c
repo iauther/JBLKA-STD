@@ -2,11 +2,8 @@
 #include "default.h"
 
 static u16 prevLength=0;
-static s16 curValue=0;
 static u8 curKey=KEY_NONE;
-const key_info_t DEFAULT_INFO={CMD_ID_Gain, 0, "MUSIC", "GAIN"};
-static key_info_t *curInfo=(key_info_t*)&DEFAULT_INFO;
-static void draw_title(rect_t rect, key_info_t *info)
+static void draw_title(rect_t rect, dsp_info_t *info)
 {
     rect_t r=rect;
 
@@ -20,21 +17,27 @@ static void draw_title(rect_t rect, key_info_t *info)
 }
 
 
-static void draw_value(rect_t rect, s16 v, key_info_t *info)
+static void draw_value(rect_t rect, dsp_info_t *info)
 {
     int len;
     u8 tmp[20];
     u8 font;
     rect_t r=rect;
     font_info_t inf1,inf2;
-    para_info_t *pinfo=(para_info_t*)&PARA_INFO[info->cmd].info[info->index];
+    para_info_t *pinfo=(para_info_t*)&PARA_INFO[info->dsp.id].info[info->index];
 
     r.y = 80;
     r.h = 100;
     
     font = FONT_96;
     inf1 = font_info(font);
-    sprintf((char*)tmp, "%d", v);
+    if(pinfo->flt) {
+        sprintf((char*)tmp, "%.1f", (f32)(*info->pdata)/pinfo->div);
+    }
+    else {
+        sprintf((char*)tmp, "%d", (*info->pdata)/(int)pinfo->div);
+    }
+    
     len = inf1.width*strlen((char*)tmp);
     if(len<prevLength) {
         lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
@@ -184,36 +187,26 @@ int home_clear(void)
 
 int home_refresh(void)
 {
-    home_refresh3(KEY_NONE, curValue, curInfo);
+    dsp_info_t info;
+
+    dsp_get_info(KEY_MUSIC_UP, &info);
+    home_refresh2(KEY_MUSIC_UP, &info);
     
     return 0;
 }
 
 
-int home_refresh2(void)
-{
-    dsp_paras_t *dsp=&uiParams.dsp;
-    s16 value=(s16)dsp->music.gain->Gain;
-    
-    home_refresh3(KEY_MUSIC, value, curInfo);
-    
-    return 0;
-}
-
-
-int home_refresh3(u8 key, s16 v, key_info_t *info)
+int home_refresh2(u8 key, dsp_info_t *info)
 {
     rect_t r=BODY_RECT;
     
-    curValue = v;
-    curInfo = info;
     if(need_refresh_all(key)) {
         draw_clear();
         draw_title(r, info);
-        draw_value(r, v, info);
+        draw_value(r, info);
     }
     else {
-        draw_value(r, v, info);
+        draw_value(r, info);
     }
     
     return 0;

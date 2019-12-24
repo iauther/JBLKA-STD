@@ -152,6 +152,8 @@ typedef struct _item {
     u8              control;
     cchr            *txt;
     u8              cmd;       //dsp cmd id
+    u8              ch;
+    u8              n;
     void            *data;
     CONST struct _item *info;
 }item_info_t;
@@ -168,5 +170,6 @@ extern const def_dsp_t DEF_DSP;
 extern const fw_info_t FW_INFO;
 extern const io_data_t IO_DATA;
 extern const paras_info_t PARA_INFO[CMD_ID_NUM];
-
+extern const int STRUCT_LEN[CMD_ID_NUM];
+extern const void* STRUCT_PTR[CMD_ID_NUM];
 #endif

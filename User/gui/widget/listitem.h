@@ -58,7 +58,7 @@ int listitem_append(listitem_t *l, item_info_t *inf);
 
 item_info_t* listitem_get(listitem_t *l, u8 index);
 
-int listitem_get_focus(listitem_t *l, node_t *n);
+item_info_t* listitem_get_focus(listitem_t *l);
 
 int listitem_set_refresh(listitem_t *l, u32 flag);
 

@@ -590,28 +590,381 @@ int dsp_update(dsp_data_t *dsp, node_t *node)
     return r;
 }
 
-#include "key.h"
-static int val_adjust(s16 *ptr, int min, int max, int fac, int val, int step)
+
+int dsp_get_struct_len(u8 cmd)
 {
-    int ost=val*step;
+    if(cmd<CMD_ID_Gain || cmd>CMD_ID_Input) {
+        return -1;
+    }
+
+    return STRUCT_LEN[cmd];
+}
+
+u8* dsp_get_struct_ptr(u8 cmd)
+{
+    if(cmd<CMD_ID_Gain || cmd>CMD_ID_Input) {
+        return NULL;
+    }
+
+    return (u8*)STRUCT_PTR[cmd];
+}
+
+
+
+u8 dsp_get_ch(u8 cmd, void *p)
+{
+    u8 ch,*p2=(u8*)p;
+    int slen=dsp_get_struct_len(cmd);
+    u8 *pstt=dsp_get_struct_ptr(cmd);
+
+    ch = (p2-pstt)/slen;
+
+    return ch;
+}
+
+
+u8 dsp_get_n(u8 cmd, void *p)
+{
+    u8 ch,*p2=(u8*)p;
+    int slen=dsp_get_struct_len(cmd);
+    u8 *pstt=dsp_get_struct_ptr(cmd);
+
+    if(cmd==CMD_ID_EQ) {
+        
+    }
+    else if(cmd==CMD_ID_HLPF) {
+        
+    }
+    else {
+        return 0;
+    }
+
+    ch = (p2-pstt)/slen;
+
+    return ch;
+}
+
+
+int dsp_get_info(u8 key, dsp_info_t *info)
+{
+    dsp_paras_t *dsp=&uiParams.dsp;
+
+    switch(key) {
+        case KEY_MUSIC_UP:      //0~100
+        case KEY_MUSIC_DN:
+        {
+            info->dsp.id = CMD_ID_Gain;
+            info->dsp.ch = Gain_CH_Music;
+            info->dsp.n = 0;
+            info->dsp.dlen = sizeof(TypeS_Gain);
+            info->index = 0;
+            info->title = (char*)"MUSIC";
+            info->name = (char*)"GAIN";
+            info->fac = (key==KEY_MUSIC_UP)?1:-1;
+            info->pdata = (s16*)&dsp->music.gain->Gain;
+            info->node.ptr = dsp->music.gain;
+            info->node.len = sizeof(TypeS_Gain);
+        }
+        break;
+
+        case KEY_EFFECT_UP:
+        case KEY_EFFECT_DN:
+        {
+            info->dsp.id = CMD_ID_Gain;
+            info->dsp.ch = Gain_CH_Eff;
+            info->dsp.n = 0;
+            info->dsp.dlen = sizeof(TypeS_Gain);
+            info->index = 0;
+            info->title = (char*)"EFFECT";
+            info->name = (char*)"GAIN";
+            info->fac = (key==KEY_EFFECT_UP)?1:-1;
+            info->pdata = (s16*)&dsp->effGain->Gain;
+            info->node.ptr = dsp->effGain;
+            info->node.len = sizeof(TypeS_Gain);
+        }
+        break;
+
+        case KEY_MIC_UP:
+        case KEY_MIC_DN:
+        {
+            info->dsp.id = CMD_ID_Gain;
+            info->dsp.ch = Gain_CH_Mic;
+            info->dsp.n = 0;
+            info->dsp.dlen = sizeof(TypeS_Gain);
+            info->index = 0;
+            info->title = (char*)"MIC";
+            info->name = (char*)"GAIN";
+            info->fac = (key==KEY_MIC_UP)?1:-1;
+            info->pdata = (s16*)&dsp->mic.gain->Gain;
+            info->node.ptr = dsp->mic.gain;
+            info->node.len = sizeof(TypeS_Gain);
+        }
+        break;
+        
+        case KEY_MUSIC_TREBLE_UP:
+        case KEY_MUSIC_TREBLE_DN:
+        {
+            info->dsp.id = CMD_ID_EQ;
+            info->dsp.ch = EQ_CH_Music;
+            info->dsp.n = 1;
+            info->dsp.dlen = sizeof(TypeS_EQBand);
+            info->index = 1;
+            info->title = (char*)"MUSIC";
+            info->name = (char*)"TREBLE";
+            info->fac = (key==KEY_MUSIC_TREBLE_UP)?1:-1;
+            info->pdata = (s16*)&dsp->music.geq[1]->Gain;
+            info->node.ptr = dsp->music.geq[1];
+            info->node.len = sizeof(TypeS_EQBand);
+        }
+        break;
+        
+        case KEY_MUSIC_BASS_UP:
+        case KEY_MUSIC_BASS_DN:
+        {
+            info->dsp.id = CMD_ID_EQ;
+            info->dsp.ch = EQ_CH_Music;
+            info->dsp.n = 0;
+            info->dsp.dlen = sizeof(TypeS_EQBand);
+            info->index = 1;
+            info->title = (char*)"MUSIC";
+            info->name = (char*)"BASS";
+            info->fac = (key==KEY_MUSIC_BASS_UP)?1:-1;
+            info->pdata = (s16*)&dsp->music.geq[0]->Gain;
+            info->node.ptr = dsp->music.geq[0];
+            info->node.len = sizeof(TypeS_EQBand);
+        }
+        break;
+        
+        case KEY_MIC_TREBLE_UP:
+        case KEY_MIC_TREBLE_DN:
+        {
+            info->dsp.id = CMD_ID_EQ;
+            info->dsp.ch = EQ_CH_Mic;
+            info->dsp.n = 2;
+            info->dsp.dlen = sizeof(TypeS_EQBand);
+            info->index = 1;
+            info->title = (char*)"MIC";
+            info->name = (char*)"TREBLE";
+            info->fac = (key==KEY_MIC_TREBLE_UP)?1:-1;
+            info->pdata = (s16*)&dsp->mic.geq[2]->Gain;
+            info->node.ptr = dsp->mic.geq[2];
+            info->node.len = sizeof(TypeS_EQBand);
+        }
+        break;
+
+        case KEY_MIC_MIDDLE_UP:
+        case KEY_MIC_MIDDLE_DN:
+        {
+            info->dsp.id = CMD_ID_EQ;
+            info->dsp.ch = EQ_CH_Mic;
+            info->dsp.n = 1;
+            info->dsp.dlen = sizeof(TypeS_EQBand);
+            info->index = 1;
+            info->title = (char*)"MIC";
+            info->name = (char*)"MIDDLE";
+            info->fac = (key==KEY_MIC_MIDDLE_UP)?1:-1;
+            info->pdata = (s16*)&dsp->mic.geq[1]->Gain;
+            info->node.ptr = dsp->mic.geq[1];
+            info->node.len = sizeof(TypeS_EQBand);
+        }
+        break;
+
+        case KEY_MIC_BASS_UP:               //-24~+12dB
+        case KEY_MIC_BASS_DN:
+        {
+            info->dsp.id = CMD_ID_EQ;
+            info->dsp.ch = EQ_CH_Mic;
+            info->dsp.n = 0;
+            info->dsp.dlen = sizeof(TypeS_EQBand);
+            info->index = 1;
+            info->title = (char*)"MIC";
+            info->name = (char*)"BASS";
+            info->fac = (key==KEY_MIC_BASS_UP)?1:-1;
+            info->pdata = (s16*)&dsp->mic.geq[0]->Gain;
+            info->node.ptr = dsp->mic.geq[0];
+            info->node.len = sizeof(TypeS_EQBand);
+        }
+        break;
+        
+        case KEY_ECHO_LEVEL_UP:
+        case KEY_ECHO_LEVEL_DN:
+        {
+            info->dsp.id = CMD_ID_Vol;
+            info->dsp.ch = Vol_CH_Echo_EffVol;
+            info->dsp.n = 0;
+            info->dsp.dlen = sizeof(TypeS_Vol);
+            info->index = 0;
+            info->title = (char*)"ECHO";
+            info->name = (char*)"LEVEL";
+            info->fac = (key==KEY_ECHO_LEVEL_UP)?1:-1;
+            info->pdata = (s16*)&dsp->echo.effVol->Vol;
+            info->node.ptr = dsp->echo.effVol;
+            info->node.len = sizeof(TypeS_Vol);
+        }
+        break;
+
+        case KEY_ECHO_DELAY_UP:
+        case KEY_ECHO_DELAY_DN:
+        {
+            info->dsp.id = CMD_ID_Delay;
+            info->dsp.ch = Delay_CH_Echo_Delay;
+            info->dsp.n = 0;
+            info->dsp.dlen = sizeof(TypeS_Delay);
+            info->index = 0;
+            info->title = (char*)"ECHO";
+            info->name = (char*)"DELAY";
+            info->fac = (key==KEY_ECHO_DELAY_UP)?1:-1;
+            info->pdata = (s16*)&dsp->echo.delay->Delay;
+            info->node.ptr = dsp->echo.delay;
+            info->node.len = sizeof(TypeS_Delay);
+        }
+        break;
+
+        case KEY_ECHO_REPEAT_UP:
+        case KEY_ECHO_REPEAT_DN:
+        {
+            info->dsp.id = CMD_ID_Vol;
+            info->dsp.ch = Vol_CH_Echo_Repeat;
+            info->dsp.n = 0;
+            info->dsp.dlen = sizeof(TypeS_Vol);
+            info->index = 0;
+            info->title = (char*)"ECHO";
+            info->name = (char*)"REPEAT";
+            info->fac = (key==KEY_ECHO_REPEAT_UP)?1:-1;
+            info->pdata = (s16*)&dsp->echo.repeat->Vol;
+            info->node.ptr = dsp->echo.repeat;
+            info->node.len = sizeof(TypeS_Vol);
+        }
+        break;
+        
+        case KEY_REVERB_LEVEL_UP:
+        case KEY_REVERB_LEVEL_DN:
+        {
+            info->dsp.id = CMD_ID_Vol;
+            info->dsp.ch = Vol_CH_Rev_EffVol;
+            info->dsp.n = 0;
+            info->dsp.dlen = sizeof(TypeS_Vol);
+            info->index = 0;
+            info->title = (char*)"REVERB";
+            info->name = (char*)"LEVEL";
+            info->fac = (key==KEY_REVERB_LEVEL_UP)?1:-1;
+            info->pdata = (s16*)&dsp->reverb.effVol->Vol;
+            info->node.ptr = dsp->reverb.effVol;
+            info->node.len = sizeof(TypeS_Vol);
+        }
+        break;
+
+        case KEY_REVERB_TIME_UP:
+        case KEY_REVERB_TIME_DN:
+        {
+            info->dsp.id = CMD_ID_Delay;
+            info->dsp.ch = Delay_CH_Rev_Time;
+            info->dsp.n = 0;
+            info->dsp.dlen = sizeof(TypeS_Delay);
+            info->index = 0;
+            info->title = (char*)"REVERB";
+            info->name = (char*)"TIME";
+            info->fac = (key==KEY_REVERB_LEVEL_UP)?1:-1;
+            info->pdata = (s16*)&dsp->reverb.time->Delay;
+            info->node.ptr = dsp->reverb.time;
+            info->node.len = sizeof(TypeS_Delay);
+        }
+        break;
+
+        case KEY_b:
+        case KEY_0:
+        case KEY_SHARP:
+        {
+            info->dsp.id = CMD_ID_PitchShift;
+            info->dsp.ch = 0;
+            info->dsp.n = 0;
+            info->dsp.dlen = sizeof(TypeS_PitchShift);
+            info->index = 0;
+            info->fac = 0;
+            info->title = (char*)"PITCH";
+            info->name = (char*)"";
+            info->pdata = (s16*)&dsp->music.pitch->PitchShift;
+            info->node.ptr = dsp->music.pitch;
+            info->node.len = sizeof(TypeS_PitchShift);
+        }
+        break;
+
+        case KEY_MODE:
+        case KEY_M1:
+        case KEY_M2:
+        case KEY_M3:
+        {
+            info->dsp.id = 0;
+            info->dsp.ch = 0;
+            info->dsp.n = 0;
+            info->dsp.dlen = sizeof(*uiParams.pre);
+            info->index = 0;
+            info->fac = 0;
+            info->title = (char*)"PRESET";
+            info->name = (char*)"";
+            info->pdata = (s16*)uiParams.pre;
+            info->node.ptr = info->pdata;
+            info->node.len = sizeof(*uiParams.pre);
+        }
+        break;
+
+        case KEY_INPUT:
+        {
+            info->dsp.id = CMD_ID_Input;
+            info->dsp.ch = 0;
+            info->dsp.n = 0;
+            info->dsp.dlen = sizeof(TypeS_Input);
+            info->index = 0;
+            info->fac = 0;
+            info->title = (char*)"INPUT";
+            info->name = (char*)"GAIN";
+            info->pdata = (s16*)&dsp->music.input->input;
+            info->node.ptr = dsp->music.input;
+            info->node.len = sizeof(TypeS_Input);
+        }
+        break;
+
+        case KEY_MUTE:
+        {
+            info->dsp.id = CMD_ID_Mute;
+            info->index = 0;
+            info->title = (char*)"MUTE";
+            info->name = (char*)"";
+            //info->pdata = NULL;
+            //info->ptr = NULL;
+            //info->len = sizeof(TypeS_Mute);
+            //info->fac = 0;
+            //info->channel = 0;
+        }
+        break;
+    }
+
+    return 0;
+}
+
+
+#include "key.h"
+static int val_adjust(s16 *ptr, int fac, int val, para_info_t *info)
+{
+    int ost=val*info->step;
 
     if(fac==1) {
-        if(*ptr==max) {
+        if(*ptr==info->max) {
             return -1;
         }
-        else if(*ptr+ost > max) {
-            *ptr = max;
+        else if(*ptr+ost > info->max) {
+            *ptr = info->max;
         }
         else {
             *ptr += ost;
         }
     }
     else {
-        if(*ptr==min) {
+        if(*ptr==info->min) {
             return -1;
         }
-        else if(*ptr+ost < min) {
-            *ptr = min;
+        else if(*ptr+ost < info->min) {
+            *ptr = info->min;
         }
         else {
             *ptr += ost;
@@ -620,360 +973,78 @@ static int val_adjust(s16 *ptr, int min, int max, int fac, int val, int step)
 
     return 0;
 }
-int dsp_set_gain(u8 key, u16 times, s16 *g, node_t *n)
+int dsp_set_gain(u8 key, u16 times, dsp_info_t *info)
 {
-    s16 *gain;
-    node_t nd;
-    dsp_data_t dd;
-    int r,fac,val,step=1;
-    dsp_paras_t *dsp=&uiParams.dsp;
-    
-    lock_on(LOCK_DSP);
-    switch(key) {
-        case KEY_MUSIC_UP:      //0~100
-        case KEY_MUSIC_DN:
-        {
-            gain=(s16*)&dsp->music.gain->Gain;
-            fac=(key==KEY_MUSIC_UP)?1:-1;
-            val=fac*times;
-            r = val_adjust(gain, 0, 100, fac, val, step);
-            if(r) {
-                goto quit;
-            }
+    int r,fac,val;
+    para_info_t *pinf;
 
-            nd.ptr = dsp->music.gain;
-            nd.len = sizeof(TypeS_Gain);
-            dd.id = CMD_ID_Gain;
-            dd.ch = Gain_CH_Music;
-        }
-        break;
-
-        case KEY_EFFECT_UP:
-        case KEY_EFFECT_DN:
-        {
-            gain=(s16*)&dsp->effGain->Gain;
-            fac=(key==KEY_EFFECT_UP)?1:-1;
-            val=fac*times;
-            r = val_adjust(gain, 0, 100, fac, val, step);
-            if(r) {
-                goto quit;
-            }
-
-            nd.ptr = dsp->effGain;
-            nd.len = sizeof(TypeS_Gain);
-            dd.id = CMD_ID_Gain;
-            dd.ch = Gain_CH_Eff;
-        }
-        break;
-
-        case KEY_MIC_UP:
-        case KEY_MIC_DN:
-        {
-            gain=(s16*)&dsp->mic.gain->Gain;
-            fac=(key==KEY_MIC_UP)?1:-1;
-            val=fac*times;
-            r = val_adjust(gain, 0, 100, fac, val, step);
-            if(r) {
-                goto quit;
-            }
-            
-            nd.ptr = dsp->mic.gain;
-            nd.len = sizeof(TypeS_Gain);
-            dd.id = CMD_ID_Gain;
-            dd.ch = Gain_CH_Mic;
-        }
-        break;
-        
-        case KEY_MUSIC_TREBLE_UP:
-        case KEY_MUSIC_TREBLE_DN:
-        {
-            gain=(s16*)&dsp->music.geq[1]->Gain;
-            fac=(key==KEY_MUSIC_TREBLE_UP)?1:-1;
-            val=fac*times;
-            r = val_adjust(gain, -240, 120, fac, val, step);
-            if(r) {
-                goto quit;
-            }
-
-            nd.ptr = dsp->music.geq[1];
-            nd.len = sizeof(TypeS_EQBand);
-            dd.id = CMD_ID_EQ;
-            dd.ch = EQ_CH_Music;
-            dd.n  = 1;
-        }
-        break;
-        
-        case KEY_MUSIC_BASS_UP:
-        case KEY_MUSIC_BASS_DN:
-        {
-            gain=(s16*)&dsp->music.geq[0]->Gain;
-            fac=(key==KEY_MUSIC_BASS_UP)?1:-1;
-            val=fac*times;
-            r = val_adjust(gain, -240, 120, fac, val, step);
-            if(r) {
-                goto quit;
-            }
-
-            nd.ptr = dsp->music.geq[0];
-            nd.len = sizeof(TypeS_EQBand);
-            dd.id = CMD_ID_EQ;
-            dd.ch = EQ_CH_Music;
-            dd.n  = 0;
-        }
-        break;
-        
-        case KEY_ECHO_LEVEL_UP:
-        case KEY_ECHO_LEVEL_DN:
-        {
-            gain=(s16*)&dsp->echo.effVol->Vol;
-            fac=(key==KEY_ECHO_LEVEL_UP)?1:-1;
-            val=fac*times;
-            r = val_adjust(gain, 0, 100, fac, val, step);
-            if(r) {
-                goto quit;
-            }
-            
-            nd.ptr = dsp->echo.effVol;
-            nd.len = sizeof(TypeS_Vol);
-            dd.id = CMD_ID_Vol;
-            dd.ch = Vol_CH_Echo_EffVol;
-        }
-        break;
-
-        case KEY_ECHO_DELAY_UP:
-        case KEY_ECHO_DELAY_DN:
-        {
-            gain=(s16*)&dsp->echo.delay->Delay;
-            fac=(key==KEY_ECHO_DELAY_UP)?1:-1;
-            val=fac*times;
-            step = 48;
-            r = val_adjust(gain, 0, 14400, fac, val, step);
-            if(r) {
-                goto quit;
-            }
-
-            nd.ptr = dsp->echo.delay;
-            nd.len = sizeof(TypeS_Delay);
-            dd.id = CMD_ID_Delay;
-            dd.ch = Delay_CH_Echo_Delay;
-        }
-        break;
-
-        case KEY_ECHO_REPEAT_UP:
-        case KEY_ECHO_REPEAT_DN:
-        {
-            gain=(s16*)&dsp->echo.repeat->Vol;
-            fac=(key==KEY_ECHO_REPEAT_UP)?1:-1;
-            val=fac*times;
-            r = val_adjust(gain, 0, 90, fac, val, step);
-            if(r) {
-                goto quit;
-            }
-
-            nd.ptr = dsp->echo.repeat;
-            nd.len = sizeof(TypeS_Vol);
-            dd.id = CMD_ID_Vol;
-            dd.ch = Vol_CH_Echo_Repeat;
-        }
-        break;
-        
-        case KEY_REVERB_LEVEL_UP:
-        case KEY_REVERB_LEVEL_DN:
-        {
-            gain=(s16*)&dsp->reverb.effVol->Vol;
-            fac=(key==KEY_REVERB_LEVEL_UP)?1:-1;
-            val=fac*times;
-            r = val_adjust(gain, 0, 100, fac, val, step);
-            if(r) {
-                goto quit;
-            }
-            
-            nd.ptr = dsp->reverb.effVol;
-            nd.len = sizeof(TypeS_Vol);
-            dd.id = CMD_ID_Vol;
-            dd.ch = Vol_CH_Rev_EffVol;
-        }
-        break;
-
-        case KEY_REVERB_TIME_UP:
-        case KEY_REVERB_TIME_DN:
-        {
-            gain=(s16*)&dsp->reverb.time->Delay;
-            fac=(key==KEY_REVERB_TIME_UP)?1:-1;
-            val=fac*times;
-            r = val_adjust(gain, 0, 8000, fac, val, step);
-            if(r) {
-                goto quit;
-            }
-
-            nd.ptr = dsp->reverb.time;
-            nd.len = sizeof(TypeS_Delay);
-            dd.id = CMD_ID_Delay;
-            dd.ch = Delay_CH_Rev_Time;
-        }
-        break;
-        
-        case KEY_MIC_TREBLE_UP:
-        case KEY_MIC_TREBLE_DN:
-        {
-            gain=(s16*)&dsp->mic.geq[2]->Gain;
-            fac=(key==KEY_MIC_TREBLE_UP)?1:-1;
-            val=fac*times;
-            r = val_adjust(gain, -240, 120, fac, val, step);
-            if(r) {
-                goto quit;
-            }
-
-            nd.ptr = dsp->mic.geq[2];
-            nd.len = sizeof(TypeS_EQBand);
-            dd.id = CMD_ID_EQ;
-            dd.ch = EQ_CH_Mic;
-            dd.n  = 2;
-        }
-        break;
-
-        case KEY_MIC_MIDDLE_UP:
-        case KEY_MIC_MIDDLE_DN:
-        {
-            gain=(s16*)&dsp->mic.geq[1]->Gain;
-            fac=(key==KEY_MIC_MIDDLE_UP)?1:-1;
-            val=fac*times;
-            r = val_adjust(gain, -240, 120, fac, val, step);
-            if(r) {
-                goto quit;
-            }
-
-            nd.ptr = dsp->mic.geq[1];
-            nd.len = sizeof(TypeS_EQBand);
-            dd.id = CMD_ID_EQ;
-            dd.ch = EQ_CH_Mic;
-            dd.n  = 1;
-        }
-        break;
-
-        case KEY_MIC_BASS_UP:               //-24~+12dB
-        case KEY_MIC_BASS_DN:
-        {
-            gain=(s16*)&dsp->mic.geq[0]->Gain;
-            fac=(key==KEY_MIC_BASS_UP)?1:-1;
-            val=fac*times;
-            r = val_adjust(gain, -240, 120, fac, val, step);
-            if(r) {
-                goto quit;
-            }
-
-            nd.ptr = dsp->mic.geq[0];
-            nd.len = sizeof(TypeS_EQBand);
-            dd.id = CMD_ID_EQ;
-            dd.ch = EQ_CH_Mic;
-            dd.n  = 0;
-        }
-        break;
-        
-        default:
-        goto quit;
-    }
-    
-    dd.dlen = nd.len;
-    r = dsp_send(&dd);
-    
-    if(g) {
-        *g = *gain/step;
+    val = info->fac*times;
+    pinf = (para_info_t*)&PARA_INFO[info->dsp.id].info[info->index];
+    r = val_adjust(info->pdata, fac, val, pinf);
+    if(r) {
+        return -1;
     }
 
-    if(n) {
-        *n = nd;
-    }
-
-quit:
-    lock_off(LOCK_DSP);
+    r = dsp_send(&info->dsp);
 
     return r;
 }
 
 
-int dsp_set_pitch(u8 key, s16 *g, node_t *n)
+int dsp_set_pitch(u8 key, dsp_info_t *info)
 {
     int r;
-    dsp_data_t dd={0};
-    Dsp_Paras *dsp=&gParams.dsp;
 
     if(key==KEY_SHARP) {
-        dsp->Array_PitchShift.PitchShift = (dsp->Array_PitchShift.PitchShift+1)%5;
+        *info->pdata = (*info->pdata+1)%5;
     }
     else if(key==KEY_0) {
-        dsp->Array_PitchShift.PitchShift = 0;
+        *info->pdata = 0;
     }
     else {
-        dsp->Array_PitchShift.PitchShift = (dsp->Array_PitchShift.PitchShift-1)%5;
+        *info->pdata = (*info->pdata-1)%5;
     }
 
-    dd.id = CMD_ID_PitchShift;
-    dd.dlen = sizeof(TypeS_PitchShift);
-    r = dsp_send(&dd);
-    if(r==0 && n) {
-        n->ptr = &dsp->Array_PitchShift;
-        n->len = sizeof(dsp->Array_PitchShift);
-        if(g) {
-            *g = dsp->Array_PitchShift.PitchShift;
-        }
-    }
+    r = dsp_send(&info->dsp);
 
     return r;
 }
 
 
-int dsp_set_preset(u8 key, s16 *g, node_t *n)
+int dsp_set_preset(u8 key, dsp_info_t *info)
 {
     int r;
     Dsp_Paras *dsp=&gParams.dsp;
 
     if(key==KEY_MODE) {
-        gParams.pre = (gParams.pre+1)%PRESET_MAX;
+        *info->pdata = (*info->pdata+1)%PRESET_MAX;
     }
     else {
-        gParams.pre = key-KEY_M1;
+        *info->pdata = key-KEY_M1;
     }
     
-    paras_read_preset(gParams.pre, dsp);
+    paras_read_preset(*info->pdata, dsp);
     r = dsp_download();
-    if(r==0 && n) {
-        n->ptr = &gParams.pre;
-        n->len = sizeof(gParams.pre);
-        if(g) {
-            *g = gParams.pre;
-        }
-    }
 
     return r;
 }
 
 
-int dsp_set_input(s16 *g, node_t *n)
+int dsp_set_input(dsp_info_t *info)
 {
     int r;
-    dsp_data_t dd={0};
-    Dsp_Paras *dsp=&gParams.dsp;
 
-    dsp->Array_Input.input = (dsp->Array_Input.input+1)%INPUT_MAX;
-    sys_set_input(dsp->Array_Input.input);
-    dd.id = CMD_ID_Input;
-    dd.dlen = sizeof(TypeS_Input);
-    r = dsp_send(&dd);
-    if(r==0 && n) {
-        n->ptr = &dsp->Array_Input;
-        n->len = sizeof(dsp->Array_Input);
-        if(g) {
-            *g = dsp->Array_Input.input;
-        }
-    }
+    *info->pdata = (*info->pdata+1)%INPUT_MAX;
+    sys_set_input(*info->pdata);
+
+    r = dsp_send(&info->dsp);
 
     return r;
 }
 
-int dsp_set_mute(s16 *g, node_t *n)
+int dsp_set_mute(dsp_info_t *info, u8 *m)
 {
-    u16 mute;
+    u8 mute;
     int r,i;
     dsp_data_t dd={0};
     Dsp_Paras *dsp=&gParams.dsp;
@@ -993,11 +1064,11 @@ int dsp_set_mute(s16 *g, node_t *n)
         dd.dlen = sizeof(TypeS_Gain);
         r = dsp_send(&dd);
     }
-    if(r==0 && n) {
-        n->ptr = &dsp->Array_Gain;
-        n->len = sizeof(dsp->Array_Gain);
-        if(g) {
-            *g = mute;
+    if(r==0) {
+        info->node.ptr = &dsp->Array_Gain;
+        info->node.len = sizeof(dsp->Array_Gain);
+        if(m) {
+            *m = mute;
         }
     }
     

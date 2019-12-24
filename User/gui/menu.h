@@ -41,13 +41,6 @@ typedef struct{
     int (*clear)(void *p);
 }control_func_t;
 
-typedef struct {
-    u8      cmd;
-    u8      index;       //在结构体中的序号
-    char    *title;
-    char    *name;
-}key_info_t;
-
 
 int menu_init(void);
 
@@ -64,8 +57,7 @@ int menu_handle(key_t *key);
 /////////////////////////////////
 int home_clear(void);
 int home_refresh(void);
-int home_refresh2(void);
-int home_refresh3(u8 key, s16 v, key_info_t *info);
+int home_refresh2(u8 key, dsp_info_t *info);
 
 
 extern u8 gM;

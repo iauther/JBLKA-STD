@@ -489,6 +489,19 @@ typedef struct {
     u8                  *pIdx;     //used preset index
 }dsp_paras_t;
 
+
+typedef struct {
+    s8          fac;
+    u8          index;       //在结构体中的序号
+    node_t      node;
+    s16         *pdata;
+    char        *title;
+    char        *name;
+    dsp_data_t  dsp;
+}dsp_info_t;
+
+
+
 //#pragma pack()
 
 //////////////////////////////////////////////////////////////////
@@ -524,15 +537,23 @@ void dsp_remap(dsp_paras_t *paras, Dsp_Paras *dsp);
 
 int dsp_update(dsp_data_t *dsp, node_t *node);
 
-int dsp_set_gain(u8 key, u16 times, s16 *g, node_t *n);
+int dsp_get_struct_len(u8 cmd);
 
-int dsp_set_pitch(u8 key, s16 *g, node_t *n);
+u8* dsp_get_struct_ptr(u8 cmd);
 
-int dsp_set_preset(u8 key, s16 *g, node_t *n);
+u8 dsp_get_ch(u8 ch, void *p);
 
-int dsp_set_input(s16 *g, node_t *n);
+int dsp_get_info(u8 key, dsp_info_t *info);
 
-int dsp_set_mute(s16 *g, node_t *n);
+int dsp_set_gain(u8 key, u16 times, dsp_info_t *info);
+
+int dsp_set_pitch(u8 key, dsp_info_t *info);
+
+int dsp_set_preset(u8 key, dsp_info_t *info);
+
+int dsp_set_input(dsp_info_t *info);
+
+int dsp_set_mute(dsp_info_t *info, u8 *m);
 
 void dsp_test(void);
 

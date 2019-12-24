@@ -119,9 +119,9 @@ item_info_t* listitem_get(listitem_t *l, u8 index)
 }
 
 
-int listitem_get_focus(listitem_t *l, node_t *n)
+item_info_t* listitem_get_focus(listitem_t *l)
 {
-    return slist_get(l->list, l->focusId, n);
+    return listitem_get(l, l->focusId);
 }
 
 
@@ -404,6 +404,16 @@ int listitem_move(listitem_t *l, u8 dir, u8 size)
         r = adjust_value(l, dir, size);
         if(r==0) {
             set_refresh(l, REFRESH_VALUE);
+
+            dsp_data_t dsp;
+            item_info_t *info=listitem_get_focus(l);
+            
+            
+            dsp.id = info->cmd;
+            dsp.ch = info->ch;
+            dsp.n  = info->n;
+            dsp.dlen = dsp_get_struct_len(dsp.id);
+            r = dsp_send(&dsp);
         }
     }
     else {

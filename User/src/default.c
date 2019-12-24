@@ -186,6 +186,36 @@ const def_dsp_t DEF_DSP={
 };
 /////////////////////////////////////////////////////////////////////////
 
+const int STRUCT_LEN[CMD_ID_NUM]={
+    0,
+    sizeof(TypeS_Gain),
+    sizeof(TypeS_Vol),
+    sizeof(TypeS_EQBand),
+    sizeof(TypeS_HLPFCoef),
+    sizeof(TypeS_Delay),
+    sizeof(TypeS_FeedBack),
+    sizeof(TypeS_Limiter),
+    sizeof(TypeS_PitchShift),
+    sizeof(TypeS_Mute),
+    sizeof(TypeS_NoiseGate),
+    sizeof(TypeS_Input),
+};
+
+const void* STRUCT_PTR[CMD_ID_NUM]={
+    NULL,
+    gParams.dsp.Array_Gain,
+    gParams.dsp.Array_Vol,
+    gParams.dsp.Array_EQ,
+    gParams.dsp.Array_HLPF,
+    gParams.dsp.Array_Delay,
+    gParams.dsp.Array_FeedBack,
+    gParams.dsp.Array_Limiter,
+    &gParams.dsp.Array_PitchShift,
+    gParams.dsp.Array_Mute,
+    gParams.dsp.Array_NoiseGate,
+    &gParams.dsp.Array_Input,
+};
+
 
 const para_txt_t HLPF_TXT={
     {
