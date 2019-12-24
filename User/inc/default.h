@@ -137,8 +137,8 @@ typedef struct {
     cchr                *unit;
     s16                 min;
     s16                 max;
-    f32                 step;
-    f32                 div;        //show number==value/div
+    u8                  step;
+    u8                  div;        //show number==value/div
     u8                  flt;        //is float or not
     const para_txt_t    *ptxt;
 }para_info_t;
@@ -169,6 +169,7 @@ typedef struct {
 extern const def_dsp_t DEF_DSP;
 extern const fw_info_t FW_INFO;
 extern const io_data_t IO_DATA;
+extern const para_info_t  DELAY_INFO[Delay_CH_NUM];
 extern const paras_info_t PARA_INFO[CMD_ID_NUM];
 extern const int STRUCT_LEN[CMD_ID_NUM];
 extern const void* STRUCT_PTR[CMD_ID_NUM];

@@ -25,18 +25,25 @@ static void draw_value(rect_t rect, dsp_info_t *info)
     u8 font;
     rect_t r=rect;
     font_info_t inf1,inf2;
-    para_info_t *pinfo=(para_info_t*)&PARA_INFO[info->dsp.id].info[info->index];
+    para_info_t *pinf;
+
+    if(info->dsp.id==CMD_ID_Delay) {
+        pinf = (para_info_t*)&DELAY_INFO[info->dsp.ch];
+    }
+    else {
+        pinf = (para_info_t*)&PARA_INFO[info->dsp.id].info[info->index];
+    }
 
     r.y = 80;
     r.h = 100;
     
     font = FONT_96;
     inf1 = font_info(font);
-    if(pinfo->flt) {
-        sprintf((char*)tmp, "%.1f", (f32)(*info->pdata)/pinfo->div);
+    if(pinf->flt) {
+        sprintf((char*)tmp, "%.1f", (f32)(*info->pdata)/pinf->div);
     }
     else {
-        sprintf((char*)tmp, "%d", (*info->pdata)/(int)pinfo->div);
+        sprintf((char*)tmp, "%d", (*info->pdata)/pinf->div);
     }
     
     len = inf1.width*strlen((char*)tmp);
@@ -56,7 +63,7 @@ static void draw_value(rect_t rect, dsp_info_t *info)
     if(prevLength!=len) {
         lcd_fill_rect(r.x-10, r.y, 10, r.h, LCD_BC);
     }
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinfo->unit, font, LCD_FC, LCD_BC, ALIGN_LEFT);
+    lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinf->unit, font, LCD_FC, LCD_BC, ALIGN_LEFT);
     prevLength = len;
 }
 

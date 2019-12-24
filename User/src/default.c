@@ -76,8 +76,8 @@ const def_dsp_t DEF_DSP={
 
         .hpf        = {.Freq = 20, .Type = HLPF_Type_12dBButterworth},
         .lpf        = {.Freq = 20000, .Type = HLPF_Type_12dBButterworth},
-        .preDelay   = {.Delay = 2},
-        .delay      = {.Delay = 235},
+        .preDelay   = {.Delay = 2*48},
+        .delay      = {.Delay = 235*48},
     },
     
     .reverb = {
@@ -94,7 +94,7 @@ const def_dsp_t DEF_DSP={
 
         .hpf        = {.Freq = 20, .Type = HLPF_Type_12dBButterworth},
         .lpf        = {.Freq = 20000, .Type = HLPF_Type_12dBButterworth},
-        .preDelay   = {.Delay = 12},
+        .preDelay   = {.Delay = 12*48},
         .time       = {.Delay = 4300},
     },
 
@@ -285,7 +285,15 @@ para_txt_t PHASE_TXT={
 };
 
 
-u32 parainfo_length=sizeof(PARA_INFO);
+const para_info_t DELAY_INFO[Delay_CH_NUM]={
+    {"PREDELAY",        "ms",               0,                  4800,               48,                 48,              0,             NULL},  //"ECHO PREDELAY"
+    {"DELAY",           "ms",               0,                  14400,              48,                 48,              0,             NULL},  //"ECHO DELAY"
+    {"PREDELAY",        "ms",               0,                  4800,               48,                 48,              0,             NULL},  //"REVERB PREDELAY"
+    {"TIME",            "ms",               0,                  8000,               1,                  1,               0,             NULL},  //"REVERB TIME"
+    {"DELAY",           "ms",               0,                  1920,               48,                 48,              0,             NULL},  //"MAINL DELAY"
+    {"DELAY",           "ms",               0,                  1920,               48,                 48,              0,             NULL},  //"MAINR DELAY"
+    {"DELAY",           "ms",               0,                  1920,               48,                 48,              0,             NULL},  //"SUB DELAY"
+};
 const paras_info_t PARA_INFO[CMD_ID_NUM]={
     {//0
         {
@@ -303,7 +311,7 @@ const paras_info_t PARA_INFO[CMD_ID_NUM]={
 
     {//CMD_ID_Vol
         {
-            {"VOL",                 "",                 0,                  200,                1,                  1,              0,              NULL},
+            {"VOL",                 "%",                0,                  200,                1,                  1,              0,              NULL},
             {"PHASE",               "",                 0,                  1,                  1,                  1,              0,              &PHASE_TXT},
             {"",                    "",                 1,                  1,                  1,                  1,              0,              NULL},
         }
@@ -330,14 +338,8 @@ const paras_info_t PARA_INFO[CMD_ID_NUM]={
 
     {//CMD_ID_Delay
         {
-            {"ECHO PREDELAY",       "ms",               0,                  4800,               48,                 48,              0,             NULL},
-            {"ECHO DELAY",          "ms",               0,                  14400,              48,                 48,              0,             NULL},
-            {"REVERB PREDELAY",     "ms",               0,                  4800,               48,                 48,              0,             NULL},
-            {"REVERB DELAY",        "ms",               0,                  8000,               1,                  1,               0,             NULL},
-            {"MAINL DELAY",         "ms",               0,                  1920,               48,                 48,              0,             NULL},
-            {"MAINR DELAY",         "ms",               0,                  1920,               48,                 48,              0,             NULL},
-            {"SUB DELAY",           "ms",               0,                  1920,               48,                 48,              0,             NULL},
-            {"",                    "",                 1,                  1,                  1,                  1,               0,             NULL},
+            {"DELAY",               "ms",               0,                  4800,               48,                 48,              0,             NULL},
+            {"",                    "",                 1,                  1,                  1,                  1,              0,              NULL},
         }
     },
 

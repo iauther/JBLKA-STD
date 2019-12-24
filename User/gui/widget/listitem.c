@@ -168,7 +168,7 @@ static void draw_paras_value(listitem_t *l, u8 index, item_info_t *info, para_in
             sprintf(tmp, "%.1f", (f32)v/pinfo->div);
         }
         else {
-            sprintf(tmp, "%d", v/(int)pinfo->div);
+            sprintf(tmp, "%d", v/pinfo->div);
         }
         ptxt = tmp;
     }

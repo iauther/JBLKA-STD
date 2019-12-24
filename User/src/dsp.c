@@ -864,7 +864,7 @@ int dsp_get_info(u8 key, dsp_info_t *info)
             info->index = 0;
             info->title = (char*)"REVERB";
             info->name = (char*)"TIME";
-            info->fac = (key==KEY_REVERB_LEVEL_UP)?1:-1;
+            info->fac = (key==KEY_REVERB_TIME_UP)?1:-1;
             info->pdata = (s16*)&dsp->reverb.time->Delay;
             info->node.ptr = dsp->reverb.time;
             info->node.len = sizeof(TypeS_Delay);
@@ -944,27 +944,27 @@ int dsp_get_info(u8 key, dsp_info_t *info)
 
 
 #include "key.h"
-static int val_adjust(s16 *ptr, s8 fac, int val, para_info_t *info)
+static int val_adjust(s16 *ptr, s8 fac, int val, int min, int max, u8 step)
 {
-    int ost=val*info->step;
+    int ost=val*step;
 
     if(fac==1) {
-        if(*ptr==info->max) {
+        if(*ptr==max) {
             return -1;
         }
-        else if(*ptr+ost > info->max) {
-            *ptr = info->max;
+        else if(*ptr+ost > max) {
+            *ptr = max;
         }
         else {
             *ptr += ost;
         }
     }
     else {
-        if(*ptr==info->min) {
+        if(*ptr==min) {
             return -1;
         }
-        else if(*ptr+ost < info->min) {
-            *ptr = info->min;
+        else if(*ptr+ost < min) {
+            *ptr = min;
         }
         else {
             *ptr += ost;
@@ -979,8 +979,14 @@ int dsp_set_gain(u8 key, u16 times, dsp_info_t *info)
     para_info_t *pinf;
 
     val = info->fac*times;
-    pinf = (para_info_t*)&PARA_INFO[info->dsp.id].info[info->index];
-    r = val_adjust(info->pdata, info->fac, val, pinf);
+    if(info->dsp.id==CMD_ID_Delay) {
+        pinf = (para_info_t*)&DELAY_INFO[info->dsp.ch];
+    }
+    else {
+        pinf = (para_info_t*)&PARA_INFO[info->dsp.id].info[info->index];
+    }
+
+    r = val_adjust(info->pdata, info->fac, val, pinf->min, pinf->max, pinf->step);
     if(r) {
         return -1;
     }
