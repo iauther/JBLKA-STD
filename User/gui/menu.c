@@ -45,13 +45,7 @@ CONST dsp_var_t dspItems[CMD_ID_NUM]={
 
     {//CMD_ID_Delay
         {
-            {CONTROL_INPUTBOX,          "ECHO PREDELAY",      CMD_ID_Delay,             NULL,           NULL},
-            {CONTROL_INPUTBOX,          "ECHO DELAY",         CMD_ID_Delay,             NULL,           NULL},
-            {CONTROL_INPUTBOX,          "REVERB PREDELAY",    CMD_ID_Delay,             NULL,           NULL},
-            {CONTROL_INPUTBOX,          "REVERB DELAY",       CMD_ID_Delay,             NULL,           NULL},
-            {CONTROL_INPUTBOX,          "MAINL DELAY",        CMD_ID_Delay,             NULL,           NULL},
-            {CONTROL_INPUTBOX,          "MAINR DELAY",        CMD_ID_Delay,             NULL,           NULL},
-            {CONTROL_INPUTBOX,          "SUB DELAY",          CMD_ID_Delay,             NULL,           NULL},
+            {CONTROL_INPUTBOX,          "DELAY",              CMD_ID_Delay,             NULL,           NULL},
             {CONTROL_NONE,              "",                   0,                        NULL,           NULL},
         }
     },

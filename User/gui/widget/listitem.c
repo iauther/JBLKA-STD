@@ -188,27 +188,48 @@ static void draw_paras_unit(listitem_t *l, u8 index, item_info_t *info, para_inf
     lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)pinfo->unit, FONT_16, color, bgcolor, ALIGN_LEFT);
 }
 
+
 static void draw_value(listitem_t *l, int id, u16 color, u16 bgcolor)
 {
     u8 index=l->focusId-l->firstId;
     rect_t r=INPUTBOX_RECT;
     item_info_t *info=listitem_get(l, id);
-    para_info_t *pinfo=(para_info_t*)&PARA_INFO[info->cmd].info[index];
+    para_info_t *pinf=(para_info_t*)&PARA_INFO[info->cmd].info[index];;
     
     r.h = ITEM_HEIGHT;
     r.y = r.y+index*ITEM_HEIGHT;
-    draw_paras_value(l, index, info, pinfo, &r, color, bgcolor, 0);
+    draw_paras_value(l, index, info, pinf, &r, color, bgcolor, 0);
+}
+
+static u8 get_ch(listitem_t *l)
+{
+    item_info_t *info=listitem_get_focus(l->parent);
+    if(info) {
+        return info->ch;
+    }
+
+    return 0;
 }
 static void draw_paras(listitem_t *l, u8 index, int id, item_info_t *info, u16 color, u16 bgcolor)
 {
+    u8 ch;
     rect_t r=INPUTBOX_RECT;
+    para_info_t *pinf;
     para_info_t *pinfo=(para_info_t*)&PARA_INFO[info->cmd].info[id];
     
+    if(info->cmd==CMD_ID_Delay) {
+        ch = get_ch(l);
+        pinf = (para_info_t*)&DELAY_INFO[ch];
+    }
+    else {
+        pinf = (para_info_t*)&PARA_INFO[info->cmd].info[index];
+    }
+
     r.h = ITEM_HEIGHT;
     r.y = r.y+index*ITEM_HEIGHT;
-    draw_paras_label(l, index, info, pinfo, &r, LCD_FC, LCD_BC);
-    draw_paras_value(l, index, info, pinfo, &r, color, bgcolor, 1);
-    draw_paras_unit (l, index, info, pinfo, &r, LCD_FC, LCD_BC);
+    draw_paras_label(l, index, info, pinf, &r, LCD_FC, LCD_BC);
+    draw_paras_value(l, index, info, pinf, &r, color, bgcolor, 1);
+    draw_paras_unit (l, index, info, pinf, &r, LCD_FC, LCD_BC);
 }
 
 
