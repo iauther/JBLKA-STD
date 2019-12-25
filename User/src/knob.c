@@ -9,6 +9,7 @@
 
 #define KQ_MAX      10
 
+u8 dmaValue=0;
 u8 knobValue=0;
 u8 keyPool[40];
 u16 keyTimes[40];
@@ -97,6 +98,8 @@ static int kfind(queue_t *q, int index, void *p1, void *p2)
 static void knob_rx_cb(u8 *data, u16 data_len)
 {
     u8 value;
+
+    knobValue = *data;
     keyTimes[knobValue]++;
 
 #ifdef RTX
@@ -145,7 +148,7 @@ void knob_tmr_cb(void)
 
 int knob_init(void)
 {
-    uart_paras_t para={knob_rx_cb, &knobValue, sizeof(knobValue)};
+    uart_paras_t para={knob_rx_cb, &dmaValue, sizeof(dmaValue)};
     
     keyPool_init();
 

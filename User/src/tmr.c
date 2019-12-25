@@ -58,7 +58,6 @@ void tim_callback(u8 timer)   //TIMÖÐ¶Ï
     TIM_ClearFlag(tmr, TIM_FLAG_Update);  
 }
 
-    
 
 #ifdef RTX
 osTimerId_t  s_tmr=0;
@@ -76,6 +75,7 @@ static void timer_cb(void *p)
 
 void tmr_start(void)
 {
+#ifdef RTX
     osStatus_t st;
 
     //tim_init(TIMER4, 50, timer_cb);
@@ -83,6 +83,7 @@ void tmr_start(void)
     if(s_tmr) {
         st = osTimerStart(s_tmr, 50);
     }
+#endif
 }
 
 

@@ -146,7 +146,7 @@ static void dma_init(eUART uart)
     DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;  //内存地址寄存器递增
     DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte; //数据宽度为8位
     DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte; //数据宽度为8位
-    DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;  //工作在正常缓存模式
+    DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;  //工作在正常缓存模式
     DMA_InitStructure.DMA_Priority = DMA_Priority_Medium; //DMA通道 x拥有中优先级 
     DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;  //DMA通道x没有设置为内存到内存传输
     DMA_Init(dmaChannel[uart], &DMA_InitStructure);  //根据DMA_InitStruct中指定的参数初始化DMA的通道
