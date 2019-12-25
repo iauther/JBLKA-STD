@@ -2,8 +2,8 @@
 #define __CONFIG_H__
 
 
-#define BOOT_VERSION "V01.0"
-#define MCU_VERSION  "V001.02"
+#define BOOT_VERSION "V01.1"
+#define MCU_VERSION  "V002.00"
 
 
 //#define BOARD_ALIENTEK

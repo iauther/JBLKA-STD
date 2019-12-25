@@ -58,7 +58,8 @@ int menu_handle(key_t *key);
 enum {
     REFRESH_HOME_CLEAR = 1<<0,
     REFRESH_HOME_TITLE = 1<<1,
-    REFRESH_HOME_VALUE = 1<<2,
+    REFRESH_HOME_NAME = 1<<2,
+    REFRESH_HOME_VALUE = 1<<3,
 
     REFRESH_HOME_ALL = 0xff,
 };
@@ -66,8 +67,7 @@ enum {
 
 int home_clear(void);
 int home_refresh(void);
-int home_set_refresh(u16 flag);
-int home_refresh2(u8 key, dsp_info_t *info);
+int home_set_key(u8 key);
 
 
 extern u8 gM;

@@ -10,10 +10,19 @@ static void draw_title(rect_t rect, dsp_info_t *info)
 
     r.y +=30;
     r.h = 40;
+
+    lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
     lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)info->title, FONT_24, LCD_FC, LCD_BC, ALIGN_MIDDLE);
+}
+
+
+static void draw_name(rect_t rect, dsp_info_t *info)
+{
+    rect_t r=rect;
     
     r.y = 190;
     r.h = 20;
+    lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
     lcd_draw_string_align(r.x, r.y, r.w, r.h, (u8*)info->name, FONT_24, YELLOW, LCD_BC, ALIGN_MIDDLE);
 }
 
@@ -75,110 +84,120 @@ static int draw_clear(rect_t r)
     return 0;
 }
 
-static int need_refresh_all(u8 key)
+static u16 get_flag(u8 key)
 {
-    int flag=1;
+    u16 flag=REFRESH_HOME_VALUE;
 
     if(key != curKey) {
         switch(key) {
             case KEY_MUSIC_UP:
             case KEY_MUSIC_DN:
-            if((key==KEY_MUSIC_UP && curKey==KEY_MUSIC_DN) || (key==KEY_MUSIC_DN && curKey==KEY_MUSIC_UP)) {
-                flag = 0;
+            case KEY_MUSIC_TREBLE_UP:
+            case KEY_MUSIC_TREBLE_DN:
+            case KEY_MUSIC_BASS_UP:
+            case KEY_MUSIC_BASS_DN:
+            if(curKey==KEY_MUSIC_UP || curKey==KEY_MUSIC_DN ||
+               curKey==KEY_MUSIC_TREBLE_UP || curKey==KEY_MUSIC_TREBLE_DN ||
+               curKey==KEY_MUSIC_BASS_UP || curKey==KEY_MUSIC_BASS_DN) {
+                if( (key==KEY_MUSIC_UP && curKey==KEY_MUSIC_DN) || (key==KEY_MUSIC_DN && curKey==KEY_MUSIC_UP) ||
+                    (key==KEY_MUSIC_TREBLE_UP && curKey==KEY_MUSIC_TREBLE_DN) || (key==KEY_MUSIC_TREBLE_DN && curKey==KEY_MUSIC_TREBLE_UP) ||
+                    (key==KEY_MUSIC_BASS_UP && curKey==KEY_MUSIC_BASS_DN) || (key==KEY_MUSIC_BASS_DN && curKey==KEY_MUSIC_BASS_UP)) {
+                    flag |= REFRESH_HOME_VALUE;
+                }
+                else {
+                    flag |= REFRESH_HOME_NAME;
+                }
+            }
+            else {
+                flag |= REFRESH_HOME_NAME|REFRESH_HOME_TITLE;
             }
             break;
 
             case KEY_EFFECT_UP:
             case KEY_EFFECT_DN:
-            if((key==KEY_EFFECT_UP && curKey==KEY_EFFECT_DN) || (key==KEY_EFFECT_DN && curKey==KEY_EFFECT_UP)) {
-                flag = 0;
+            if(curKey==KEY_EFFECT_UP || curKey==KEY_EFFECT_DN) {
+                if((key==KEY_EFFECT_UP && curKey==KEY_EFFECT_DN) || (key==KEY_EFFECT_DN && curKey==KEY_EFFECT_UP)) {
+                    flag |= REFRESH_HOME_VALUE;
+                }
+                else {
+                    flag |= REFRESH_HOME_NAME;
+                }
+            }
+            else {
+                flag |= REFRESH_HOME_NAME|REFRESH_HOME_TITLE;
             }
             break;
 
             case KEY_MIC_UP:
             case KEY_MIC_DN:
-            if((key==KEY_MIC_UP && curKey==KEY_MIC_DN) || (key==KEY_MIC_DN && curKey==KEY_MIC_UP)) {
-                flag = 0;
-            }
-            break;
-            
-            case KEY_MUSIC_TREBLE_UP:
-            case KEY_MUSIC_TREBLE_DN:
-            if((key==KEY_MUSIC_TREBLE_UP && curKey==KEY_MUSIC_TREBLE_DN) || (key==KEY_MUSIC_TREBLE_DN && curKey==KEY_MUSIC_TREBLE_UP)) {
-                flag = 0;
-            }
-            break;
-            
-            case KEY_MUSIC_BASS_UP:
-            case KEY_MUSIC_BASS_DN:
-            if((key==KEY_MUSIC_BASS_UP && curKey==KEY_MUSIC_BASS_DN) || (key==KEY_MUSIC_BASS_DN && curKey==KEY_MUSIC_BASS_UP)) {
-                flag = 0;
-            }
-            break;
-            
             case KEY_MIC_TREBLE_UP:
             case KEY_MIC_TREBLE_DN:
-            if((key==KEY_MIC_TREBLE_UP && curKey==KEY_MIC_TREBLE_DN) || (key==KEY_MIC_TREBLE_DN && curKey==KEY_MIC_TREBLE_UP)) {
-                flag = 0;
-            }
-            break;
-
             case KEY_MIC_MIDDLE_UP:
             case KEY_MIC_MIDDLE_DN:
-            if((key==KEY_MIC_MIDDLE_UP && curKey==KEY_MIC_MIDDLE_DN) || (key==KEY_MIC_MIDDLE_DN && curKey==KEY_MIC_MIDDLE_UP)) {
-                flag = 0;
-            }
-            break;
-
             case KEY_MIC_BASS_UP:               //-24~+12dB
             case KEY_MIC_BASS_DN:
-            if((key==KEY_MIC_BASS_UP && curKey==KEY_MIC_BASS_DN) || (key==KEY_MIC_BASS_DN && curKey==KEY_MIC_BASS_UP)) {
-                flag = 0;
+            if(curKey==KEY_MIC_UP || curKey==KEY_MIC_DN || curKey==KEY_MIC_TREBLE_UP || curKey==KEY_MIC_TREBLE_DN ||
+               curKey==KEY_MIC_MIDDLE_UP || curKey==KEY_MIC_MIDDLE_DN || curKey==KEY_MIC_BASS_UP || curKey==KEY_MIC_BASS_DN) {
+                if( (key==KEY_MIC_UP && curKey==KEY_MIC_DN) || (key==KEY_MIC_DN && curKey==KEY_MIC_UP) ||
+                    (key==KEY_MIC_TREBLE_UP && curKey==KEY_MIC_TREBLE_DN) || (key==KEY_MIC_TREBLE_DN && curKey==KEY_MIC_TREBLE_UP) ||
+                    (key==KEY_MIC_MIDDLE_UP && curKey==KEY_MIC_MIDDLE_DN) || (key==KEY_MIC_MIDDLE_DN && curKey==KEY_MIC_MIDDLE_UP) ||
+                    (key==KEY_MIC_BASS_UP && curKey==KEY_MIC_BASS_DN) || (key==KEY_MIC_BASS_DN && curKey==KEY_MIC_BASS_UP)) {
+                    flag |= REFRESH_HOME_VALUE;
+                }
+                else {
+                    flag |= REFRESH_HOME_NAME;
+                }
+            }
+            else {
+                flag |= REFRESH_HOME_NAME|REFRESH_HOME_TITLE;
             }
             break;
             
             case KEY_ECHO_LEVEL_UP:
             case KEY_ECHO_LEVEL_DN:
-            if((key==KEY_ECHO_LEVEL_UP && curKey==KEY_ECHO_LEVEL_DN) || (key==KEY_ECHO_LEVEL_DN && curKey==KEY_ECHO_LEVEL_UP)) {
-                flag = 0;
-            }
-            break;
-
             case KEY_ECHO_DELAY_UP:
             case KEY_ECHO_DELAY_DN:
-            if((key==KEY_ECHO_DELAY_UP && curKey==KEY_ECHO_DELAY_DN) || (key==KEY_ECHO_DELAY_DN && curKey==KEY_ECHO_DELAY_UP)) {
-                flag = 0;
-            }
-            break;
-
             case KEY_ECHO_REPEAT_UP:
             case KEY_ECHO_REPEAT_DN:
-            if((key==KEY_ECHO_REPEAT_UP && curKey==KEY_ECHO_REPEAT_DN) || (key==KEY_ECHO_REPEAT_DN && curKey==KEY_ECHO_REPEAT_UP)) {
-                flag = 0;
+            if(curKey==KEY_ECHO_LEVEL_UP || curKey==KEY_ECHO_LEVEL_DN ||
+               curKey==KEY_ECHO_DELAY_UP || curKey==KEY_ECHO_DELAY_DN ||
+               curKey==KEY_ECHO_REPEAT_UP || curKey==KEY_ECHO_REPEAT_DN) {
+                if((key==KEY_ECHO_LEVEL_UP && curKey==KEY_ECHO_LEVEL_DN) || (key==KEY_ECHO_LEVEL_DN && curKey==KEY_ECHO_LEVEL_UP) ||
+                   (key==KEY_ECHO_DELAY_UP && curKey==KEY_ECHO_DELAY_DN) || (key==KEY_ECHO_DELAY_DN && curKey==KEY_ECHO_DELAY_UP) ||
+                   (key==KEY_ECHO_REPEAT_UP && curKey==KEY_ECHO_REPEAT_DN) || (key==KEY_ECHO_REPEAT_DN && curKey==KEY_ECHO_REPEAT_UP)) {
+                    flag |= REFRESH_HOME_VALUE;
+                }
+                else {
+                    flag |= REFRESH_HOME_NAME;
+                }
+            }
+            else {
+                flag |= REFRESH_HOME_NAME|REFRESH_HOME_TITLE;
             }
             break;
             
             case KEY_REVERB_LEVEL_UP:
             case KEY_REVERB_LEVEL_DN:
-            if((key==KEY_REVERB_LEVEL_UP && curKey==KEY_REVERB_LEVEL_DN) || (key==KEY_REVERB_LEVEL_DN && curKey==KEY_REVERB_LEVEL_UP)) {
-                flag = 0;
-            }
-            break;
-
             case KEY_REVERB_TIME_UP:
             case KEY_REVERB_TIME_DN:
-            if((key==KEY_REVERB_TIME_UP && curKey==KEY_REVERB_TIME_DN) || (key==KEY_REVERB_TIME_DN && curKey==KEY_REVERB_TIME_UP)) {
-                flag = 0;
+            if(curKey==KEY_REVERB_LEVEL_UP || curKey==KEY_REVERB_LEVEL_DN ||
+               curKey==KEY_REVERB_TIME_UP || curKey==KEY_REVERB_TIME_DN) {
+                if((key==KEY_REVERB_LEVEL_UP && curKey==KEY_REVERB_LEVEL_DN) || (key==KEY_REVERB_LEVEL_DN && curKey==KEY_REVERB_LEVEL_UP) ||
+                   (key==KEY_REVERB_TIME_UP && curKey==KEY_REVERB_TIME_DN) || (key==KEY_REVERB_TIME_DN && curKey==KEY_REVERB_TIME_UP)) {
+                    flag |= REFRESH_HOME_VALUE;
+                }
+                else {
+                    flag |= REFRESH_HOME_NAME;
+                }
+            }
+            else {
+                flag |= REFRESH_HOME_NAME|REFRESH_HOME_TITLE;
             }
             break;
     
             default:
             break;
         }
-        curKey = key;
-    }
-    else {
-        flag = 0;
     }
 
     return flag;
@@ -192,11 +211,17 @@ int home_clear(void)
     return 0;
 }
 
-
-int home_set_refresh(u16 flag)
+static void set_refresh(u16 flag)
 {
     refreshFlag |= flag;
     gui_post_refresh();
+}
+
+
+int home_set_refresh(u16 flag)
+{
+    set_refresh(flag);
+    
     return 0;
 }
 
@@ -209,11 +234,15 @@ int home_refresh(void)
     dsp_get_info(key, &info);
 
     if(refreshFlag&REFRESH_HOME_CLEAR) {
-        //draw_clear(r);
+        draw_clear(r);
     }
 
     if(refreshFlag&REFRESH_HOME_TITLE) {
         draw_title(r, &info);
+    }
+
+    if(refreshFlag&REFRESH_HOME_NAME) {
+        draw_name(r, &info);
     }
 
     if(refreshFlag&REFRESH_HOME_VALUE) {
@@ -226,18 +255,13 @@ int home_refresh(void)
 }
 
 
-int home_refresh2(u8 key, dsp_info_t *info)
+int home_set_key(u8 key)
 {
-    rect_t r=BODY_RECT;
-    
-    if(need_refresh_all(key)) {
-        draw_clear(r);
-        draw_title(r, info);
-        draw_value(r, info);
-    }
-    else {
-        draw_value(r, info);
-    }
+    u16 flag;
+
+    flag = get_flag(key);
+    set_refresh(flag);
+    curKey = key;
     
     return 0;
 }

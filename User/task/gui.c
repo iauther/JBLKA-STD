@@ -122,7 +122,7 @@ static void knob_proc(key_t *key, dsp_info_t *info)
     }
 
     menu_switch(MENU_HOME);
-    home_refresh2(key->value, info);
+    home_set_key(key->value);
     e2p_put(&info->node);
 }
 
