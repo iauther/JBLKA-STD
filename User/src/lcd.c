@@ -141,6 +141,10 @@ static inline void lcd_write_data(u8 data)
 
 static inline void lcd_write_datas(u8 *data, int len)
 {
+    if(!data || !len) {
+        return;
+    }
+
     LCD_RS(1);
     lcd_write(data, len);
 }
@@ -161,13 +165,13 @@ static void lcd_set_rect(u16 x, u16 y, u16 w, u16 h)
     lcd_write_cmd(0x2a);
     lcd_write_data(x >> 8);
     lcd_write_data(x);
-    lcd_write_data(x+w-1 >> 8);
+    lcd_write_data((x+w-1) >> 8);
     lcd_write_data(x+w-1);
 
     lcd_write_cmd(0x2b);
     lcd_write_data(y >> 8);
     lcd_write_data(y);
-    lcd_write_data(y+h-1 >> 8);
+    lcd_write_data((y+h-1) >> 8);
     lcd_write_data(y+h-1);
 
     lcd_write_cmd(0x2C);
@@ -562,35 +566,24 @@ void lcd_draw_round_rect(u16 x, u16 y, u16 w, u16 h, u16 r, u16 color)
 
 void lcd_fill_rect(u16 x, u16 y, u16 w, u16 h, u16 color)
 {
-    u16 i = 0;
+    u16 i,times;
     u16 *plcd=(u16*)lcd_buf;
-    u32 size = 0, size_remain = 0;
+    u32 size,remain,oncelen;
     
     size = w*h*2;
-    if(size > LCD_BUF_SIZE) {
-        size_remain = size - LCD_BUF_SIZE;
-        size = LCD_BUF_SIZE;
-    }
+    times = size/LCD_BUF_SIZE;
+    remain = size%LCD_BUF_SIZE;
 
+    oncelen = (times>0)?LCD_BUF_SIZE:remain;
     lcd_set_rect(x, y, w, h);
-    while(1) {
-        for(i=0; i<size/2; i++) {
-            plcd[i] = SWAP16(color);
-        }
 
-        lcd_write_datas((u8*)plcd, size);
-        if(size_remain == 0)
-            break;
-
-        if(size_remain > LCD_BUF_SIZE) {
-            size_remain = size_remain - LCD_BUF_SIZE;
-        }
-
-        else {
-            size = size_remain;
-            size_remain = 0;
-        }
+    for(i=0; i<oncelen/2; i++) {
+        plcd[i] = SWAP16(color);
     }
+    for(i=0; i<times; i++) {
+        lcd_write_datas((u8*)plcd, oncelen);
+    }
+    lcd_write_datas((u8*)plcd, remain);
 }
 
 
