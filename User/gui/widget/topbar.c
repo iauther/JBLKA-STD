@@ -58,7 +58,7 @@ static void show_preset(void)
 
     r.x += mTopbar.rect.w*2/3;
     r.w = mTopbar.rect.w/3;
-    sprintf((char*)tmp, "%d", gParams.pre);
+    sprintf((char*)tmp, "%d", gParams.pre+1);
     
     lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
