@@ -68,7 +68,7 @@ enum {
 int home_clear(void);
 int home_refresh(void);
 int home_set_key(u8 key);
-
+int home_set_refresh(u16 flag);
 
 extern u8 gM;
 

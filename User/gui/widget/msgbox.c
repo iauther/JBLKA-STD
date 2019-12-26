@@ -142,6 +142,10 @@ static void draw_button(rect_t rect, u16 color, u16 bgcolor)
 
 int msgbox_refresh(void)
 {
+    if(mbox.refreshFlag==0) {
+        return -1;
+    }
+
     if(mbox.refreshFlag&REFRESH_MSGBOX_CLEAR) {
         msgbox_clear();
         draw_rect(mbox.rect, BROWN);

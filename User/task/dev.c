@@ -1,4 +1,5 @@
 #include "task.h"
+#include "topbar.h"
 
 
 #define MSG_MAX         6
@@ -35,7 +36,7 @@ static void temp_check(void)
     pwr_temp = adc_read(ADC_CH_PWR_TEMP);
 
     //do something...
-    //topbar_set();
+    //topbar_set_refresh(TOPBAR_REFRESH_TEMP);
 }
 static void amp_check(void)
 {

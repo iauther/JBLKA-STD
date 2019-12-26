@@ -312,7 +312,7 @@ static int list_refresh(listitem_t *l)
 {
     u8  i,maxId;
 
-    if(!l) {
+    if(!l || l->refreshFlag==0) {
         return -1;
     }
     
@@ -443,6 +443,11 @@ int listitem_move(listitem_t *l, u8 dir, u8 size)
             dsp.n  = info->n;
             dsp.dlen = dsp_get_struct_len(dsp.id);
             r = dsp_send(&dsp);
+            
+            if(dsp.id==CMD_ID_Input) {
+                sys_set_input(gParams.dsp.Array_Input.input);
+                topbar_set_refresh(TOPBAR_REFRESH_INPUT);
+            }
         }
     }
     else {
@@ -642,10 +647,34 @@ int listitem_handle(listitem_t **l, key_t *key)
             }
             else if(key->value==KEY_ENTER){
                 //LOAD PRESET
+#if 0       //ÔÝÊ±ÆÁ±Î
+                node_t n;
+                u8 pre=gParams.pre;
+                u16 input=gParams.dsp.Array_Input.input;
+                paras_read_preset((*l)->focusId, &gParams.dsp);
+
+                gParams.pre = (*l)->focusId;
                 set_refresh(*l, REFRESH_LIST);
+
+                if(pre!=gParams.pre) {
+                    n.ptr = &gParams.pre;
+                    n.len = sizeof(gParams.pre);
+                    e2p_put(&n);
+                    topbar_set_refresh(TOPBAR_REFRESH_PRESET);
+                }
+
+                if(input!=gParams.dsp.Array_Input.input) {
+                    topbar_set_refresh(TOPBAR_REFRESH_INPUT);
+                }
+                
+                n.ptr = &gParams.dsp;
+                n.len = sizeof(gParams.dsp);
+                e2p_put(&n);
+#endif
             }
             else if(key->value==KEY_SAVE){
                 //SAVE PRESET
+                paras_write_preset((*l)->focusId, &gParams.dsp);
                 set_refresh(*l, REFRESH_LIST);
             }
         }

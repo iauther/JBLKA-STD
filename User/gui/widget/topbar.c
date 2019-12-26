@@ -3,6 +3,7 @@
 #include "topbar.h"
 #include "font.h"
 #include "lcd.h"
+#include "task.h"
 #include "default.h"
 #include "packet.h"
 
@@ -29,23 +30,12 @@ static void show_temp(void)
     u8 tmp[10];
     rect_t r = mTopbar.rect;
 
-    r.w = mTopbar.rect.w/4;
+    r.w = mTopbar.rect.w/3;
     sprintf((char*)tmp, "%02d", mTopbar.stat->pwr_temp);
     
     lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
 
-static void show_bt(void)
-{
-    u8 tmp[10];
-    rect_t r = mTopbar.rect;
-
-    r.x += mTopbar.rect.w/4;
-    r.w = mTopbar.rect.w/4;
-    sprintf((char*)tmp, "%s", INPUT_TXT.txt[INPUT_BTUSB]);
-    
-    lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
-}
 
 static void show_input(void)
 {
@@ -53,8 +43,8 @@ static void show_input(void)
     rect_t r = mTopbar.rect;
     u16 input=uiParams.dsp.music.input->input;
 
-    r.x += mTopbar.rect.w/2;
-    r.w = mTopbar.rect.w/4;
+    r.x += mTopbar.rect.w/3;
+    r.w = mTopbar.rect.w/3;
     sprintf((char*)tmp, "%s", INPUT_TXT.txt[input]);
     
     lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
@@ -65,8 +55,8 @@ static void show_preset(void)
     u8 tmp[10];
     rect_t r = mTopbar.rect;
 
-    r.x += mTopbar.rect.w*3/4;
-    r.w = mTopbar.rect.w/4;
+    r.x += mTopbar.rect.w*2/3;
+    r.w = mTopbar.rect.w/3;
     sprintf((char*)tmp, "%d", gParams.pre);
     
     lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
@@ -100,14 +90,16 @@ int topbar_free(void)
 int topbar_set_refresh(u32 flag)
 {
     mTopbar.refreshFlag |= flag;
+    gui_post_refresh();
+
     return 0;
 }
 
 
 int topbar_refresh(void)
 {
-    if(mTopbar.refreshFlag & TOPBAR_REFRESH_BT) {
-        show_bt();
+    if(mTopbar.refreshFlag==0) {
+        return -1;
     }
 
     if(mTopbar.refreshFlag & TOPBAR_REFRESH_TEMP) {
@@ -121,7 +113,6 @@ int topbar_refresh(void)
     if(mTopbar.refreshFlag & TOPBAR_REFRESH_PRESET) {
         show_preset();
     }
-    
     mTopbar.refreshFlag = 0;
 
     return 0;
