@@ -47,6 +47,7 @@ static void show_input(void)
     r.w = mTopbar.rect.w/3;
     sprintf((char*)tmp, "%s", INPUT_TXT.txt[input]);
     
+    lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
     lcd_draw_string_align(r.x, r.y, r.w, r.h, tmp, FONT_16, LCD_FC, LCD_BC, ALIGN_MIDDLE);
 }
 

@@ -443,10 +443,14 @@ int listitem_move(listitem_t *l, u8 dir, u8 size)
             dsp.n  = info->n;
             dsp.dlen = dsp_get_struct_len(dsp.id);
             r = dsp_send(&dsp);
-            
-            if(dsp.id==CMD_ID_Input) {
-                sys_set_input(gParams.dsp.Array_Input.input);
-                topbar_set_refresh(TOPBAR_REFRESH_INPUT);
+            if(r==0) {
+                node_t n={*(s16**)l->data+l->focusId, dsp.dlen};
+                e2p_put(&n);
+
+                if(dsp.id==CMD_ID_Input) {
+                    sys_set_input(gParams.dsp.Array_Input.input);
+                    topbar_set_refresh(TOPBAR_REFRESH_INPUT);
+                }
             }
         }
     }
