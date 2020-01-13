@@ -463,11 +463,6 @@
               <FileType>1</FileType>
               <FilePath>..\User\task\task.c</FilePath>
             </File>
-            <File>
-              <FileName>Timer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Timer.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -685,19 +680,14 @@
               <FilePath>..\User\src\gbl.c</FilePath>
             </File>
             <File>
-              <FileName>dlist.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\src\dlist.c</FilePath>
-            </File>
-            <File>
-              <FileName>slist.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\src\slist.c</FilePath>
-            </File>
-            <File>
               <FileName>config.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\User\inc\config.h</FilePath>
+            </File>
+            <File>
+              <FileName>list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\list.c</FilePath>
             </File>
           </Files>
         </Group>

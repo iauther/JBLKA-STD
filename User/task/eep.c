@@ -24,7 +24,6 @@ static void e2p_check(void)
 void eep_task(void *arg)
 {
     int r;
-    u8  i;
     evt_eep_t e;
     osStatus_t st;
     

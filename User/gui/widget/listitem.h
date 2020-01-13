@@ -2,7 +2,7 @@
 #define __LISTITEM_H__
 
 #include "base.h"
-#include "slist.h"
+#include "list.h"
 #include "default.h"
 
 enum {
@@ -24,7 +24,7 @@ typedef struct _listitem {
     u8      pageItems;
     u8      dispItems;
     
-    slist_t *list;
+    list_t  *list;
     u8      firstId;
     u8      focusId;
     u8      prev_firstId;

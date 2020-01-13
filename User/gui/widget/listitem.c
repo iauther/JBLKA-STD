@@ -27,116 +27,6 @@ static void set_refresh(listitem_t *l, u32 flag)
     l->refreshFlag |= flag;
     if(l->trigger) l->trigger();
 }
-
-
-
-listitem_t *listitem_init(cchr *title, u8 max, int node_size)
-{
-    rect_t r=MENU_RECT;
-    listitem_t *l=(listitem_t *)malloc(sizeof(listitem_t));
-    if(!l) {
-        return NULL;
-    }
-    
-    l->rect = r;
-    l->list = slist_init(max, node_size);
-
-    l->pageItems = l->rect.h/ITEM_HEIGHT;
-    l->dispItems = 0;
-    l->title = title;
-    
-    li_reset(l);
-    
-    return l;
-}
-
-
-int listitem_free(listitem_t **l)
-{
-    if(!l) {
-        return -1;
-    }
-    slist_free(&(*l)->list);
-    free(*l);
-
-    return 0;
-}
-
-
-int listitem_reset(listitem_t *l)
-{
-    if(!l) {
-        return -1;
-    }
-    li_reset(l);
-
-    return 0;
-}
-
-
-listitem_t* listitem_get_child(listitem_t *l)
-{
-    if(!l) {
-        return NULL;
-    }
-
-    return l->child;
-}
-
-
-int listitem_set_child(listitem_t *l, listitem_t *child)
-{
-    if(!l|| !child) {
-        return -1;
-    }
-    l->child = child;
-    child->parent = l;
-
-    return 0;
-}
-
-
-int listitem_append(listitem_t *l, item_info_t *inf)
-{
-    int r,size;
-    node_t n={&inf, sizeof(inf)};
-
-    r = slist_append(l->list, &n);
-    size = slist_size(l->list);
-    l->dispItems = MIN(l->pageItems, size);
-
-    return r;
-}
-
-
-item_info_t* listitem_get(listitem_t *l, u8 index)
-{
-    item_info_t *inf=NULL;
-    node_t n={&inf, sizeof(inf)};
-
-    slist_get(l->list, index, &n);
-    return inf;
-}
-
-
-item_info_t* listitem_get_focus(listitem_t *l)
-{
-    return listitem_get(l, l->focusId);
-}
-
-
-int listitem_set_refresh(listitem_t *l, u32 flag)
-{
-    if(!l) {
-        return -1;
-    }
-
-    set_refresh(l, flag);
-
-    return 0;
-}
-
-
 static void draw_paras_label(listitem_t *l, u8 index, item_info_t *info, para_info_t *pinfo, rect_t *rect, u16 color, u16 bgcolor)
 {
     rect_t r=*rect;
@@ -326,7 +216,7 @@ static int list_refresh(listitem_t *l)
 
     if(l->refreshFlag & REFRESH_LIST) {
         rect_t r=INPUTBOX_RECT;
-        maxId = MIN((slist_size(l->list)-1),(l->firstId+l->dispItems-1));
+        maxId = MIN((list_size(l->list)-1),(l->firstId+l->dispItems-1));
         lcd_fill_rect(r.x, r.y, r.w, r.h, LCD_BC);
         for(i=l->firstId; i<=maxId; i++) {
             if(i!=l->focusId) {
@@ -363,6 +253,117 @@ static int list_refresh(listitem_t *l)
     
     return 0;
 }
+///////////////////////////////////////////////////////////////
+
+
+listitem_t *listitem_init(cchr *title, u8 max, int node_size)
+{
+    rect_t r=MENU_RECT;
+    listitem_t *l=(listitem_t *)malloc(sizeof(listitem_t));
+    if(!l) {
+        return NULL;
+    }
+    
+    l->rect = r;
+    l->list = list_init(max, node_size);
+
+    l->pageItems = l->rect.h/ITEM_HEIGHT;
+    l->dispItems = 0;
+    l->title = title;
+    
+    li_reset(l);
+    
+    return l;
+}
+
+
+int listitem_free(listitem_t **l)
+{
+    if(!l) {
+        return -1;
+    }
+    list_free(&(*l)->list);
+    free(*l);
+
+    return 0;
+}
+
+
+int listitem_reset(listitem_t *l)
+{
+    if(!l) {
+        return -1;
+    }
+    li_reset(l);
+
+    return 0;
+}
+
+
+listitem_t* listitem_get_child(listitem_t *l)
+{
+    if(!l) {
+        return NULL;
+    }
+
+    return l->child;
+}
+
+
+int listitem_set_child(listitem_t *l, listitem_t *child)
+{
+    if(!l|| !child) {
+        return -1;
+    }
+    l->child = child;
+    child->parent = l;
+
+    return 0;
+}
+
+
+int listitem_append(listitem_t *l, item_info_t *inf)
+{
+    int r,size;
+    node_t n={&inf, sizeof(inf)};
+
+    r = list_append(l->list, &n);
+    size = list_size(l->list);
+    l->dispItems = MIN(l->pageItems, size);
+
+    return r;
+}
+
+
+item_info_t* listitem_get(listitem_t *l, u8 index)
+{
+    item_info_t *inf=NULL;
+    node_t n={&inf, sizeof(inf)};
+
+    list_get(l->list, index, &n);
+
+    return inf;
+}
+
+
+item_info_t* listitem_get_focus(listitem_t *l)
+{
+    return listitem_get(l, l->focusId);
+}
+
+
+int listitem_set_refresh(listitem_t *l, u32 flag)
+{
+    if(!l) {
+        return -1;
+    }
+
+    set_refresh(l, flag);
+
+    return 0;
+}
+
+
 int listitem_refresh(listitem_t *l)
 {
     int r=0;
@@ -470,7 +471,7 @@ int listitem_move(listitem_t *l, u8 dir, u8 size)
         }
         else if(dir==DOWN) {
             if(l->firstId>0) {
-                if(l->focusId<slist_size(l->list)-1) {
+                if(l->focusId<list_size(l->list)-1) {
                     l->focusId++;
                     if(l->focusId-l->firstId>=l->dispItems) {
                         l->firstId++;
@@ -478,7 +479,7 @@ int listitem_move(listitem_t *l, u8 dir, u8 size)
                 }
             }
             else {
-                if(l->focusId<slist_size(l->list)-1) {
+                if(l->focusId<list_size(l->list)-1) {
                     l->focusId++;
                     if(l->focusId>=l->dispItems) {
                         l->firstId++;
@@ -504,7 +505,7 @@ int listitem_move(listitem_t *l, u8 dir, u8 size)
 
 int listitem_size(listitem_t *l)
 {
-    return l?slist_size(l->list):-1;
+    return l?list_size(l->list):-1;
 }
 
 
@@ -521,7 +522,7 @@ int listitem_set_trigger(listitem_t *l, trigger_fn trigger)
 
 listitem_t* listitem_create(cchr *title, item_info_t *info, void *data, trigger_fn trigger)
 {
-    u8 i,n;
+    u8 i,num;
     listitem_t *l;
     item_info_t *inf;
 
@@ -529,12 +530,12 @@ listitem_t* listitem_create(cchr *title, item_info_t *info, void *data, trigger_
         return NULL;
     }
 
-    n = get_num(info);
-    if(n==0) {
+    num = get_num(info);
+    if(num==0) {
         return NULL;
     }
 
-    l = listitem_init(title, n, sizeof(inf));
+    l = listitem_init(title, num, sizeof(inf));
     if(!l) {
         return NULL;
     }
