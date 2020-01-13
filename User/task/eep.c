@@ -51,9 +51,9 @@ void eep_task(void *arg)
 }
 
 
-void eep_post_evt(evt_eep_t *e)
+int eep_post_evt(evt_eep_t *e)
 {
-    msg_post(eep_msg, e, sizeof(*e));
+    return msg_post(eep_msg, e, sizeof(*e));
 }
 
 #endif

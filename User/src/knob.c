@@ -115,12 +115,22 @@ static void knob_rx_cb(u8 *data, u16 data_len)
         k.updown = 0;
         k.longPress = 0;
 
+#if 1
         n.ptr = &k;
         n.len = sizeof(k);
         r = queue_put(kq, &n, kfind);
         if(r==0) {
             keyTimes[knobValue] = 0;
         }
+#else
+        evt_gui_t e;
+        e.evt = EVT_KEY;
+        e.key = k;
+        r = gui_post_evt(&e);
+        if(r==0) {
+            keyTimes[knobValue] = 0;
+        }
+#endif
     }
 #endif
 }

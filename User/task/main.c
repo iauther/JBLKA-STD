@@ -63,8 +63,7 @@ int main(void)
     task_new(com_task, 1024);
     task_new(dev_task, 1024);
     task_new(gui_task, 1024);
-    task_new(eep_task, 512);
-
+    task_new(eep_task, 256);
     task_start();
     while(1);
 

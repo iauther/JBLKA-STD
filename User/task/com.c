@@ -229,9 +229,9 @@ void com_task(void *arg)
 }
 
 
-void com_post_evt(evt_com_t *e)
+int com_post_evt(evt_com_t *e)
 {
-    msg_post(com_msg, e, sizeof(*e));
+    return msg_post(com_msg, e, sizeof(*e));
 }
 
 #endif

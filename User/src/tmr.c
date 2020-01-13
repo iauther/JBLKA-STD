@@ -63,7 +63,7 @@ void tim_callback(u8 timer)   //TIMÖÐ¶Ï
 osTimerId_t  s_tmr=0;
 #endif
 u32 tmr_cnt=0;
-static void timer_cb(void *p)
+static void timer_cb(void *arg)
 {
     if(tmr_cnt%4==0) {
         adc_tmr_cb();

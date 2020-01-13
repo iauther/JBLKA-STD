@@ -15,6 +15,6 @@ typedef struct {
     s8      *unit;
 }data_t;
 
-typedef void (*trigger_fn)(void);
+typedef int (*trigger_fn)(void);
 
 #endif

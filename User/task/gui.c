@@ -144,6 +144,7 @@ void gui_task(void *arg)
 
     topbar_init();
     menu_init();
+    tmr_start();
 
     gui_msg = msg_init(MSG_MAX, sizeof(e));
     if(!gui_msg) {
@@ -202,16 +203,16 @@ void gui_task(void *arg)
 }
 
 
-void gui_post_evt(evt_gui_t *e)
+int gui_post_evt(evt_gui_t *e)
 {
-    msg_post(gui_msg, e, sizeof(*e));
+    return msg_post(gui_msg, e, sizeof(*e));
 }
 
-void gui_post_refresh(void)
+int gui_post_refresh(void)
 {
     evt_gui_t e;
     e.evt = EVT_REFRESH;
-    msg_post(gui_msg, &e, sizeof(e));
+    return msg_post(gui_msg, &e, sizeof(e));
 }
 
 #endif

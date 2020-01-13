@@ -85,7 +85,6 @@ void dev_task(void *arg)
         return;
     }
 
-    tmr_start();
     dev_tmr = osTimerNew(tmr1_fun, osTimerPeriodic, NULL, NULL);
     osTimerStart(dev_tmr, 1000);
 
@@ -116,9 +115,9 @@ void dev_task(void *arg)
 }
 
 
-void dev_post_evt(evt_dev_t *e)
+int dev_post_evt(evt_dev_t *e)
 {
-    msg_post(dev_msg, e, sizeof(*e));
+    return msg_post(dev_msg, e, sizeof(*e));
 }
 
 #endif

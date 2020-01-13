@@ -77,20 +77,17 @@ int audio_init(void)
 
 int sys_init(void)
 {
-    gpio_init();
-    
     lock_init();
+    gpio_init();
     paras_init();
     adc_init();
     knob_init();
     amp_init();
     hdmi_init();
-
     fan_init();
     lcd_init();
     usbd_init();
     ir_init();
-
     audio_init();
 
     return 0;
